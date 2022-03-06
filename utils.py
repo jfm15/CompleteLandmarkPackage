@@ -140,10 +140,10 @@ def use_model(model, final_layer, loader, loss_function, logger=None, print_per_
     with torch.no_grad():
         for idx, (image, channels, meta) in enumerate(loader):
             # Put image and channels onto gpu
-            # image = image.cuda()
-            # channels = channels.cuda()
-            # meta['landmarks_per_annotator'] = meta['landmarks_per_annotator'].cuda()
-            # meta['pixel_size'] = meta['pixel_size'].cuda()
+            image = image.cuda()
+            channels = channels.cuda()
+            meta['landmarks_per_annotator'] = meta['landmarks_per_annotator'].cuda()
+            meta['pixel_size'] = meta['pixel_size'].cuda()
             file_names.extend(meta["file_name"])
 
             output = model(image.float())
