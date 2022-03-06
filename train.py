@@ -90,6 +90,7 @@ def main():
         validation_loaders.append(validation_loader)
 
     # Used for debugging
+    '''
     for batch, (image, channels, meta) in enumerate(training_loader):
         plt.imshow(np.moveaxis(image[0].detach().cpu().numpy(), 0, -1), cmap='gray')
         squashed_channels = np.max(channels[0].detach().cpu().numpy(), axis=0)
@@ -101,6 +102,7 @@ def main():
         for i, positions in enumerate(avg_key_point_locations):
             plt.text(positions[0], positions[1], "{}".format(i + 1), color="yellow", fontsize="small")
         plt.show()
+    '''
 
     for run in range(cfg.TRAIN.REPEATS):
 
