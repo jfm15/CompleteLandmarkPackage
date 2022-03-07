@@ -3,6 +3,7 @@ import time
 import logging
 import torch
 import numpy as np
+import matplotlib.pyplot as plt
 
 from config import get_cfg_defaults
 from evaluate import get_predicted_and_target_points
@@ -45,7 +46,7 @@ def prepare_for_testing(cfg_path, model_path, data_path):
     # setup the logger
     logger = setup_logger(log_path)
 
-    return cfg, logger, output_path
+    return cfg, logger, output_path, yaml_file_name
 
 
 def prepare_config(cfg_path):
@@ -97,35 +98,6 @@ def train_model(model, final_layer, optimizer, scheduler, loader, loss_function,
             logger.info("[{}/{}]\tLoss: {:.3f}".format(batch + 1, len(loader), np.mean(losses_per_epoch)))
 
     scheduler.step()
-
-
-def evaluate_model(model, final_layer, loader, loss_function):
-    model.eval()
-    all_losses = []
-    all_radial_errors = []
-    all_eres = []
-
-    with torch.no_grad():
-        for idx, (image, channels, meta) in enumerate(loader):
-            # Put image and channels onto gpu
-            image = image.cuda()
-            channels = channels.cuda()
-            meta['landmarks_per_annotator'] = meta['landmarks_per_annotator'].cuda()
-            meta['pixel_size'] = meta['pixel_size'].cuda()
-
-            output = model(image.float())
-            output = final_layer(output)
-
-            loss = loss_function(output, channels)
-            all_losses.append(loss.item())
-
-            radial_errors, eres = evaluate_gpu(output, meta['landmarks_per_annotator'], meta['pixel_size'])
-            all_radial_errors.extend(radial_errors.cpu().detach().numpy())
-            all_eres.extend(eres.cpu().detach().numpy())
-
-    model.cpu()
-
-    return all_losses, all_radial_errors, all_eres
 
 
 def use_model(model, final_layer, loader, loss_function, logger=None, print_progress=False):
@@ -205,7 +177,8 @@ def get_least_ere_points(predicted_points_per_model, eres_per_model):
 
 
 def get_validation_message(predicted_points_per_model, eres_per_model, target_points, sdr_thresholds,
-                           print_individual_image_stats=False, loader=None, logger=None):
+                           print_individual_image_stats=False, loader=None, logger=None,
+                           save_images=False, save_image_path=None):
 
     # Get radial errors for each model
     avg_radial_errors = [np.mean(cal_radial_errors(predicted_points, target_points))
@@ -223,12 +196,28 @@ def get_validation_message(predicted_points_per_model, eres_per_model, target_po
 
     if print_individual_image_stats:
         logger.info('-----------Confidence Weighted Aggregation Individual Image Statistics-----------')
-        for idx, (image, _, meta) in enumerate(loader):
+        for idx, (_, _, meta) in enumerate(loader):
             msg = "Image: {}".format(meta['file_name'][0])
             for radial_error in rec_weighted_model_radial_errors[idx]:
                 msg += "\t{:.3f}mm".format(radial_error)
             msg += "\taverage: {:.3f}mm".format(np.mean(rec_weighted_model_radial_errors[idx]))
             logger.info(msg)
+
+    if save_images:
+        if not os.path.exists(save_image_path):
+            os.makedirs(save_image_path)
+
+        logger.info('-----------Save Images-----------')
+        for idx, (image, _, meta) in enumerate(loader):
+            if (idx + 1) % 30 == 0:
+                logger.info("[{}/{}]".format(idx + 1, len(loader)))
+
+            name = meta['file_name'][0]
+            individual_image_path = os.path.join(save_image_path, name)
+            plt.imshow(image)
+            plt.axis('off')
+            plt.savefig(individual_image_path, bbox_inches='tight')
+            plt.close()
 
     # Print loss, radial error for each landmark and MRE for the image
     # Assumes that the batch size is 1 here
