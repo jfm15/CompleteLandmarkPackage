@@ -97,7 +97,8 @@ def main():
         our_model = our_model.cuda()
 
         all_losses, all_predicted_points, all_target_points, all_eres, _, _ \
-            = use_model(our_model, two_d_softmax, test_loader, nll_across_batch)
+            = use_model(our_model, two_d_softmax, test_loader, nll_across_batch,
+                        logger=logger, print_per_image=True)
 
         predicted_points_per_model.append(all_predicted_points)
         eres_per_model.append(all_eres)
