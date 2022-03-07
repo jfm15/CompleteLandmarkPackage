@@ -228,7 +228,7 @@ def get_validation_message(predicted_points_per_model, eres_per_model, target_po
     # Print loss, radial error for each landmark and MRE for the image
     # Assumes that the batch size is 1 here
     msg = " Avg Radial Error per model: {:.3f}mm {:.3f}mm {:.3f}mm Avg Aggregation: {:.3f}mm " \
-          "Confidence Weighted Aggregation: {:.3f}mm \\" \
+          "Confidence Weighted Aggregation: {:.3f}mm \n" \
         .format(*avg_radial_errors)
 
     sdr_statistics = produce_sdr_statistics(rec_weighted_model_radial_errors, sdr_thresholds)
