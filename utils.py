@@ -213,6 +213,7 @@ def get_validation_message(predicted_points_per_model, eres_per_model, target_po
                 logger.info("[{}/{}]".format(idx + 1, len(loader)))
 
             name = meta['file_name'][0]
+            pixel_size = np.array(meta['pixel_size'][0])
             usable_image = np.squeeze(image) * 0.6
 
             # cycle through landmarks
@@ -220,13 +221,29 @@ def get_validation_message(predicted_points_per_model, eres_per_model, target_po
             for landmark_idx in range(no_of_landmarks):
 
                 image_path = os.path.join(save_image_path, "{}_{}".format(name, landmark_idx + 1))
+                figure = plt.gcf()
+                figure.set_size_inches(usable_image.shape[1] / 100, usable_image.shape[0] / 100)
                 plt.imshow(usable_image, cmap='gray', vmin=0.0, vmax=255.0)
 
+                for model_idx in range(len(predicted_points_per_model)):
+                    individual_model_pred = predicted_points_per_model[model_idx, idx, landmark_idx]
+                    scaled_individual_model_pred = np.divide(individual_model_pred, pixel_size)
+                    plt.scatter(scaled_individual_model_pred[0], scaled_individual_model_pred[1], color='white')
+
+                mean_pred = mean_model_points[idx, landmark_idx]
+                scaled_mean_pred = np.divide(mean_pred, pixel_size)
+                plt.scatter(scaled_mean_pred[0], scaled_mean_pred[1], color='violet')
+
+                confidence_weighted_pred = rec_weighted_model_points[idx, landmark_idx]
+                scaled_confidence_weighted_pred = np.divide(confidence_weighted_pred, pixel_size)
+                plt.scatter(scaled_confidence_weighted_pred[0], scaled_confidence_weighted_pred[1], color='red')
+
                 ground_truth = target_points[idx, landmark_idx]
-                plt.scatter(ground_truth[0], ground_truth[1], color='lime')
+                scaled_ground_truth = np.divide(ground_truth, pixel_size)
+                plt.scatter(scaled_ground_truth[0], scaled_ground_truth[1], color='lime')
 
                 plt.axis('off')
-                plt.savefig(image_path, bbox_inches='tight')
+                plt.savefig(image_path, bbox_inches='tight', dpi=100)
                 plt.close()
 
     # Print loss, radial error for each landmark and MRE for the image
