@@ -213,12 +213,21 @@ def get_validation_message(predicted_points_per_model, eres_per_model, target_po
                 logger.info("[{}/{}]".format(idx + 1, len(loader)))
 
             name = meta['file_name'][0]
-            individual_image_path = os.path.join(save_image_path, name)
-            usable_image = np.squeeze(image)
-            plt.imshow(usable_image)
-            plt.axis('off')
-            plt.savefig(individual_image_path, bbox_inches='tight')
-            plt.close()
+            usable_image = np.squeeze(image) * 0.6
+
+            # cycle through landmarks
+            no_of_landmarks = rec_weighted_model_radial_errors[idx].shape[0]
+            for landmark_idx in range(no_of_landmarks):
+
+                image_path = os.path.join(save_image_path, "{}_{}".format(name, landmark_idx + 1))
+                plt.imshow(usable_image, cmap='gray', vmin=0.0, vmax=255.0)
+
+                ground_truth = target_points[idx, landmark_idx]
+                plt.scatter(ground_truth[0], ground_truth[1], color='lime')
+
+                plt.axis('off')
+                plt.savefig(image_path, bbox_inches='tight')
+                plt.close()
 
     # Print loss, radial error for each landmark and MRE for the image
     # Assumes that the batch size is 1 here
