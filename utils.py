@@ -128,7 +128,7 @@ def evaluate_model(model, final_layer, loader, loss_function):
     return all_losses, all_radial_errors, all_eres
 
 
-def use_model(model, final_layer, loader, loss_function, logger=None, print_per_image=False):
+def use_model(model, final_layer, loader, loss_function, logger=None, print_progress=False):
     model.eval()
     all_losses = []
     all_predicted_points = []
@@ -161,14 +161,9 @@ def use_model(model, final_layer, loader, loss_function, logger=None, print_per_
             predicted_pixel_points = get_hottest_points(output).cpu().detach().numpy()
             all_predicted_pixel_points.append(predicted_pixel_points)
 
-            if print_per_image:
-                radial_errors = cal_radial_errors(predicted_points.cpu().detach().numpy(),target_points.cpu().detach().numpy())
-
-                msg = "Image: {}\tloss: {:.3f}".format(meta['file_name'][0], loss.item())
-                for radial_error in radial_errors:
-                    msg += "\t{:.3f}mm".format(radial_error)
-                msg += "\taverage: {:.3f}mm".format(np.mean(radial_errors))
-                logger.info(msg)
+            if print_progress:
+                if (idx + 1) % 30 == 0:
+                    logger.info("[{}/{}]".format(idx + 1, len(loader)))
 
     model.cpu()
 
