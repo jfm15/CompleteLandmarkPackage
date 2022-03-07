@@ -171,7 +171,8 @@ def main():
                 eres_per_model = np.array(eres_per_model).squeeze()
                 target_points = np.squeeze(target_points)
 
-                msg = get_validation_message(predicted_points_per_model, eres_per_model, target_points)
+                msg = get_validation_message(predicted_points_per_model, eres_per_model, target_points,
+                                             cfg.VALIDATION.SDR_THRESHOLDS)
 
                 logger.info(msg)
 

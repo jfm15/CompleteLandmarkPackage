@@ -209,7 +209,7 @@ def get_least_ere_points(predicted_points_per_model, eres_per_model):
     return predicted_points_per_model[least_ere_indices, grid[0], grid[1]]
 
 
-def get_validation_message(predicted_points_per_model, eres_per_model, target_points):
+def get_validation_message(predicted_points_per_model, eres_per_model, target_points, sdr_thresholds):
 
     # Get radial errors for each model
     avg_radial_errors = [np.mean(cal_radial_errors(predicted_points, target_points))
@@ -220,40 +220,21 @@ def get_validation_message(predicted_points_per_model, eres_per_model, target_po
     mean_model_radial_errors = cal_radial_errors(mean_model_points, target_points)
     avg_radial_errors.append(np.mean(mean_model_radial_errors))
 
-    # Get radial error using sum ere method
-    sum_weighted_model_points = get_ere_sum_weighted_points(predicted_points_per_model, eres_per_model)
-    sum_weighted_model_radial_errors = cal_radial_errors(sum_weighted_model_points, target_points)
-    avg_radial_errors.append(np.mean(sum_weighted_model_radial_errors))
-
-    # Get radial error using max ere method
-    max_weighted_model_points = get_ere_max_weighted_points(predicted_points_per_model, eres_per_model)
-    max_weighted_model_radial_errors = cal_radial_errors(max_weighted_model_points, target_points)
-    avg_radial_errors.append(np.mean(max_weighted_model_radial_errors))
-
     # Get radial error using reciprocal ere method
     rec_weighted_model_points = get_ere_reciprocal_weighted_points(predicted_points_per_model, eres_per_model)
     rec_weighted_model_radial_errors = cal_radial_errors(rec_weighted_model_points, target_points)
     avg_radial_errors.append(np.mean(rec_weighted_model_radial_errors))
 
-    # Get radial error using least ere method
-    least_ere_model_points = get_least_ere_points(predicted_points_per_model, eres_per_model)
-    least_ere_model_radial_errors = cal_radial_errors(least_ere_model_points, target_points)
-    avg_radial_errors.append(np.mean(least_ere_model_radial_errors))
-
     # Print loss, radial error for each landmark and MRE for the image
     # Assumes that the batch size is 1 here
-    msg = " Avg Radial Error per model: {:.3f}mm {:.3f}mm {:.3f}mm Avg Model: {:.3f}mm Sum Weighted Avg Model: {:.3f}mm" \
-          " Max Weighted Avg Model: {:.3f}mm Reciprocal Weighted Avg Model: {:.3f}mm Least ERE Model: {:.3f}mm \\" \
+    msg = " Avg Radial Error per model: {:.3f}mm {:.3f}mm {:.3f}mm Avg Aggregation: {:.3f}mm " \
+          "Confidence Weighted Aggregation: {:.3f}mm \\" \
         .format(*avg_radial_errors)
 
-    '''
-    sdr_statistics = produce_sdr_statistics(rec_weighted_model_radial_errors, [2.0, 2.5, 3.0, 4.0])
-    msg += "Successful Detection Rate (SDR) for 2mm, 2.5mm, 3mm and 4mm respectively: " \
-           "{:.3f}% {:.3f}% {:.3f}% {:.3f}%".format(*sdr_statistics)
-    '''
-
-    sdr_statistics = produce_sdr_statistics(rec_weighted_model_radial_errors, [2.0, 4.0, 10.0])
-    msg += "Successful Detection Rate (SDR) for 2mm, 4mm and 10mm respectively: " \
-           "{:.3f}% {:.3f}% {:.3f}%".format(*sdr_statistics)
+    sdr_statistics = produce_sdr_statistics(rec_weighted_model_radial_errors, sdr_thresholds)
+    sdr_thresholds_formatted = ', '.join([str(threshold) + "mm" for threshold in sdr_thresholds])
+    sdr_statistics_formatted = ', '.join(["{:.3f}%".format(stat) for stat in sdr_statistics])
+    msg += "Successful Detection Rate (SDR) for {} respectively are: {} "\
+        .format(sdr_thresholds_formatted, sdr_statistics_formatted)
 
     return msg

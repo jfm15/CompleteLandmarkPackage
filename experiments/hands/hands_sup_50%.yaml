@@ -27,6 +27,12 @@ TRAIN:
   REPEATS: 3
   LABELED_SUBSET: 298
 
+VALIDATION:
+  SDR_THRESHOLDS:
+    - 2.0
+    - 4.0
+    - 10.0
+
 MODEL:
   ENCODER_NAME: 'resnet34'
   ENCODER_WEIGHTS: 'imagenet'
