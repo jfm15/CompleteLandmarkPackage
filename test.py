@@ -87,87 +87,36 @@ def main():
     logger.info(model_summary)
 
     logger.info("-----------Start Testing-----------")
-    all_losses = []
+    avg_loss_per_model = []
+    predicted_points_per_model = []
+    eres_per_model = []
+    target_points = None
 
-    with torch.no_grad():
-        for idx, (image, channels, meta) in enumerate(test_loader):
+    for model_idx in range(len(ensemble)):
+        our_model = ensemble[model_idx]
+        our_model = our_model.cuda()
 
-            output_per_model = []
-            losses_per_model = []
-            scaled_predicted_points_per_model = []
-            target_points = None
-            scaled_target_points = None
-            eres_per_model = []
+        all_losses, all_predicted_points, all_target_points, all_eres, _, _ \
+            = use_model(our_model, two_d_softmax, test_loader, nll_across_batch)
 
-            for our_model in ensemble:
-                output = our_model(image.float())
-                output = two_d_softmax(output)
-                output_per_model.append(output.cpu().detach().numpy())
+        predicted_points_per_model.append(all_predicted_points)
+        eres_per_model.append(all_eres)
+        target_points = np.array(all_target_points)
 
-                loss = nll_across_batch(output, channels)
-                losses_per_model.append(loss)
+        # radial_error_per_model.append(all_radial_errors)
+        avg_loss_per_model.append(all_losses)
 
-                scaled_predicted_points, scaled_target_points, eres \
-                    = get_predicted_and_target_points(output, meta['landmarks_per_annotator'], meta['pixel_size'])
-                scaled_predicted_points_per_model.append(scaled_predicted_points.cpu().detach().numpy())
-                target_points = torch.mean(meta['landmarks_per_annotator'], dim=1).cpu().detach().numpy()
-                eres_per_model.append(eres.cpu().detach().numpy())
+        # move model back to cpu
+        our_model.cpu()
 
-            recp_points = get_ere_reciprocal_weighted_points(np.array(scaled_predicted_points_per_model), np.array(eres_per_model))
-            scaled_target_points = scaled_target_points.cpu().detach().numpy()
+    predicted_points_per_model = np.array(predicted_points_per_model).squeeze()
+    eres_per_model = np.array(eres_per_model).squeeze()
+    target_points = np.squeeze(target_points)
 
-            displacement_vectors = recp_points - scaled_target_points
-            radial_errors = np.linalg.norm(displacement_vectors, axis=2)
+    msg = get_validation_message(predicted_points_per_model, eres_per_model, target_points,
+                                 cfg.VALIDATION.SDR_THRESHOLDS)
 
-            # Print loss, radial error for each landmark and MRE for the image
-            # Assumes that the batch size is 1 here
-            msg = "Image: {}\tloss: {:.3f}".format(meta['file_name'][0], loss.item())
-            for radial_error in radial_errors[0]:
-                msg += "\t{:.3f}mm".format(radial_error)
-            msg += "\taverage: {:.3f}mm".format(np.mean(radial_errors))
-            logger.info(msg)
-
-            # if np.any(radial_errors > 10):
-            #     for keypoint_idx in np.argwhere(np.squeeze(radial_errors) > 10):
-            # for keypoint_idx in range(cfg.DATASET.KEY_POINTS):
-            visualise_ensemble_2(image.cpu().detach().numpy(),
-                                 output_per_model,
-                                 recp_points,
-                                 target_points,
-                                 eres_per_model)
-
-    # Overall loss
-    '''
-    logger.info("Average loss: {:.3f}".format(np.mean(all_losses)))
-
-    # Get 'all' statistics
-    all_radial_errors = [val['radial_errors'] for val in data_tracker.values()]
-    all_expected_radial_errors = [val['expected_radial_errors'] for val in data_tracker.values()]
-    all_mode_probabilities = [val['mode_probabilities'] for val in data_tracker.values()]
-
-    # MRE per landmark
-    all_radial_errors = np.array(all_radial_errors)
-    mre_per_landmark = np.mean(all_radial_errors, axis=0)
-    msg = "Average radial error per landmark: "
-    for mre in mre_per_landmark:
-        msg += "\t{:.3f}mm".format(mre)
-    logger.info(msg
-    '''
-
-    # Total MRE
-    mre = np.mean(all_radial_errors)
-    logger.info("Average radial error (MRE): {:.3f}mm".format(mre))
-
-    # Detection rates
-    flattened_radial_errors = all_radial_errors.flatten()
-    '''
-    sdr_statistics = produce_sdr_statistics(flattened_radial_errors, [2.0, 2.5, 3.0, 4.0])
-    logger.info("Successful Detection Rate (SDR) for 2mm, 2.5mm, 3mm and 4mm respectively: "
-                "{:.3f}% {:.3f}% {:.3f}% {:.3f}%".format(*sdr_statistics))
-    '''
-    sdr_statistics = produce_sdr_statistics(flattened_radial_errors, [2.0, 4.0, 10.0])
-    logger.info("Successful Detection Rate (SDR) for 2mm, 4mm and 10mm respectively: "
-                "{:.3f}% {:.3f}% {:.3f}%".format(*sdr_statistics))
+    logger.info(msg)
 
 
 if __name__ == '__main__':
