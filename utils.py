@@ -222,25 +222,25 @@ def get_validation_message(predicted_points_per_model, eres_per_model, target_po
 
                 image_path = os.path.join(save_image_path, "{}_{}".format(name, landmark_idx + 1))
                 figure = plt.gcf()
-                figure.set_size_inches(usable_image.shape[1] / 100, usable_image.shape[0] / 100)
+                figure.set_size_inches(usable_image.shape[1] / 50, usable_image.shape[0] / 50)
                 plt.imshow(usable_image, cmap='gray', vmin=0.0, vmax=255.0)
 
                 for model_idx in range(len(predicted_points_per_model)):
                     individual_model_pred = predicted_points_per_model[model_idx, idx, landmark_idx]
                     scaled_individual_model_pred = np.divide(individual_model_pred, pixel_size)
-                    plt.scatter(scaled_individual_model_pred[0], scaled_individual_model_pred[1], color='white')
+                    plt.scatter(scaled_individual_model_pred[0], scaled_individual_model_pred[1], color='white', s=5)
 
                 mean_pred = mean_model_points[idx, landmark_idx]
                 scaled_mean_pred = np.divide(mean_pred, pixel_size)
-                plt.scatter(scaled_mean_pred[0], scaled_mean_pred[1], color='violet')
+                plt.scatter(scaled_mean_pred[0], scaled_mean_pred[1], color='violet', s=5)
 
                 confidence_weighted_pred = rec_weighted_model_points[idx, landmark_idx]
                 scaled_confidence_weighted_pred = np.divide(confidence_weighted_pred, pixel_size)
-                plt.scatter(scaled_confidence_weighted_pred[0], scaled_confidence_weighted_pred[1], color='red')
+                plt.scatter(scaled_confidence_weighted_pred[0], scaled_confidence_weighted_pred[1], color='red', s=5)
 
                 ground_truth = target_points[idx, landmark_idx]
                 scaled_ground_truth = np.divide(ground_truth, pixel_size)
-                plt.scatter(scaled_ground_truth[0], scaled_ground_truth[1], color='lime')
+                plt.scatter(scaled_ground_truth[0], scaled_ground_truth[1], color='lime', s=5)
 
                 plt.axis('off')
                 plt.savefig(image_path, bbox_inches='tight', dpi=100)
