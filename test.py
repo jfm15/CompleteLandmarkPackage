@@ -1,17 +1,13 @@
 import argparse
 import torch
 import glob
+import os
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 import model
 from model import two_d_softmax
 from model import nll_across_batch
-from visualise import visualise_ensemble_2
-from evaluate import get_predicted_and_target_points
-from utils import get_ere_reciprocal_weighted_points
-from backup.evaluate import produce_sdr_statistics
 from landmark_dataset import LandmarkDataset
 from utils import prepare_for_testing
 from utils import use_model
@@ -54,7 +50,8 @@ def main():
     # Get arguments and the experiment file
     args = parse_args()
 
-    cfg, logger, output_path = prepare_for_testing(args.cfg, args.pretrained_model_directory, args.testing_images)
+    cfg, logger, output_path, yaml_file_name = prepare_for_testing(args.cfg, args.pretrained_model_directory,
+                                                                   args.testing_images)
 
     # Print the arguments into the log
     logger.info("-----------Arguments-----------")
@@ -115,9 +112,10 @@ def main():
     eres_per_model = np.array(eres_per_model).squeeze()
     target_points = np.squeeze(target_points)
 
+    save_image_path = os.path.join(cfg.VALIDATION.SAVE_IMAGE_PATH, yaml_file_name)
     msg = get_validation_message(predicted_points_per_model, eres_per_model, target_points,
                                  cfg.VALIDATION.SDR_THRESHOLDS, print_individual_image_stats=True,
-                                 loader=test_loader, logger=logger)
+                                 loader=test_loader, logger=logger, save_images=True, save_image_path=save_image_path)
 
     logger.info(msg)
 
