@@ -177,9 +177,12 @@ def main():
                 logger.info(msg)
 
         logger.info('-----------Saving Models-----------')
+        model_run_path = os.path.join(output_path, "run:{}_models".format(run))
+        if not os.path.exists(model_run_path):
+            os.makedirs(model_run_path)
         for model_idx in range(len(ensemble)):
             our_model = ensemble[model_idx]
-            save_model_path = os.path.join(output_path, "{}_model_run:{}_idx:{}.pth".format(yaml_file_name, run, model_idx))
+            save_model_path = os.path.join(model_run_path, "{}_model_run:{}_idx:{}.pth".format(yaml_file_name, run, model_idx))
             logger.info("Saving Model {}'s State Dict to {}".format(model_idx, save_model_path))
             torch.save(our_model.state_dict(), save_model_path)
 

@@ -73,7 +73,7 @@ def main():
 
     # Load models and state dict from file
     ensemble = []
-    model_paths = sorted(glob.glob(args.pretrained_model_directory + "*.pth"))
+    model_paths = sorted(glob.glob(args.pretrained_model_directory + "/*.pth"))
 
     for model_path in model_paths:
         our_model = eval("model." + cfg.MODEL.NAME)(cfg.MODEL, cfg.DATASET.KEY_POINTS)
