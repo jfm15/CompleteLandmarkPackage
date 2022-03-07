@@ -224,9 +224,9 @@ def get_validation_message(predicted_points_per_model, eres_per_model, target_po
     if print_individual_image_stats:
         for idx, (image, _, meta) in enumerate(loader):
             msg = "Image: {}".format(meta['file_name'][0])
-            for radial_error in rec_weighted_model_radial_errors:
+            for radial_error in rec_weighted_model_radial_errors[idx]:
                 msg += "\t{:.3f}mm".format(radial_error)
-            msg += "\taverage: {:.3f}mm".format(np.mean(rec_weighted_model_radial_errors))
+            msg += "\taverage: {:.3f}mm".format(np.mean(rec_weighted_model_radial_errors[idx]))
             logger.info(msg)
 
     # Print loss, radial error for each landmark and MRE for the image
