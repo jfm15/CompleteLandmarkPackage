@@ -3,12 +3,12 @@ import time
 import logging
 import torch
 import numpy as np
-import matplotlib.pyplot as plt
 
 from config import get_cfg_defaults
 from evaluate import get_predicted_and_target_points
 from evaluate import get_hottest_points
 from backup.evaluate import produce_sdr_statistics
+from visualise import visualise_aggregations
 
 
 def prepare_for_training(cfg_path, output_path):
@@ -214,37 +214,12 @@ def get_validation_message(predicted_points_per_model, eres_per_model, target_po
 
             name = meta['file_name'][0]
             pixel_size = np.array(meta['pixel_size'][0])
-            usable_image = np.squeeze(image) * 0.6
 
-            # cycle through landmarks
-            no_of_landmarks = rec_weighted_model_radial_errors[idx].shape[0]
-            for landmark_idx in range(no_of_landmarks):
+            visualise_aggregations(image, predicted_points_per_model[:, idx, :],
+                                   rec_weighted_model_points[idx], mean_model_points[idx],
+                                   target_points[idx], pixel_size, name, save_image_path)
 
-                image_path = os.path.join(save_image_path, "{}_{}".format(name, landmark_idx + 1))
-                figure = plt.gcf()
-                figure.set_size_inches(usable_image.shape[1] / 50, usable_image.shape[0] / 50)
-                plt.imshow(usable_image, cmap='gray', vmin=0.0, vmax=255.0)
 
-                for model_idx in range(len(predicted_points_per_model)):
-                    individual_model_pred = predicted_points_per_model[model_idx, idx, landmark_idx]
-                    scaled_individual_model_pred = np.divide(individual_model_pred, pixel_size)
-                    plt.scatter(scaled_individual_model_pred[0], scaled_individual_model_pred[1], color='white', s=5)
-
-                mean_pred = mean_model_points[idx, landmark_idx]
-                scaled_mean_pred = np.divide(mean_pred, pixel_size)
-                plt.scatter(scaled_mean_pred[0], scaled_mean_pred[1], color='violet', s=5)
-
-                confidence_weighted_pred = rec_weighted_model_points[idx, landmark_idx]
-                scaled_confidence_weighted_pred = np.divide(confidence_weighted_pred, pixel_size)
-                plt.scatter(scaled_confidence_weighted_pred[0], scaled_confidence_weighted_pred[1], color='red', s=5)
-
-                ground_truth = target_points[idx, landmark_idx]
-                scaled_ground_truth = np.divide(ground_truth, pixel_size)
-                plt.scatter(scaled_ground_truth[0], scaled_ground_truth[1], color='lime', s=5)
-
-                plt.axis('off')
-                plt.savefig(image_path, bbox_inches='tight', dpi=100)
-                plt.close()
 
     # Print loss, radial error for each landmark and MRE for the image
     # Assumes that the batch size is 1 here
