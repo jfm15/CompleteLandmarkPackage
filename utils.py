@@ -214,7 +214,8 @@ def get_validation_message(predicted_points_per_model, eres_per_model, target_po
 
             name = meta['file_name'][0]
             individual_image_path = os.path.join(save_image_path, name)
-            plt.imshow(image)
+            usable_image = np.squeeze(image)
+            plt.imshow(usable_image)
             plt.axis('off')
             plt.savefig(individual_image_path, bbox_inches='tight')
             plt.close()
