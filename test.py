@@ -93,6 +93,7 @@ def main():
     target_points = None
 
     for model_idx in range(len(ensemble)):
+        logger.info('-----------Running Model {}-----------'.format(model_idx))
         our_model = ensemble[model_idx]
         our_model = our_model.cuda()
 
@@ -115,7 +116,8 @@ def main():
     target_points = np.squeeze(target_points)
 
     msg = get_validation_message(predicted_points_per_model, eres_per_model, target_points,
-                                 cfg.VALIDATION.SDR_THRESHOLDS)
+                                 cfg.VALIDATION.SDR_THRESHOLDS, print_individual_image_stats=True,
+                                 loader=test_loader, logger=logger)
 
     logger.info(msg)
 
