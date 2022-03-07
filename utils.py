@@ -204,7 +204,8 @@ def get_least_ere_points(predicted_points_per_model, eres_per_model):
     return predicted_points_per_model[least_ere_indices, grid[0], grid[1]]
 
 
-def get_validation_message(predicted_points_per_model, eres_per_model, target_points, sdr_thresholds):
+def get_validation_message(predicted_points_per_model, eres_per_model, target_points, sdr_thresholds,
+                           print_individual_image_stats=False, loader=None, logger=None):
 
     # Get radial errors for each model
     avg_radial_errors = [np.mean(cal_radial_errors(predicted_points, target_points))
@@ -219,6 +220,14 @@ def get_validation_message(predicted_points_per_model, eres_per_model, target_po
     rec_weighted_model_points = get_ere_reciprocal_weighted_points(predicted_points_per_model, eres_per_model)
     rec_weighted_model_radial_errors = cal_radial_errors(rec_weighted_model_points, target_points)
     avg_radial_errors.append(np.mean(rec_weighted_model_radial_errors))
+
+    if print_individual_image_stats:
+        for idx, (image, _, meta) in enumerate(loader):
+            msg = "Image: {}".format(meta['file_name'][0])
+            for radial_error in rec_weighted_model_radial_errors:
+                msg += "\t{:.3f}mm".format(radial_error)
+            msg += "\taverage: {:.3f}mm".format(np.mean(rec_weighted_model_radial_errors))
+            logger.info(msg)
 
     # Print loss, radial error for each landmark and MRE for the image
     # Assumes that the batch size is 1 here
