@@ -89,6 +89,8 @@ def main():
     eres_per_model = []
     target_points = None
     save_image_path = os.path.join(cfg.VALIDATION.SAVE_IMAGE_PATH, yaml_file_name)
+    if not os.path.exists(save_image_path):
+        os.makedirs(save_image_path)
 
     for model_idx in range(len(ensemble)):
         logger.info('-----------Running Model {}-----------'.format(model_idx))

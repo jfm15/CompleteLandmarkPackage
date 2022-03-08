@@ -214,9 +214,6 @@ def get_validation_message(predicted_points_per_model, eres_per_model, target_po
             logger.info(msg)
 
     if save_images:
-        if not os.path.exists(save_image_path):
-            os.makedirs(save_image_path)
-
         logger.info('-----------Save Images-----------')
         for idx, (image, _, meta) in enumerate(loader):
             if (idx + 1) % 30 == 0:
