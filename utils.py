@@ -144,6 +144,7 @@ def use_model(model, final_layer, loader, loss_function,
                 name = meta['file_name'][0]
                 visualise_heatmaps(image.cpu().detach().numpy(),
                                    output.cpu().detach().numpy(),
+                                   eres.cpu().detach().numpy(),
                                    predicted_pixel_points,
                                    model_idx, name, save_image_path)
 
