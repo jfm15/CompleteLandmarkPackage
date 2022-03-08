@@ -17,7 +17,7 @@ def visualise_heatmaps(image, output, eres, predicted_pixel_points, model_idx, n
         plt.imshow(usable_image, cmap='gray', vmin=0.0, vmax=255.0)
         plt.imshow(output[0, landmark_idx], cmap='inferno', alpha=0.5)
         pred_point = predicted_pixel_points[landmark_idx]
-        ere = eres[landmark_idx]
+        ere = eres[0, landmark_idx]
         plt.scatter(pred_point[0], pred_point[1], color='violet', s=3)
         plt.text(pred_point[0] + 10, pred_point[1] + 10, "ERE: {:.3f}".format(ere), color="white", fontsize="small")
         plt.axis('off')
