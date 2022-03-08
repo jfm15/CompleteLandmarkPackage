@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 def visualise_heatmaps(image, output, eres, predicted_pixel_points, model_idx, name, save_image_path):
 
-    usable_image = np.squeeze(image) * 0.6
+    usable_image = np.squeeze(image)
 
     # cycle through landmarks
     no_of_landmarks = output.shape[1]
@@ -18,8 +18,8 @@ def visualise_heatmaps(image, output, eres, predicted_pixel_points, model_idx, n
         plt.imshow(output[0, landmark_idx], cmap='inferno', alpha=0.5)
         pred_point = predicted_pixel_points[0, landmark_idx]
         ere = eres[0, landmark_idx]
-        plt.scatter(pred_point[0], pred_point[1], color='white', s=3)
-        plt.text(pred_point[0] + 10, pred_point[1] + 10, "ERE: {:.3f}".format(ere), color="white", fontsize="small")
+        # plt.scatter(pred_point[0], pred_point[1], color='white', s=3)
+        # plt.text(pred_point[0] + 10, pred_point[1] + 10, "ERE: {:.3f}".format(ere), color="white", fontsize="small")
         plt.axis('off')
         plt.savefig(image_path, bbox_inches='tight', dpi=100)
         plt.close()
