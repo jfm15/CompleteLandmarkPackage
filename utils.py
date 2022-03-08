@@ -142,7 +142,10 @@ def use_model(model, final_layer, loader, loss_function,
 
             if print_heatmap_images:
                 name = meta['file_name'][0]
-                visualise_heatmaps(image, output, predicted_pixel_points, model_idx, name, save_image_path)
+                visualise_heatmaps(image.cpu().detach().numpy(),
+                                   output.cpu().detach().numpy(),
+                                   predicted_pixel_points.cpu().detach().numpy(),
+                                   model_idx, name, save_image_path)
 
     model.cpu()
 
