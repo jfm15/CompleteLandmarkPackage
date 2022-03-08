@@ -9,6 +9,7 @@ from evaluate import get_predicted_and_target_points
 from evaluate import get_hottest_points
 from backup.evaluate import produce_sdr_statistics
 from visualise import visualise_aggregations
+from visualise import visualise_heatmaps
 
 
 def prepare_for_training(cfg_path, output_path):
@@ -100,7 +101,9 @@ def train_model(model, final_layer, optimizer, scheduler, loader, loss_function,
     scheduler.step()
 
 
-def use_model(model, final_layer, loader, loss_function, logger=None, print_progress=False):
+def use_model(model, final_layer, loader, loss_function,
+              logger=None, print_progress=False, print_heatmap_images=False,
+              model_idx=0, save_image_path=None):
     model.eval()
     all_losses = []
     all_predicted_points = []
@@ -136,6 +139,10 @@ def use_model(model, final_layer, loader, loss_function, logger=None, print_prog
             if print_progress:
                 if (idx + 1) % 30 == 0:
                     logger.info("[{}/{}]".format(idx + 1, len(loader)))
+
+            if print_heatmap_images:
+                name = meta['file_name'][0]
+                visualise_heatmaps(image, output, predicted_pixel_points, model_idx, name, save_image_path)
 
     model.cpu()
 
@@ -218,8 +225,6 @@ def get_validation_message(predicted_points_per_model, eres_per_model, target_po
             visualise_aggregations(image, predicted_points_per_model[:, idx, :],
                                    rec_weighted_model_points[idx], mean_model_points[idx],
                                    target_points[idx], pixel_size, name, save_image_path)
-
-
 
     # Print loss, radial error for each landmark and MRE for the image
     # Assumes that the batch size is 1 here
