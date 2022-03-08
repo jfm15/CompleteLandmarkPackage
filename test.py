@@ -88,6 +88,7 @@ def main():
     predicted_points_per_model = []
     eres_per_model = []
     target_points = None
+    save_image_path = os.path.join(cfg.VALIDATION.SAVE_IMAGE_PATH, yaml_file_name)
 
     for model_idx in range(len(ensemble)):
         logger.info('-----------Running Model {}-----------'.format(model_idx))
@@ -96,7 +97,8 @@ def main():
 
         all_losses, all_predicted_points, all_target_points, all_eres, _, _ \
             = use_model(our_model, two_d_softmax, test_loader, nll_across_batch,
-                        logger=logger, print_progress=True)
+                        logger=logger, print_progress=True, print_heatmap_images=True,
+                        model_idx=model_idx, save_image_path=save_image_path)
 
         predicted_points_per_model.append(all_predicted_points)
         eres_per_model.append(all_eres)
@@ -112,7 +114,6 @@ def main():
     eres_per_model = np.array(eres_per_model).squeeze()
     target_points = np.squeeze(target_points)
 
-    save_image_path = os.path.join(cfg.VALIDATION.SAVE_IMAGE_PATH, yaml_file_name)
     msg = get_validation_message(predicted_points_per_model, eres_per_model, target_points,
                                  cfg.VALIDATION.SDR_THRESHOLDS, print_individual_image_stats=True,
                                  loader=test_loader, logger=logger, save_images=True, save_image_path=save_image_path)

@@ -3,6 +3,25 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+def visualise_heatmaps(image, output, predicted_pixel_points, model_idx, name, save_image_path):
+
+    usable_image = np.squeeze(image) * 0.6
+
+    # cycle through landmarks
+    no_of_landmarks = output.shape[1]
+    for landmark_idx in range(no_of_landmarks):
+
+        image_path = os.path.join(save_image_path, "heat_{}_{}_model:{}".format(name, landmark_idx + 1, model_idx))
+        figure = plt.gcf()
+        figure.set_size_inches(usable_image.shape[1] / 50, usable_image.shape[0] / 50)
+        plt.imshow(usable_image, cmap='gray', vmin=0.0, vmax=255.0)
+        plt.imshow(output[landmark_idx], cmap='inferno', alpha=0.5)
+
+        plt.axis('off')
+        plt.savefig(image_path, bbox_inches='tight', dpi=100)
+        plt.close()
+
+
 def visualise_aggregations(image, predicted_points_per_model, rec_weighted_model_points,
                            mean_model_points, target_points, pixel_size, name, save_image_path):
 
@@ -12,7 +31,7 @@ def visualise_aggregations(image, predicted_points_per_model, rec_weighted_model
     no_of_landmarks = rec_weighted_model_points.shape[0]
     for landmark_idx in range(no_of_landmarks):
 
-        image_path = os.path.join(save_image_path, "{}_{}".format(name, landmark_idx + 1))
+        image_path = os.path.join(save_image_path, "agg_{}_{}".format(name, landmark_idx + 1))
         figure = plt.gcf()
         figure.set_size_inches(usable_image.shape[1] / 50, usable_image.shape[0] / 50)
         plt.imshow(usable_image, cmap='gray', vmin=0.0, vmax=255.0)
