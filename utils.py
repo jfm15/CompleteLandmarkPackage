@@ -5,11 +5,8 @@ import torch
 import numpy as np
 
 from config import get_cfg_defaults
-from evaluate import get_predicted_and_target_points
-from evaluate import get_hottest_points
 from backup.evaluate import produce_sdr_statistics
 from visualise import visualise_aggregations
-from visualise import visualise_heatmaps
 
 
 def prepare_for_training(cfg_path, output_path):
@@ -72,119 +69,6 @@ def setup_logger(log_path):
     console = logging.StreamHandler()
     logging.getLogger('').addHandler(console)
     return logger
-
-
-def train_model(model, final_layer, optimizer, scheduler, loader, loss_function, logger):
-    model.train()
-    losses_per_epoch = []
-
-    for batch, (image, channels, meta) in enumerate(loader):
-
-        # Put image and channels onto gpu
-        image = image.cuda()
-        channels = channels.cuda()
-
-        output = model(image.float())
-        output = final_layer(output)
-
-        optimizer.zero_grad()
-        loss = loss_function(output, channels)
-        loss.backward()
-
-        optimizer.step()
-
-        losses_per_epoch.append(loss.item())
-
-        if (batch + 1) % 5 == 0:
-            logger.info("[{}/{}]\tLoss: {:.3f}".format(batch + 1, len(loader), np.mean(losses_per_epoch)))
-
-    scheduler.step()
-
-
-def use_model(model, final_layer, loader, loss_function,
-              logger=None, print_progress=False, print_heatmap_images=False,
-              model_idx=0, save_image_path=None):
-    model.eval()
-    all_losses = []
-    all_predicted_points = []
-    all_predicted_pixel_points = []
-    all_target_points = []
-    all_eres = []
-    file_names = []
-
-    with torch.no_grad():
-        for idx, (image, channels, meta) in enumerate(loader):
-            # Put image and channels onto gpu
-            image = image.cuda()
-            channels = channels.cuda()
-            meta['landmarks_per_annotator'] = meta['landmarks_per_annotator'].cuda()
-            meta['pixel_size'] = meta['pixel_size'].cuda()
-            file_names.extend(meta["file_name"])
-
-            output = model(image.float())
-            output = final_layer(output)
-
-            loss = loss_function(output, channels)
-            all_losses.append(loss.item())
-
-            predicted_points, target_points, eres \
-                = get_predicted_and_target_points(output, meta['landmarks_per_annotator'], meta['pixel_size'])
-            all_predicted_points.append(predicted_points.cpu().detach().numpy())
-            all_target_points.append(target_points.cpu().detach().numpy())
-            all_eres.extend(eres.cpu().detach().numpy())
-
-            predicted_pixel_points = get_hottest_points(output).cpu().detach().numpy()
-            all_predicted_pixel_points.append(predicted_pixel_points)
-
-            if print_progress:
-                if (idx + 1) % 30 == 0:
-                    logger.info("[{}/{}]".format(idx + 1, len(loader)))
-
-            if print_heatmap_images:
-                name = meta['file_name'][0]
-                visualise_heatmaps(image.cpu().detach().numpy(),
-                                   output.cpu().detach().numpy(),
-                                   eres.cpu().detach().numpy(),
-                                   predicted_pixel_points,
-                                   model_idx, name, save_image_path)
-
-    model.cpu()
-
-    return all_losses, all_predicted_points, all_target_points, all_eres, all_predicted_pixel_points, file_names
-
-
-def cal_radial_errors(predicted_points, target_points):
-    displacement_vectors = predicted_points - target_points
-    return np.linalg.norm(displacement_vectors, axis=2)
-
-
-def get_ere_sum_weighted_points(predicted_points_per_model, eres_per_model):
-    sum_eres = np.sum(eres_per_model, axis=0, keepdims=True)
-    inverted_eres = sum_eres - eres_per_model
-    inverted_eres = np.expand_dims(inverted_eres, axis=3)
-    weighted_points = np.multiply(inverted_eres, predicted_points_per_model)
-    return np.sum(weighted_points, axis=0) / np.sum(inverted_eres, axis=0)
-
-
-def get_ere_max_weighted_points(predicted_points_per_model, eres_per_model):
-    max_eres = np.max(eres_per_model, axis=0, keepdims=True)
-    inverted_eres = max_eres - eres_per_model
-    inverted_eres = np.expand_dims(inverted_eres, axis=3)
-    weighted_points = np.multiply(inverted_eres, predicted_points_per_model)
-    return np.sum(weighted_points, axis=0) / np.sum(inverted_eres, axis=0)
-
-
-def get_ere_reciprocal_weighted_points(predicted_points_per_model, eres_per_model):
-    inverted_eres = np.reciprocal(eres_per_model)
-    inverted_eres = np.expand_dims(inverted_eres, axis=3)
-    weighted_points = np.multiply(inverted_eres, predicted_points_per_model)
-    return np.sum(weighted_points, axis=0) / np.sum(inverted_eres, axis=0)
-
-
-def get_least_ere_points(predicted_points_per_model, eres_per_model):
-    least_ere_indices = np.argmin(eres_per_model, axis=0)
-    grid = np.indices(least_ere_indices.shape)
-    return predicted_points_per_model[least_ere_indices, grid[0], grid[1]]
 
 
 def get_validation_message(predicted_points_per_model, eres_per_model, target_points, sdr_thresholds,

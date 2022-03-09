@@ -52,15 +52,6 @@ def get_eres(output_stack, predicted_points_scaled, pixel_sizes, significant_pix
     return torch.stack(eres_per_image)
 
 
-'''
-# test eres
-output_stack = torch.Tensor([[[[0.0, 0.5, 0.0], [0.0, 0.5, 0.0], [0.0, 0.0, 0.0]]]])
-predicted_points_scaled = torch.Tensor([[[0.5, 0.5]]])
-pixel_sizes = torch.Tensor([[0.5, 0.5]])
-print(get_eres(output_stack, predicted_points_scaled, pixel_sizes))
-'''
-
-
 def get_predicted_and_target_points(output_stack, landmarks_per_annotator, pixels_sizes):
     # Evaluate radial error
     # Predicted points has shape (B, N, 2)
@@ -92,6 +83,8 @@ def evaluate(output_stack, landmarks_per_annotator, pixels_sizes):
     return distances, eres
 
 
+# TODO use the function below
+# Create another function which does the print messages, extract the rest of get_validation_message to this file
 def get_sum_weighted_point(eres_for_this_landmark, predicted_points):
     ere_sum = np.sum(eres_for_this_landmark)
     inverted_eres = ere_sum - eres_for_this_landmark

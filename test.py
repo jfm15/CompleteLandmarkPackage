@@ -10,8 +10,8 @@ from model import two_d_softmax
 from model import nll_across_batch
 from landmark_dataset import LandmarkDataset
 from utils import prepare_for_testing
-from utils import use_model
 from utils import get_validation_message
+from function import use_model
 from torchsummary.torchsummary import summary_string
 
 
@@ -97,14 +97,13 @@ def main():
         our_model = ensemble[model_idx]
         our_model = our_model.cuda()
 
-        all_losses, all_predicted_points, all_target_points, all_eres, _, _ \
+        all_losses, all_predicted_points, target_points, all_eres \
             = use_model(our_model, two_d_softmax, test_loader, nll_across_batch,
                         logger=logger, print_progress=True, print_heatmap_images=True,
                         model_idx=model_idx, save_image_path=save_image_path)
 
         predicted_points_per_model.append(all_predicted_points)
         eres_per_model.append(all_eres)
-        target_points = np.array(all_target_points)
 
         # radial_error_per_model.append(all_radial_errors)
         avg_loss_per_model.append(all_losses)
@@ -112,13 +111,12 @@ def main():
         # move model back to cpu
         our_model.cpu()
 
-    predicted_points_per_model = np.array(predicted_points_per_model).squeeze()
-    eres_per_model = np.array(eres_per_model).squeeze()
-    target_points = np.squeeze(target_points)
+    predicted_points_per_model = torch.stack(predicted_points_per_model)
+    eres_per_model = torch.stack(eres_per_model)
+    print("end of test", predicted_points_per_model.size(), eres_per_model.size(), target_points.size())
 
     msg = get_validation_message(predicted_points_per_model, eres_per_model, target_points,
-                                 cfg.VALIDATION.SDR_THRESHOLDS, print_individual_image_stats=True,
-                                 loader=test_loader, logger=logger, save_images=True, save_image_path=save_image_path)
+                                 cfg.VALIDATION.SDR_THRESHOLDS)
 
     logger.info(msg)
 
