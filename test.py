@@ -114,6 +114,7 @@ def main():
     eres_per_model = torch.stack(eres_per_model)
     # predicted_points_per_model is size [M, D, N, 2]
     # eres_per_model is size [M, D, N]
+    # target_points is size [D, N, 2]
     logger.info("here")
     logger.info(predicted_points_per_model.size())
     logger.info(eres_per_model.size())
