@@ -13,8 +13,8 @@ This code can be used to reproduce the experiments performed in our paper 'Confi
 
 1. Go to your chosen directory, clone this repo then enter it:
 ```
-git clone https://github.com/jfm15/ContourHuggingHeatmaps.git
-cd ContourHuggingHeatmaps/
+git clone https://github.com/jfm15/ConfidentLandmarkEnsembling.git
+cd ConfidentLandmarkEnsembling/
 ```
 
 2. Install required packages. In this guide we create our own virtual environment:
@@ -87,32 +87,13 @@ You can either train the model yourself or download one of our pretrained models
 #### 1. Train a model
 
 1.1 Train a model using the following command. This script resizes images in your training set directory 
-and saves them in ContourHuggingHeatmaps/cache. After 10 epochs it will save the model at
-ContourHuggingHeatmaps/output/cephalometric/cephalometric_model.pth.
+and saves them in ConfidentLandmarkEnsembling/cache. This script will perform the experiment 3 times. Each experiment will 
+train the ensemble from scratch and after 10 epochs it will save the 3 base estimators in 
+{output_path}/ceph_sup_150/run:{X}_models/ were {X} is replaced by 0, 1 or 2 depending on which repetition the
+experiment is.
 
 ```
-python train.py --cfg experiments/cephalometric.yaml --training_images {cephalometric_data_directory}/RawImage/TrainingData/ \
- --annotations {cephalometric_data_directory}/AnnotationsByMD/
-```
-
-1.2 Perform temperature scaling on the model saved in the previous step using the following command. 
-The model with the best Estimated Calibration Error (ECE) score will be saved at ContourHuggingHeatmaps/output/cephalometric/cephalometric_scaled_model.pth.
-
-```
-python temperature_scaling.py --cfg experiments/cephalometric.yaml --fine_tuning_images {cephalometric_data_directory}/RawImage/Test1Data/ \
- --annotations {cephalometric_data_directory}/AnnotationsByMD/ --pretrained_model output/cephalometric/cephalometric_model.pth
-```
-
-#### 2. Download a model
-
-2.1 If you would like, instead of training a model you can download our pretrained models at the following link: https://app.box.com/s/4qz3tthh7q6xajtaasj4fp9iaw86mmyx
-
-#### 3. Testing
-
-3.1 Test the models using the following commands where {model_path} is the path to the model you have trained or downloaded. 
-You can either test the basic model or the temperature scaled model.
-
-```
-python test.py --cfg experiments/cephalometric.yaml --testing_images {cephalometric_data_directory}/RawImage/{Test1Data or Test2Data}/
---annotations {cephalometric_data_directory}/AnnotationsByMD  --pretrained_model {model_path}
+python train.py --cfg experiments/cephalometric/ceph_sup_150.yaml --training_images {cephalometric_data_directory}/RawImage/TrainingData/ \
+ --validation_images /data/coml-oxmedis/shug6372/data/CephalometricData/RawImage/Test1Data/ /data/coml-oxmedis/shug6372/data/CephalometricData/RawImage/Test2Data/ \
+ --annotations {cephalometric_data_directory}/AnnotationsByMD/ --output_path {output_path}
 ```
