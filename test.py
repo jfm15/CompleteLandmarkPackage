@@ -99,7 +99,7 @@ def main():
 
         all_losses, all_predicted_points, target_points, all_eres \
             = use_model(our_model, two_d_softmax, test_loader, nll_across_batch,
-                        logger=logger, print_progress=True, print_heatmap_images=True)
+                        logger=logger, print_progress=True)
 
         predicted_points_per_model.append(all_predicted_points)
         eres_per_model.append(all_eres)
