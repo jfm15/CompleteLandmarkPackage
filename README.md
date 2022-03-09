@@ -88,8 +88,7 @@ You can either train the model yourself or download one of our pretrained models
 
 1.1 Train a model using the following command. This script resizes images in your training set directory 
 and saves them in ConfidentLandmarkEnsembling/cache. This script will perform the experiment 3 times. Each experiment will 
-train the ensemble from scratch and after 10 epochs it will save the 3 base estimators in 
-{output_path}/ceph_sup_150/run:{X}_models/ were {X} is replaced by 0, 1 or 2 depending on which repetition the
+train the ensemble from scratch and after 10 epochs it will save the 3 base estimators in {output_path}/ceph_sup_150/run:{X}_models/ where {X} is replaced by 0, 1 or 2 depending on which repetition the
 experiment is.
 
 ```
