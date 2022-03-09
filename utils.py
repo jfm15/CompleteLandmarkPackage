@@ -1,12 +1,8 @@
 import os
 import time
 import logging
-import torch
-import numpy as np
 
 from config import get_cfg_defaults
-from backup.evaluate import produce_sdr_statistics
-from visualise import visualise_aggregations
 
 
 def prepare_for_training(cfg_path, output_path):
