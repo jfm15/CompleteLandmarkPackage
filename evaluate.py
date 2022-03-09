@@ -68,38 +68,45 @@ def get_predicted_and_target_points(output_stack, landmarks_per_annotator, pixel
     return scaled_predicted_points, scaled_target_points, eres
 
 
-# output stack is of shape (B, N, W, H)
-# landmark per annotator is of shape (B, N_annotators, N, 2)
-# pixel sizes is of shape (B, 2)
-def evaluate(output_stack, landmarks_per_annotator, pixels_sizes):
+def cal_radial_errors(predicted_points, target_points, mean=False):
+    '''
 
-    scaled_predicted_points, scaled_target_points, eres = get_predicted_and_target_points(output_stack,
-                                                                                          landmarks_per_annotator,
-                                                                                          pixels_sizes)
+    :param predicted_points: tensor of size [D, N, 2]
+    :param target_points: tensor of size [D, N, 2]
+    :return: the distance between each point, a tensor of size [D, N]
+    '''
 
-    displacement_vectors = torch.sub(scaled_predicted_points, scaled_target_points)
-    distances = torch.norm(displacement_vectors, dim=2)
-
-    return distances, eres
-
-
-# TODO use the function below
-# Create another function which does the print messages, extract the rest of get_validation_message to this file
-def get_sum_weighted_point(eres_for_this_landmark, predicted_points):
-    ere_sum = np.sum(eres_for_this_landmark)
-    inverted_eres = ere_sum - eres_for_this_landmark
-    weighted_points = np.multiply(np.expand_dims(inverted_eres, axis=1), predicted_points)
-    return np.sum(weighted_points, axis=0) / np.sum(inverted_eres)
+    displacement = predicted_points - target_points
+    per_landmark_error = torch.norm(displacement, dim=2)
+    if mean:
+        return torch.mean(per_landmark_error).item()
+    else:
+        return per_landmark_error
 
 
-def get_max_weighted_point(eres_for_this_landmark, predicted_points):
-    ere_max = np.max(eres_for_this_landmark)
-    inverted_eres = ere_max - eres_for_this_landmark
-    weighted_points = np.multiply(np.expand_dims(inverted_eres, axis=1), predicted_points)
-    return np.sum(weighted_points, axis=0) / np.sum(inverted_eres)
+def get_confidence_weighted_points(predicted_points_per_model, eres_per_model):
+    '''
+
+    :param predicted_points_per_model: tensor of size [M, D, N, 2]
+    :param eres_per_model: tensor of size [M, D, N]
+    :return: a tensor of size [D, N, 2] representing the confidence weighted points
+    '''
+
+    inverted_eres = torch.reciprocal(eres_per_model)
+    # make inverted_eres size [M, D, N, 1] so it can be multiplied
+    weighted_points = torch.multiply(predicted_points_per_model, torch.unsqueeze(inverted_eres, -1))
+    # weighted points has size [M, D, N, 2]
+    average_points = torch.mean(weighted_points, dim=0)
+    # average points has size [D, N, 2]
+    total_inverted_eres = torch.sum(inverted_eres, dim=0)
+    # total_inverted_eres has size [D, N]
+    return torch.divide(average_points, torch.unsqueeze(total_inverted_eres, -1))
 
 
-def get_recp_weighted_point(eres_for_this_landmark, predicted_points):
-    inverted_eres = np.reciprocal(eres_for_this_landmark)
-    weighted_points = np.multiply(np.expand_dims(inverted_eres, axis=1), predicted_points)
-    return np.sum(weighted_points, axis=0) / np.sum(inverted_eres)
+def get_sdr_statistics(radial_errors, thresholds):
+    successful_detection_rates = []
+    for threshold in thresholds:
+        filter = torch.where(radial_errors < threshold, 1.0, 0.0)
+        sdr = 100 * torch.sum(filter) / torch.numel(radial_errors)
+        successful_detection_rates.append(sdr)
+    return successful_detection_rates
