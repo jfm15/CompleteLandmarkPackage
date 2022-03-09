@@ -1,4 +1,4 @@
-# Contour Hugging Heatmaps
+# Confident Landmark Ensembling
 
 This code can be used to reproduce the experiments performed in our paper 'Confidence is Key - A Weighted Ensembling of CNNs for Accurate Landmark Detection'.
 
