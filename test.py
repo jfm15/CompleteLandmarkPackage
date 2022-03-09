@@ -112,7 +112,12 @@ def main():
 
     predicted_points_per_model = torch.stack(predicted_points_per_model)
     eres_per_model = torch.stack(eres_per_model)
-    print("end of test", predicted_points_per_model.size(), eres_per_model.size(), target_points.size())
+    # predicted_points_per_model is size [M, D, N, 2]
+    # eres_per_model is size [M, D, N]
+    logger.info("here")
+    logger.info(predicted_points_per_model.size())
+    logger.info(eres_per_model.size())
+    logger.info(target_points.size())
 
     msg = get_validation_message(predicted_points_per_model, eres_per_model, target_points,
                                  cfg.VALIDATION.SDR_THRESHOLDS)

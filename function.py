@@ -60,7 +60,9 @@ def use_model(model, final_layer, loader, loss_function,
             all_predicted_points.append(predicted_points)
             all_target_points.append(target_points)
             all_eres.extend(eres)
-            print("during test", predicted_points.size(), target_points.size(), eres.size())
+            # predicted_points has size [B, N, 2]
+            # target_points has size [B, N, 2]
+            # eres has size [B, N]
 
             predicted_pixel_points = get_hottest_points(output).cpu().detach().numpy()
 
@@ -78,8 +80,12 @@ def use_model(model, final_layer, loader, loss_function,
 
     model.cpu()
 
-    all_predicted_points = torch.stack(all_predicted_points)
-    all_target_points = torch.stack(all_target_points)
-    all_eres = torch.stack(all_eres)
+    all_predicted_points = torch.cat(all_predicted_points)
+    all_target_points = torch.cat(all_target_points)
+    all_eres = torch.cat(all_eres)
+    # D = Dataset size
+    # predicted_points has size [D, N, 2]
+    # target_points has size [D, N, 2]
+    # eres has size [D, N]
 
     return all_losses, all_predicted_points, all_target_points, all_eres
