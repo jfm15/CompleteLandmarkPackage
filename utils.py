@@ -28,7 +28,7 @@ def prepare_for_testing(cfg_path, model_path, data_path):
 
     split_cfg_path = cfg_path.split("/")
     yaml_file_name = os.path.splitext(split_cfg_path[-1])[0]
-    model_name = os.path.basename(model_path)[:-len(".pth")]
+    model_name = os.path.basename(model_path)
     data_folder = os.path.basename(data_path)
     model_and_data_id = "{}_{}".format(model_name, data_folder)
     output_path = os.path.join('output', yaml_file_name, model_and_data_id)

@@ -160,8 +160,7 @@ def main():
                     our_model = our_model.cuda()
 
                     all_losses, all_predicted_points, target_points, all_eres \
-                        = use_model(our_model, two_d_softmax, validation_loaders[i], nll_across_batch,
-                                    logger=logger, print_progress=True)
+                        = use_model(our_model, two_d_softmax, validation_loaders[i], nll_across_batch)
 
                     predicted_points_per_model.append(all_predicted_points)
                     eres_per_model.append(all_eres)
