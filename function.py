@@ -59,7 +59,7 @@ def use_model(model, final_layer, loader, loss_function,
                 = get_predicted_and_target_points(output, meta['landmarks_per_annotator'], meta['pixel_size'])
             all_predicted_points.append(predicted_points)
             all_target_points.append(target_points)
-            all_eres.extend(eres)
+            all_eres.append(eres)
             # predicted_points has size [B, N, 2]
             # target_points has size [B, N, 2]
             # eres has size [B, N]
