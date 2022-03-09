@@ -144,55 +144,55 @@ def main():
                 # move model back to cpu
                 our_model.cpu()
 
-            for i, validation_images_path in enumerate(args.validation_images):
-                logger.info("-----------Validation over {}-----------".format(validation_images_path))
+        for i, validation_images_path in enumerate(args.validation_images):
+            logger.info("-----------Validation over {}-----------".format(validation_images_path))
 
-                avg_loss_per_model = []
-                predicted_points_per_model = []
-                eres_per_model = []
-                target_points = None
-                save_image_path = os.path.join(cfg.VALIDATION.SAVE_IMAGE_PATH, yaml_file_name)
-                if not os.path.exists(save_image_path):
-                    os.makedirs(save_image_path)
+            avg_loss_per_model = []
+            predicted_points_per_model = []
+            eres_per_model = []
+            target_points = None
+            save_image_path = os.path.join(cfg.VALIDATION.SAVE_IMAGE_PATH, yaml_file_name)
+            if not os.path.exists(save_image_path):
+                os.makedirs(save_image_path)
 
-                for model_idx in range(len(ensemble)):
-                    our_model = ensemble[model_idx]
-                    our_model = our_model.cuda()
+            for model_idx in range(len(ensemble)):
+                our_model = ensemble[model_idx]
+                our_model = our_model.cuda()
 
-                    all_losses, all_predicted_points, target_points, all_eres \
-                        = use_model(our_model, two_d_softmax, validation_loaders[i], nll_across_batch)
+                all_losses, all_predicted_points, target_points, all_eres \
+                    = use_model(our_model, two_d_softmax, validation_loaders[i], nll_across_batch)
 
-                    predicted_points_per_model.append(all_predicted_points)
-                    eres_per_model.append(all_eres)
+                predicted_points_per_model.append(all_predicted_points)
+                eres_per_model.append(all_eres)
 
-                    # radial_error_per_model.append(all_radial_errors)
-                    avg_loss_per_model.append(all_losses)
+                # radial_error_per_model.append(all_radial_errors)
+                avg_loss_per_model.append(all_losses)
 
-                    # move model back to cpu
-                    our_model.cpu()
+                # move model back to cpu
+                our_model.cpu()
 
-                predicted_points_per_model = torch.stack(predicted_points_per_model)
-                eres_per_model = torch.stack(eres_per_model)
-                # predicted_points_per_model is size [M, D, N, 2]
-                # eres_per_model is size [M, D, N]
-                # target_points is size [D, N, 2]
+            predicted_points_per_model = torch.stack(predicted_points_per_model)
+            eres_per_model = torch.stack(eres_per_model)
+            # predicted_points_per_model is size [M, D, N, 2]
+            # eres_per_model is size [M, D, N]
+            # target_points is size [D, N, 2]
 
-                # perform analysis
-                per_model_mre = [cal_radial_errors(predicted_points, target_points, mean=True)
-                                 for predicted_points in predicted_points_per_model]
+            # perform analysis
+            per_model_mre = [cal_radial_errors(predicted_points, target_points, mean=True)
+                             for predicted_points in predicted_points_per_model]
 
-                mean_aggregation_points = torch.mean(predicted_points_per_model, dim=0)
-                mean_aggregation_mre = cal_radial_errors(mean_aggregation_points, target_points, mean=True)
+            mean_aggregation_points = torch.mean(predicted_points_per_model, dim=0)
+            mean_aggregation_mre = cal_radial_errors(mean_aggregation_points, target_points, mean=True)
 
-                confidence_weighted_points = get_confidence_weighted_points(predicted_points_per_model, eres_per_model)
-                confidence_weighted_errors = cal_radial_errors(confidence_weighted_points, target_points)
-                confidence_weighted_mre = torch.mean(confidence_weighted_errors).item()
+            confidence_weighted_points = get_confidence_weighted_points(predicted_points_per_model, eres_per_model)
+            confidence_weighted_errors = cal_radial_errors(confidence_weighted_points, target_points)
+            confidence_weighted_mre = torch.mean(confidence_weighted_errors).item()
 
-                sdr_statistics = get_sdr_statistics(confidence_weighted_errors, cfg.VALIDATION.SDR_THRESHOLDS)
+            sdr_statistics = get_sdr_statistics(confidence_weighted_errors, cfg.VALIDATION.SDR_THRESHOLDS)
 
-                msg = get_validation_message(per_model_mre, mean_aggregation_mre, confidence_weighted_mre,
-                                             cfg.VALIDATION.SDR_THRESHOLDS, sdr_statistics)
-                logger.info(msg)
+            msg = get_validation_message(per_model_mre, mean_aggregation_mre, confidence_weighted_mre,
+                                         cfg.VALIDATION.SDR_THRESHOLDS, sdr_statistics)
+            logger.info(msg)
 
         logger.info('-----------Saving Models-----------')
         model_run_path = os.path.join(output_path, "run:{}_models".format(run))
