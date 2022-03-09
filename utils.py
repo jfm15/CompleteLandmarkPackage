@@ -76,7 +76,7 @@ def get_validation_message(logger, per_model_mre, mean_aggregation_mre, confiden
 
     # Print loss, radial error for each landmark and MRE for the image
     # Assumes that the batch size is 1 here
-    per_model_mre_formatted = ', '.join(["{:.3f}mm".format(stat) for stat in sdr_statistics])
+    per_model_mre_formatted = ', '.join(["{:.3f}mm".format(model_mre) for model_mre in per_model_mre])
     logger.info('-----------Overall Statistics-----------')
     msg = "Avg Radial Error per model: {} Mean Average Aggregation: {:.3f}mm " \
           "Confidence Weighted Aggregation: {:.3f}mm \n" \
