@@ -2,8 +2,6 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 
-from backup.evaluate import get_hottest_point
-
 
 # Get the predicted landmark point from the coordinate of the hottest point
 # Heatmap is a tensor of size (B, N, W, H)
