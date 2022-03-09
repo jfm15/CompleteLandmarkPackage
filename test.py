@@ -12,6 +12,9 @@ from landmark_dataset import LandmarkDataset
 from utils import prepare_for_testing
 from utils import get_validation_message
 from function import use_model
+from evaluate import cal_radial_errors
+from evaluate import get_confidence_weighted_points
+from evaluate import get_sdr_statistics
 from torchsummary.torchsummary import summary_string
 
 
@@ -115,13 +118,22 @@ def main():
     # predicted_points_per_model is size [M, D, N, 2]
     # eres_per_model is size [M, D, N]
     # target_points is size [D, N, 2]
-    logger.info("here")
-    logger.info(predicted_points_per_model.size())
-    logger.info(eres_per_model.size())
-    logger.info(target_points.size())
 
-    msg = get_validation_message(predicted_points_per_model, eres_per_model, target_points,
-                                 cfg.VALIDATION.SDR_THRESHOLDS)
+    # perform analysis
+    per_model_mre = [cal_radial_errors(predicted_points, target_points, mean=True)
+                     for predicted_points in predicted_points_per_model]
+
+    mean_aggregation_points = torch.mean(predicted_points_per_model, dim=0)
+    mean_aggregation_mre = cal_radial_errors(mean_aggregation_points, target_points, mean=True)
+
+    confidence_weighted_points = get_confidence_weighted_points(predicted_points_per_model, eres_per_model)
+    confidence_weighted_errors = cal_radial_errors(confidence_weighted_points, target_points)
+    confidence_weighted_mre = torch.mean(confidence_weighted_errors).item()
+
+    sdr_statistics = get_sdr_statistics(confidence_weighted_errors, cfg.VALIDATION.SDR_THRESHOLDS)
+
+    msg = get_validation_message(per_model_mre, mean_aggregation_mre, confidence_weighted_mre,
+                                 cfg.VALIDATION.SDR_THRESHOLDS, sdr_statistics)
 
     logger.info(msg)
 

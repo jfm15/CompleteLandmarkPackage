@@ -71,55 +71,18 @@ def setup_logger(log_path):
     return logger
 
 
-def get_validation_message(predicted_points_per_model, eres_per_model, target_points, sdr_thresholds,
-                           print_individual_image_stats=False, loader=None, logger=None,
-                           save_images=False, save_image_path=None):
-
-    # Get radial errors for each model
-    avg_radial_errors = [np.mean(cal_radial_errors(predicted_points, target_points))
-                         for predicted_points in predicted_points_per_model]
-
-    # Get radial error by averaging the models
-    mean_model_points = np.mean(predicted_points_per_model, axis=0)
-    mean_model_radial_errors = cal_radial_errors(mean_model_points, target_points)
-    avg_radial_errors.append(np.mean(mean_model_radial_errors))
-
-    # Get radial error using reciprocal ere method
-    rec_weighted_model_points = get_ere_reciprocal_weighted_points(predicted_points_per_model, eres_per_model)
-    rec_weighted_model_radial_errors = cal_radial_errors(rec_weighted_model_points, target_points)
-    avg_radial_errors.append(np.mean(rec_weighted_model_radial_errors))
-
-    if print_individual_image_stats:
-        logger.info('-----------Confidence Weighted Aggregation Individual Image Statistics-----------')
-        for idx, (_, _, meta) in enumerate(loader):
-            msg = "Image: {}".format(meta['file_name'][0])
-            for radial_error in rec_weighted_model_radial_errors[idx]:
-                msg += "\t{:.3f}mm".format(radial_error)
-            msg += "\taverage: {:.3f}mm".format(np.mean(rec_weighted_model_radial_errors[idx]))
-            logger.info(msg)
-
-    if save_images:
-        logger.info('-----------Save Images-----------')
-        for idx, (image, _, meta) in enumerate(loader):
-            if (idx + 1) % 30 == 0:
-                logger.info("[{}/{}]".format(idx + 1, len(loader)))
-
-            name = meta['file_name'][0]
-            pixel_size = np.array(meta['pixel_size'][0])
-
-            visualise_aggregations(image, predicted_points_per_model[:, idx, :],
-                                   rec_weighted_model_points[idx], mean_model_points[idx],
-                                   target_points[idx], pixel_size, name, save_image_path)
+def get_validation_message(logger, per_model_mre, mean_aggregation_mre, confidence_weighted_mre,
+                           sdr_thresholds, sdr_statistics):
 
     # Print loss, radial error for each landmark and MRE for the image
     # Assumes that the batch size is 1 here
+    per_model_mre_formatted = ', '.join(["{:.3f}mm".format(stat) for stat in sdr_statistics])
     logger.info('-----------Overall Statistics-----------')
-    msg = "Avg Radial Error per model: {:.3f}mm {:.3f}mm {:.3f}mm Avg Aggregation: {:.3f}mm " \
+    msg = "Avg Radial Error per model: {} Mean Average Aggregation: {:.3f}mm " \
           "Confidence Weighted Aggregation: {:.3f}mm \n" \
-        .format(*avg_radial_errors)
+        .format(per_model_mre_formatted, mean_aggregation_mre, confidence_weighted_mre)
 
-    sdr_statistics = produce_sdr_statistics(rec_weighted_model_radial_errors.flatten(), sdr_thresholds)
-    sdr_thresholds_formatted = ', '.join([str(threshold) + "mm" for threshold in sdr_thresholds])
+    sdr_thresholds_formatted = ', '.join(["{}mm".format(threshold) for threshold in sdr_thresholds])
     sdr_statistics_formatted = ', '.join(["{:.3f}%".format(stat) for stat in sdr_statistics])
     msg += "Successful Detection Rate (SDR) for {} respectively are: {} "\
         .format(sdr_thresholds_formatted, sdr_statistics_formatted)
