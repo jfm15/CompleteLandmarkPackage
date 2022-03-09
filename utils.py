@@ -67,13 +67,12 @@ def setup_logger(log_path):
     return logger
 
 
-def get_validation_message(logger, per_model_mre, mean_aggregation_mre, confidence_weighted_mre,
+def get_validation_message(per_model_mre, mean_aggregation_mre, confidence_weighted_mre,
                            sdr_thresholds, sdr_statistics):
 
     # Print loss, radial error for each landmark and MRE for the image
     # Assumes that the batch size is 1 here
     per_model_mre_formatted = ', '.join(["{:.3f}mm".format(model_mre) for model_mre in per_model_mre])
-    logger.info('-----------Overall Statistics-----------')
     msg = "Avg Radial Error per model: {} Mean Average Aggregation: {:.3f}mm " \
           "Confidence Weighted Aggregation: {:.3f}mm \n" \
         .format(per_model_mre_formatted, mean_aggregation_mre, confidence_weighted_mre)

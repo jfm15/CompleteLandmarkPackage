@@ -132,9 +132,9 @@ def main():
 
     sdr_statistics = get_sdr_statistics(confidence_weighted_errors, cfg.VALIDATION.SDR_THRESHOLDS)
 
+    logger.info('-----------Overall Statistics-----------')
     msg = get_validation_message(per_model_mre, mean_aggregation_mre, confidence_weighted_mre,
                                  cfg.VALIDATION.SDR_THRESHOLDS, sdr_statistics)
-
     logger.info(msg)
 
 
