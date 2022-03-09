@@ -155,7 +155,7 @@ def main():
                     our_model = ensemble[model_idx]
                     our_model = our_model.cuda()
 
-                    all_losses, all_predicted_points, all_target_points, all_eres, _, _ \
+                    all_losses, all_predicted_points, all_target_points, all_eres \
                         = use_model(our_model, two_d_softmax, validation_loaders[i], nll_across_batch)
 
                     predicted_points_per_model.append(all_predicted_points)
@@ -168,9 +168,11 @@ def main():
                     # move model back to cpu
                     our_model.cpu()
 
+                '''
                 predicted_points_per_model = np.array(predicted_points_per_model).squeeze()
                 eres_per_model = np.array(eres_per_model).squeeze()
                 target_points = np.squeeze(target_points)
+                '''
 
                 msg = get_validation_message(predicted_points_per_model, eres_per_model, target_points,
                                              cfg.VALIDATION.SDR_THRESHOLDS)
