@@ -96,3 +96,5 @@ python train.py --cfg experiments/cephalometric/ceph_sup_150.yaml --training_ima
  --validation_images /data/coml-oxmedis/shug6372/data/CephalometricData/RawImage/Test1Data/ /data/coml-oxmedis/shug6372/data/CephalometricData/RawImage/Test2Data/ \
  --annotations {cephalometric_data_directory}/AnnotationsByMD/ --output_path {output_path}
 ```
+
+You will see that after each 
