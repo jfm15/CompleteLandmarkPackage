@@ -94,11 +94,11 @@ def get_confidence_weighted_points(predicted_points_per_model, eres_per_model):
     # make inverted_eres size [M, D, N, 1] so it can be multiplied
     weighted_points = torch.multiply(predicted_points_per_model, torch.unsqueeze(inverted_eres, -1))
     # weighted points has size [M, D, N, 2]
-    average_points = torch.mean(weighted_points, dim=0)
+    sum_points = torch.sum(weighted_points, dim=0)
     # average points has size [D, N, 2]
     total_inverted_eres = torch.sum(inverted_eres, dim=0)
     # total_inverted_eres has size [D, N]
-    return torch.divide(average_points, torch.unsqueeze(total_inverted_eres, -1))
+    return torch.divide(sum_points, torch.unsqueeze(total_inverted_eres, -1))
 
 
 def get_sdr_statistics(radial_errors, thresholds):
