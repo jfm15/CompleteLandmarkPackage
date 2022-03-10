@@ -146,14 +146,13 @@ def main():
             logger.info("-----------Validation over {}-----------".format(validation_images_path))
 
             predicted_points_per_model, eres_per_model, target_points = \
-                validate_ensemble(ensemble, validation_loaders[i], print_progress=True, logger=logger)
+                validate_ensemble(ensemble, validation_loaders[i])
 
             aggregated_point_dict = use_aggregate_methods(predicted_points_per_model, eres_per_model,
                                                           aggregate_methods=cfg.VALIDATION.AGGREGATION_METHODS)
             aggregated_point_mres = [cal_radial_errors(predicted_points, target_points) for
                                      predicted_points in aggregated_point_dict.values()]
 
-            # get sdr for confidence weighted predictions
             sdr_statistics = get_sdr_statistics(aggregated_point_dict[cfg.VALIDATION.SDR_AGGREGATION_METHOD],
                                                 cfg.VALIDATION.SDR_THRESHOLDS)
 

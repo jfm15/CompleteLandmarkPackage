@@ -79,6 +79,9 @@ def validate_ensemble(ensemble, loader, print_progress=False, logger=None):
     target_points = None
 
     for model_idx in range(len(ensemble)):
+        if print_progress:
+            logger.info("-----------Running Model {}-----------".format(model_idx))
+
         our_model = ensemble[model_idx]
         our_model = our_model.cuda()
 

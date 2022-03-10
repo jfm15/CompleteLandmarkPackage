@@ -89,7 +89,6 @@ def main():
     aggregated_point_mres = [cal_radial_errors(predicted_points, target_points) for
                              predicted_points in aggregated_point_dict.values()]
 
-    # get sdr for confidence weighted predictions
     sdr_statistics = get_sdr_statistics(aggregated_point_dict[cfg.VALIDATION.SDR_AGGREGATION_METHOD],
                                         cfg.VALIDATION.SDR_THRESHOLDS)
 
