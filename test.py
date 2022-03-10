@@ -86,11 +86,12 @@ def main():
 
     aggregated_point_dict = use_aggregate_methods(predicted_points_per_model, eres_per_model,
                                                   aggregate_methods=cfg.VALIDATION.AGGREGATION_METHODS)
-    aggregated_point_mres = [cal_radial_errors(predicted_points, target_points) for
+    aggregated_point_mres = [cal_radial_errors(predicted_points, target_points, mean=True) for
                              predicted_points in aggregated_point_dict.values()]
 
-    sdr_statistics = get_sdr_statistics(aggregated_point_dict[cfg.VALIDATION.SDR_AGGREGATION_METHOD],
-                                        cfg.VALIDATION.SDR_THRESHOLDS)
+    chosen_radial_errors = cal_radial_errors(aggregated_point_dict[cfg.VALIDATION.SDR_AGGREGATION_METHOD],
+                                             target_points)
+    sdr_statistics = get_sdr_statistics(chosen_radial_errors, cfg.VALIDATION.SDR_THRESHOLDS)
 
     logger.info('-----------Overall Statistics-----------')
     msg = get_validation_message(aggregated_point_mres, cfg.TRAIN.ENSEMBLE_MODELS, cfg.VALIDATION.AGGREGATION_METHODS,
