@@ -28,6 +28,11 @@ TRAIN:
   LABELED_SUBSET: 20
 
 VALIDATION:
+  AGGREGATION_METHODS:
+    - "mean average"
+    - "confidence weighted"
+  SDR_AGGREGATION_METHOD:
+    - "confidence weighted"
   SDR_THRESHOLDS:
     - 2.0
     - 2.5
