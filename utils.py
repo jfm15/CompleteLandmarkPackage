@@ -74,7 +74,7 @@ def get_validation_message(aggregated_point_mres, no_of_base_estimators, aggrega
     i = 0
     for _ in range(no_of_base_estimators):
         value = aggregated_point_mres[i]
-        msg += "{:.3f}mm\t".format(value)
+        msg += "{:.3f}mm ".format(value)
         i += 1
 
     for aggregation_method in aggregation_methods:
@@ -84,7 +84,7 @@ def get_validation_message(aggregated_point_mres, no_of_base_estimators, aggrega
 
     sdr_thresholds_formatted = ', '.join(["{}mm".format(threshold) for threshold in sdr_thresholds])
     sdr_statistics_formatted = ', '.join(["{:.3f}%".format(stat) for stat in sdr_statistics])
-    msg += "\nSuccessful Detection Rate (SDR) for {} aggregation for thresholds {} respectively are {} "\
+    msg += "\nThe Successful Detection Rate (SDR) for {} aggregation for thresholds {} respectively is {} "\
         .format(sdr_method, sdr_thresholds_formatted, sdr_statistics_formatted)
 
     return msg
