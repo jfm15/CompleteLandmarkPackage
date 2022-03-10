@@ -3,18 +3,16 @@ import torch
 import os
 
 import model
-import numpy as np
 
-import matplotlib.pyplot as plt
 from model import two_d_softmax
 from model import nll_across_batch
 from landmark_dataset import LandmarkDataset
 from utils import prepare_for_training
 from utils import get_validation_message
 from function import train_model
-from function import use_model
+from function import validate_ensemble
 from evaluate import cal_radial_errors
-from evaluate import get_confidence_weighted_points
+from evaluate import use_aggregate_methods
 from evaluate import get_sdr_statistics
 from torchsummary.torchsummary import summary_string
 
@@ -147,51 +145,22 @@ def main():
         for i, validation_images_path in enumerate(args.validation_images):
             logger.info("-----------Validation over {}-----------".format(validation_images_path))
 
-            avg_loss_per_model = []
-            predicted_points_per_model = []
-            eres_per_model = []
-            target_points = None
-            save_image_path = os.path.join(cfg.VALIDATION.SAVE_IMAGE_PATH, yaml_file_name)
-            if not os.path.exists(save_image_path):
-                os.makedirs(save_image_path)
+            predicted_points_per_model, eres_per_model, target_points = \
+                validate_ensemble(ensemble, validation_loaders[i], print_progress=True, logger=logger)
 
-            for model_idx in range(len(ensemble)):
-                our_model = ensemble[model_idx]
-                our_model = our_model.cuda()
+            aggregated_point_dict = use_aggregate_methods(predicted_points_per_model, eres_per_model,
+                                                          aggregate_methods=cfg.VALIDATION.AGGREGATION_METHODS)
+            aggregated_point_mres = [cal_radial_errors(predicted_points, target_points) for
+                                     predicted_points in aggregated_point_dict.values()]
 
-                all_losses, all_predicted_points, target_points, all_eres \
-                    = use_model(our_model, two_d_softmax, validation_loaders[i], nll_across_batch)
+            # get sdr for confidence weighted predictions
+            sdr_statistics = get_sdr_statistics(aggregated_point_dict[cfg.VALIDATION.SDR_AGGREGATION_METHOD],
+                                                cfg.VALIDATION.SDR_THRESHOLDS)
 
-                predicted_points_per_model.append(all_predicted_points)
-                eres_per_model.append(all_eres)
-
-                # radial_error_per_model.append(all_radial_errors)
-                avg_loss_per_model.append(all_losses)
-
-                # move model back to cpu
-                our_model.cpu()
-
-            predicted_points_per_model = torch.stack(predicted_points_per_model)
-            eres_per_model = torch.stack(eres_per_model)
-            # predicted_points_per_model is size [M, D, N, 2]
-            # eres_per_model is size [M, D, N]
-            # target_points is size [D, N, 2]
-
-            # perform analysis
-            per_model_mre = [cal_radial_errors(predicted_points, target_points, mean=True)
-                             for predicted_points in predicted_points_per_model]
-
-            mean_aggregation_points = torch.mean(predicted_points_per_model, dim=0)
-            mean_aggregation_mre = cal_radial_errors(mean_aggregation_points, target_points, mean=True)
-
-            confidence_weighted_points = get_confidence_weighted_points(predicted_points_per_model, eres_per_model)
-            confidence_weighted_errors = cal_radial_errors(confidence_weighted_points, target_points)
-            confidence_weighted_mre = torch.mean(confidence_weighted_errors).item()
-
-            sdr_statistics = get_sdr_statistics(confidence_weighted_errors, cfg.VALIDATION.SDR_THRESHOLDS)
-
-            msg = get_validation_message(per_model_mre, mean_aggregation_mre, confidence_weighted_mre,
-                                         cfg.VALIDATION.SDR_THRESHOLDS, sdr_statistics)
+            msg = get_validation_message(aggregated_point_mres, cfg.TRAIN.ENSEMBLE_MODELS,
+                                         cfg.VALIDATION.AGGREGATION_METHODS,
+                                         cfg.VALIDATION.SDR_AGGREGATION_METHOD, cfg.VALIDATION.SDR_THRESHOLDS,
+                                         sdr_statistics)
             logger.info(msg)
 
         logger.info('-----------Saving Models-----------')

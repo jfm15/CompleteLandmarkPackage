@@ -108,3 +108,27 @@ def get_sdr_statistics(radial_errors, thresholds):
         sdr = 100 * torch.sum(filter) / torch.numel(radial_errors)
         successful_detection_rates.append(sdr)
     return successful_detection_rates
+
+
+def use_aggregate_methods(predicted_points_per_model, eres_per_model, aggregate_methods):
+    """
+
+    :param predicted_points_per_model: tensor of size [M, D, N, 2]
+    :param eres_per_model: tensor of size [M, D, N]
+    :param aggregate_methods: a list of what aggregate functions are going to be add to the output
+    :return: a list of tensors of size [D, N, 2] where the first M entries are the base estimator models and
+             the next entries correspond to the aggregate methods
+    """
+    # perform analysis
+    aggregated_point_list = {}
+    for i, predicted_points in enumerate(predicted_points_per_model):
+        aggregated_point_list[str(i + 1)] = predicted_points
+
+    for aggregate_method in aggregate_methods:
+        if aggregate_method == 'mean average':
+            aggregated_point_list['mean average'] = torch.mean(predicted_points_per_model, dim=0)
+        elif aggregate_method == 'confidence weighted':
+            aggregated_point_list['confidence weighted'] \
+                = get_confidence_weighted_points(predicted_points_per_model, eres_per_model)
+
+    return aggregated_point_list

@@ -1,8 +1,7 @@
 import torch
 import numpy as np
 from evaluate import get_predicted_and_target_points
-from evaluate import get_hottest_points
-from visualise import visualise_heatmaps
+from model import two_d_softmax
 
 
 def train_model(model, final_layer, optimizer, scheduler, loader, loss_function, logger):
@@ -32,28 +31,21 @@ def train_model(model, final_layer, optimizer, scheduler, loader, loss_function,
     scheduler.step()
 
 
-def use_model(model, final_layer, loader, loss_function,
-              logger=None, print_progress=False, print_heatmap_images=False,
-              model_idx=0, save_image_path=None):
+def use_model(model, final_layer, loader, logger=None, print_progress=False):
     model.eval()
-    all_losses = []
     all_predicted_points = []
     all_target_points = []
     all_eres = []
 
     with torch.no_grad():
-        for idx, (image, channels, meta) in enumerate(loader):
+        for idx, (image, _, meta) in enumerate(loader):
             # Put image and channels onto gpu
             image = image.cuda()
-            channels = channels.cuda()
             meta['landmarks_per_annotator'] = meta['landmarks_per_annotator'].cuda()
             meta['pixel_size'] = meta['pixel_size'].cuda()
 
             output = model(image.float())
             output = final_layer(output)
-
-            loss = loss_function(output, channels)
-            all_losses.append(loss.item())
 
             predicted_points, target_points, eres \
                 = get_predicted_and_target_points(output, meta['landmarks_per_annotator'], meta['pixel_size'])
@@ -64,19 +56,9 @@ def use_model(model, final_layer, loader, loss_function,
             # target_points has size [B, N, 2]
             # eres has size [B, N]
 
-            predicted_pixel_points = get_hottest_points(output).cpu().detach().numpy()
-
             if print_progress:
                 if (idx + 1) % 30 == 0:
                     logger.info("[{}/{}]".format(idx + 1, len(loader)))
-
-            if print_heatmap_images:
-                name = meta['file_name'][0]
-                visualise_heatmaps(image.cpu().detach().numpy(),
-                                   output.cpu().detach().numpy(),
-                                   eres.cpu().detach().numpy(),
-                                   predicted_pixel_points,
-                                   model_idx, name, save_image_path)
 
     model.cpu()
 
@@ -88,4 +70,31 @@ def use_model(model, final_layer, loader, loss_function,
     # target_points has size [D, N, 2]
     # eres has size [D, N]
 
-    return all_losses, all_predicted_points, all_target_points, all_eres
+    return all_predicted_points, all_target_points, all_eres
+
+
+def validate_ensemble(ensemble, loader, print_progress=False, logger=None):
+    predicted_points_per_model = []
+    eres_per_model = []
+    target_points = None
+
+    for model_idx in range(len(ensemble)):
+        our_model = ensemble[model_idx]
+        our_model = our_model.cuda()
+
+        all_predicted_points, target_points, all_eres = use_model(our_model, two_d_softmax, loader,
+                                                                  logger=logger, print_progress=print_progress)
+
+        predicted_points_per_model.append(all_predicted_points)
+        eres_per_model.append(all_eres)
+
+        # move model back to cpu
+        our_model.cpu()
+
+    predicted_points_per_model = torch.stack(predicted_points_per_model)
+    eres_per_model = torch.stack(eres_per_model)
+    # predicted_points_per_model is size [M, D, N, 2]
+    # eres_per_model is size [M, D, N]
+    # target_points is size [D, N, 2]
+    return predicted_points_per_model, eres_per_model, target_points
+
