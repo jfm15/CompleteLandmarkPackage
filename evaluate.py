@@ -120,15 +120,15 @@ def use_aggregate_methods(predicted_points_per_model, eres_per_model, aggregate_
              the next entries correspond to the aggregate methods
     """
     # perform analysis
-    aggregated_point_list = {}
+    aggregated_point_dict = {}
     for i, predicted_points in enumerate(predicted_points_per_model):
-        aggregated_point_list[str(i + 1)] = predicted_points
+        aggregated_point_dict[str(i + 1)] = predicted_points
 
     for aggregate_method in aggregate_methods:
         if aggregate_method == 'mean average':
-            aggregated_point_list['mean average'] = torch.mean(predicted_points_per_model, dim=0)
+            aggregated_point_dict['mean average'] = torch.mean(predicted_points_per_model, dim=0)
         elif aggregate_method == 'confidence weighted':
-            aggregated_point_list['confidence weighted'] \
+            aggregated_point_dict['confidence weighted'] \
                 = get_confidence_weighted_points(predicted_points_per_model, eres_per_model)
 
-    return aggregated_point_list
+    return aggregated_point_dict
