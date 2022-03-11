@@ -1,6 +1,4 @@
 import torch
-import numpy as np
-import matplotlib.pyplot as plt
 
 
 # Get the predicted landmark point from the coordinate of the hottest point
@@ -132,3 +130,26 @@ def use_aggregate_methods(predicted_points_per_model, eres_per_model, aggregate_
                 = get_confidence_weighted_points(predicted_points_per_model, eres_per_model)
 
     return aggregated_point_dict
+
+
+def combined_test_results(aggregated_mres_per_test_set, sdr_statistics_per_test_set, no_in_each_set):
+    """
+
+    :param aggregated_mres_per_test_set: a nested list of size [T, A] where T = test sets and A == aggregate methods
+    :param sdr_statistics_per_test_set: a nested list of size [T, Thresholds]
+    :param no_in_each_set: a number of images in each test set, size [T]
+    :return: a list of size [A] and a list of size [Threshold]
+    """
+    aggregated_mres_per_test_set = torch.Tensor(aggregated_mres_per_test_set)
+    sdr_statistics_per_test_set = torch.Tensor(sdr_statistics_per_test_set)
+    no_in_each_set = torch.unsqueeze(torch.Tensor(no_in_each_set), -1)
+    total_no = torch.sum(no_in_each_set).item()
+
+    weighted_mre_per_test_set = torch.multiply(aggregated_mres_per_test_set, no_in_each_set)
+    weighted_sdr_per_test_set = torch.multiply(sdr_statistics_per_test_set, no_in_each_set)
+    weighted_mres = torch.sum(weighted_mre_per_test_set, dim=0)
+    weighted_sdrs = torch.sum(weighted_sdr_per_test_set, dim=0)
+    combined_mres = torch.divide(weighted_mres, total_no)
+    combined_sdrs = torch.divide(weighted_sdrs, total_no)
+
+    return combined_mres.tolist(), combined_sdrs.tolist()
