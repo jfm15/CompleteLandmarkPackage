@@ -116,11 +116,12 @@ def main():
                                                                               sdr_statistics_per_test_set,
                                                                               no_per_test_set)
 
-    logger.info('\n-----------Combined Statistics-----------')
-    msg = get_validation_message(combined_aggregated_mres, cfg.TRAIN.ENSEMBLE_MODELS, cfg.VALIDATION.AGGREGATION_METHODS,
-                                 cfg.VALIDATION.SDR_AGGREGATION_METHOD, cfg.VALIDATION.SDR_THRESHOLDS,
-                                 sdr_statistics_per_test_set)
-    logger.info(msg)
+    if len(args.testing_images) > 1:
+        logger.info('\n-----------Combined Statistics-----------')
+        msg = get_validation_message(combined_aggregated_mres, cfg.TRAIN.ENSEMBLE_MODELS, cfg.VALIDATION.AGGREGATION_METHODS,
+                                     cfg.VALIDATION.SDR_AGGREGATION_METHOD, cfg.VALIDATION.SDR_THRESHOLDS,
+                                     sdr_statistics_per_test_set)
+        logger.info(msg)
 
 
 if __name__ == '__main__':
