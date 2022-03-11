@@ -10,6 +10,7 @@ from function import validate_ensemble
 from evaluate import cal_radial_errors
 from evaluate import use_aggregate_methods
 from evaluate import get_sdr_statistics
+from evaluate import combined_test_results
 from torchsummary.torchsummary import summary_string
 
 
@@ -22,8 +23,9 @@ def parse_args():
                         type=str)
 
     parser.add_argument('--testing_images',
-                        help='The path to the testing images',
+                        help='The path to the validation images',
                         type=str,
+                        nargs='+',
                         required=True,
                         default='')
 
@@ -61,9 +63,14 @@ def main():
     logger.info(cfg)
     logger.info("")
 
-    # Load the testing dataset and put it into a loader
-    test_dataset = LandmarkDataset(args.testing_images, args.annotations, cfg.DATASET, perform_augmentation=False)
-    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1, shuffle=False)
+    test_datasets = []
+    test_loaders = []
+    for test_images_path in args.testing_images:
+        test_dataset = LandmarkDataset(test_images_path, args.annotations, cfg.DATASET, gaussian=False,
+                                         perform_augmentation=False)
+        test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1, shuffle=False)
+        test_datasets.append(test_dataset)
+        test_loaders.append(test_loader)
 
     # Load models and state dict from file
     ensemble = []
@@ -80,22 +87,39 @@ def main():
     model_summary, _ = summary_string(ensemble[0], (1, *cfg.DATASET.CACHED_IMAGE_SIZE), device=torch.device('cpu'))
     logger.info(model_summary)
 
-    logger.info("-----------Start Testing-----------")
-    predicted_points_per_model, eres_per_model, target_points = \
-        validate_ensemble(ensemble, test_loader, print_progress=True, logger=logger)
+    aggregated_mres_per_test_set = []
+    sdr_statistics_per_test_set = []
+    no_per_test_set = []
+    for i, testing_images_path in enumerate(args.testing_images):
+        logger.info("\n-----------Testing over {}-----------".format(testing_images_path))
+        predicted_points_per_model, eres_per_model, target_points = \
+            validate_ensemble(ensemble, test_loaders[i], print_progress=True, logger=logger)
+        no_per_test_set.append(len(test_loaders[i]))
 
-    aggregated_point_dict = use_aggregate_methods(predicted_points_per_model, eres_per_model,
-                                                  aggregate_methods=cfg.VALIDATION.AGGREGATION_METHODS)
-    aggregated_point_mres = [cal_radial_errors(predicted_points, target_points, mean=True) for
-                             predicted_points in aggregated_point_dict.values()]
+        aggregated_point_dict = use_aggregate_methods(predicted_points_per_model, eres_per_model,
+                                                      aggregate_methods=cfg.VALIDATION.AGGREGATION_METHODS)
+        aggregated_point_mres = [cal_radial_errors(predicted_points, target_points, mean=True) for
+                                 predicted_points in aggregated_point_dict.values()]
+        aggregated_mres_per_test_set.append(aggregated_point_mres)
 
-    chosen_radial_errors = cal_radial_errors(aggregated_point_dict[cfg.VALIDATION.SDR_AGGREGATION_METHOD],
-                                             target_points)
-    sdr_statistics = get_sdr_statistics(chosen_radial_errors, cfg.VALIDATION.SDR_THRESHOLDS)
+        chosen_radial_errors = cal_radial_errors(aggregated_point_dict[cfg.VALIDATION.SDR_AGGREGATION_METHOD],
+                                                 target_points)
+        sdr_statistics = get_sdr_statistics(chosen_radial_errors, cfg.VALIDATION.SDR_THRESHOLDS)
+        sdr_statistics_per_test_set.append(sdr_statistics)
 
-    logger.info('-----------Overall Statistics-----------')
-    msg = get_validation_message(aggregated_point_mres, cfg.TRAIN.ENSEMBLE_MODELS, cfg.VALIDATION.AGGREGATION_METHODS,
-                                 cfg.VALIDATION.SDR_AGGREGATION_METHOD, cfg.VALIDATION.SDR_THRESHOLDS, sdr_statistics)
+        logger.info('\n-----------Statistics for {}-----------'.format(testing_images_path))
+        msg = get_validation_message(aggregated_point_mres, cfg.TRAIN.ENSEMBLE_MODELS, cfg.VALIDATION.AGGREGATION_METHODS,
+                                     cfg.VALIDATION.SDR_AGGREGATION_METHOD, cfg.VALIDATION.SDR_THRESHOLDS, sdr_statistics)
+        logger.info(msg)
+
+    combined_aggregated_mres, combined_sdr_statistics = combined_test_results(aggregated_mres_per_test_set,
+                                                                              sdr_statistics_per_test_set,
+                                                                              no_per_test_set)
+
+    logger.info('\n-----------Combined Statistics-----------')
+    msg = get_validation_message(combined_aggregated_mres, cfg.TRAIN.ENSEMBLE_MODELS, cfg.VALIDATION.AGGREGATION_METHODS,
+                                 cfg.VALIDATION.SDR_AGGREGATION_METHOD, cfg.VALIDATION.SDR_THRESHOLDS,
+                                 sdr_statistics_per_test_set)
     logger.info(msg)
 
 
