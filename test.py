@@ -50,8 +50,7 @@ def main():
     # Get arguments and the experiment file
     args = parse_args()
 
-    cfg, logger, output_path, yaml_file_name = prepare_for_testing(args.cfg, args.pretrained_model_directory,
-                                                                   args.testing_images)
+    cfg, logger, output_path, yaml_file_name = prepare_for_testing(args.cfg, args.pretrained_model_directory)
 
     # Print the arguments into the log
     logger.info("-----------Arguments-----------")
