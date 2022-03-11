@@ -97,4 +97,4 @@ python train.py --cfg experiments/cephalometric/ceph_sup_150.yaml --training_ima
  --annotations {cephalometric_data_directory}/AnnotationsByMD/ --output_path {output_path}
 ```
 
-(To be completed on March 10th)
+(To be completed on March 11th)
