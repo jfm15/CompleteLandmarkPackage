@@ -8,7 +8,7 @@ import segmentation_models_pytorch as smp
 class UnetPlusPlus(nn.Module):
     def __init__(self, cfg_model, no_of_landmarks):
         super(UnetPlusPlus, self).__init__()
-        self.unetPlusPlus = smp.UnetPlusPlus(
+        self.unet = smp.UnetPlusPlus(
             encoder_name=cfg_model.ENCODER_NAME,
             encoder_weights=cfg_model.ENCODER_WEIGHTS,
             decoder_channels=cfg_model.DECODER_CHANNELS,
@@ -17,7 +17,7 @@ class UnetPlusPlus(nn.Module):
         )
 
     def forward(self, x):
-        return self.unetPlusPlus(x)
+        return self.unet(x)
 
 
 def two_d_softmax(x):
