@@ -15,6 +15,7 @@ class UnetPlusPlus(nn.Module):
             in_channels=cfg_model.IN_CHANNELS,
             classes=no_of_landmarks,
         )
+        self.temperatures = nn.Parameter(torch.ones(1, no_of_landmarks, 1, 1), requires_grad=False)
 
     def forward(self, x):
         return self.unet(x)
