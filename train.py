@@ -8,12 +8,8 @@ from model import two_d_softmax
 from model import nll_across_batch
 from landmark_dataset import LandmarkDataset
 from utils import prepare_for_training
-from utils import get_validation_message
 from function import train_model
-from function import validate_ensemble
-from evaluate import cal_radial_errors
-from evaluate import use_aggregate_methods
-from evaluate import get_sdr_statistics
+from test import print_validation_of_ensemble
 from torchsummary.torchsummary import summary_string
 
 
@@ -142,26 +138,8 @@ def main():
                 # move model back to cpu
                 our_model.cpu()
 
-        for i, validation_images_path in enumerate(args.validation_images):
-            logger.info("-----------Validation over {}-----------".format(validation_images_path))
-
-            predicted_points_per_model, eres_per_model, target_points = \
-                validate_ensemble(ensemble, validation_loaders[i])
-
-            aggregated_point_dict = use_aggregate_methods(predicted_points_per_model, eres_per_model,
-                                                          aggregate_methods=cfg.VALIDATION.AGGREGATION_METHODS)
-            aggregated_point_mres = [cal_radial_errors(predicted_points, target_points, mean=True) for
-                                     predicted_points in aggregated_point_dict.values()]
-
-            chosen_radial_errors = cal_radial_errors(aggregated_point_dict[cfg.VALIDATION.SDR_AGGREGATION_METHOD],
-                                                     target_points)
-            sdr_statistics = get_sdr_statistics(chosen_radial_errors, cfg.VALIDATION.SDR_THRESHOLDS)
-
-            msg = get_validation_message(aggregated_point_mres, cfg.TRAIN.ENSEMBLE_MODELS,
-                                         cfg.VALIDATION.AGGREGATION_METHODS,
-                                         cfg.VALIDATION.SDR_AGGREGATION_METHOD, cfg.VALIDATION.SDR_THRESHOLDS,
-                                         sdr_statistics)
-            logger.info(msg)
+        # Validate
+        print_validation_of_ensemble(cfg, ensemble, args.validation_images, validation_loaders, logger)
 
         logger.info('-----------Saving Models-----------')
         model_run_path = os.path.join(output_path, "run:{}_models".format(run))
