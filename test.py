@@ -138,6 +138,8 @@ def main():
     logger.info(model_summary)
 
     image_save_path = os.path.join(output_path, 'images')
+    if not os.path.exists(image_save_path):
+        os.makedirs(image_save_path)
     print_validation_of_ensemble(cfg, ensemble, args.testing_images, test_loaders, logger, print_progress=True,
                                  print_predictions=True, image_save_path=image_save_path)
 
