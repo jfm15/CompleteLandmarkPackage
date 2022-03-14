@@ -81,8 +81,11 @@ def save_final_predictions(loader, predicted_points, target_points, save_image_p
 
         plt.imshow(usable_image, cmap='gray', vmin=0.0, vmax=255.0)
 
-        plt.scatter(scaled_predicted_points[idx, :, 0], scaled_predicted_points[idx, :, 1], color='red', s=3)
-        plt.scatter(scaled_target_points[idx, :, 0], scaled_target_points[idx, :, 1], color='lime', s=3)
+        plt.scatter(scaled_predicted_points[idx, :, 0], scaled_predicted_points[idx, :, 1], color='red', s=7)
+        plt.scatter(scaled_target_points[idx, :, 0], scaled_target_points[idx, :, 1], color='lime', s=7)
+
+        for i, positions in enumerate(scaled_target_points[idx]):
+            plt.text(positions[0], positions[1], "{}".format(i + 1), color="yellow", fontsize="small")
 
         save_path = os.path.join(save_image_path, "{}_predictions".format(name))
         plt.axis('off')
