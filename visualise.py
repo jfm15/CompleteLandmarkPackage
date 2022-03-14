@@ -67,6 +67,9 @@ def save_final_predictions(loader, predicted_points, target_points, save_image_p
         name = meta['file_name'][0]
         pixel_size = meta['pixel_size'][0]
 
+        predicted_points_as_np = predicted_points.cpu().detach().numpy()
+        target_points_as_np = target_points.cpu().detach().numpy()
+
         # removes the first 2 dimensions from image
         usable_image = np.squeeze(image)
 
@@ -75,7 +78,7 @@ def save_final_predictions(loader, predicted_points, target_points, save_image_p
 
         plt.imshow(usable_image, cmap='gray', vmin=0.0, vmax=255.0)
 
-        plt.scatter(predicted_points[idx, :, 0], predicted_points[idx, :, 1], color='red', s=3)
+        plt.scatter(predicted_points_as_np[idx, :, 0], predicted_points[idx, :, 1], color='red', s=3)
 
         save_path = os.path.join(save_image_path, "{}_predictions".format(name))
         plt.axis('off')
