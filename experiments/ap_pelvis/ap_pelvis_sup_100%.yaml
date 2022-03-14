@@ -1,6 +1,10 @@
 DATASET:
   CACHE_DIR: "cache/ap_pelvis/"
   IMAGE_EXT: ".png"
+  USE_COLS:
+    - 1
+    - 2
+  DELIMITER: " "
   KEY_POINTS: 30
   PIXEL_SIZE:
     - 0.143
