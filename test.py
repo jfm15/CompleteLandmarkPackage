@@ -1,6 +1,7 @@
 import argparse
 import torch
 import glob
+import os
 
 import model
 from landmark_dataset import LandmarkDataset
@@ -11,6 +12,7 @@ from evaluate import cal_radial_errors
 from evaluate import use_aggregate_methods
 from evaluate import get_sdr_statistics
 from evaluate import combined_test_results
+from visualise import save_final_predictions
 from torchsummary.torchsummary import summary_string
 
 
@@ -45,7 +47,8 @@ def parse_args():
     return args
 
 
-def print_validation_of_ensemble(cfg, ensemble, validation_set_paths, loaders, logger, print_progress=False):
+def print_validation_of_ensemble(cfg, ensemble, validation_set_paths, loaders, logger, print_progress=False,
+                                 print_predictions=False, image_save_path=None):
 
     aggregated_mres_per_test_set = []
     sdr_statistics_per_test_set = []
@@ -58,6 +61,12 @@ def print_validation_of_ensemble(cfg, ensemble, validation_set_paths, loaders, l
 
         aggregated_point_dict = use_aggregate_methods(predicted_points_per_model, eres_per_model,
                                                       aggregate_methods=cfg.VALIDATION.AGGREGATION_METHODS)
+
+        # output images
+        if print_predictions:
+            save_final_predictions(loaders[i], aggregated_point_dict[cfg.VALIDATION.SDR_AGGREGATION_METHOD],
+                                   target_points, image_save_path)
+
         aggregated_point_mres = [cal_radial_errors(predicted_points, target_points, mean=True) for
                                  predicted_points in aggregated_point_dict.values()]
         aggregated_mres_per_test_set.append(aggregated_point_mres)
@@ -128,7 +137,9 @@ def main():
     model_summary, _ = summary_string(ensemble[0], (1, *cfg.DATASET.CACHED_IMAGE_SIZE), device=torch.device('cpu'))
     logger.info(model_summary)
 
-    print_validation_of_ensemble(cfg, ensemble, args.testing_images, test_loaders, logger, print_progress=True)
+    image_save_path = os.path.join(output_path, 'images')
+    print_validation_of_ensemble(cfg, ensemble, args.testing_images, test_loaders, logger, print_progress=True,
+                                 print_predictions=True, image_save_path=image_save_path)
 
 
 if __name__ == '__main__':
