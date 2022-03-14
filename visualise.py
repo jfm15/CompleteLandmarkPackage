@@ -65,14 +65,21 @@ def save_final_predictions(loader, predicted_points, target_points, save_image_p
 
     for idx, (image, _, meta) in enumerate(loader):
         name = meta['file_name'][0]
+        pixel_size = meta['pixel_size'][0]
 
         # removes the first 2 dimensions from image
         usable_image = np.squeeze(image)
 
+        figure = plt.gcf()
+        figure.set_size_inches(usable_image.shape[1] / 50, usable_image.shape[0] / 50)
+
         plt.imshow(usable_image, cmap='gray', vmin=0.0, vmax=255.0)
+
+        plt.scatter(predicted_points[idx, 0], predicted_points[idx, 1], color='red', s=3)
+
         save_path = os.path.join(save_image_path, "{}_predictions".format(name))
         plt.axis('off')
-        plt.savefig(save_path, bbox_inches='tight')
+        plt.savefig(save_path, bbox_inches='tight', dpi=100)
         plt.close()
 
 
