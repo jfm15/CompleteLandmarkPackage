@@ -64,6 +64,7 @@ def print_validation_of_ensemble(cfg, ensemble, validation_set_paths, loaders, l
 
         # output images
         if print_predictions:
+            logger.info('\n-----------Save Images In {}-----------'.format(image_save_path))
             save_final_predictions(loaders[i], aggregated_point_dict[cfg.VALIDATION.SDR_AGGREGATION_METHOD],
                                    target_points, image_save_path)
 
