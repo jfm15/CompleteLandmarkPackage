@@ -65,7 +65,11 @@ def save_final_predictions(loader, predicted_points, target_points, save_image_p
 
     for idx, (image, _, meta) in enumerate(loader):
         name = meta['file_name']
-        plt.imshow(image, cmap='gray', vmin=0.0, vmax=255.0)
+
+        # removes the first 2 dimensions from image
+        usable_image = np.squeeze(image)
+        
+        plt.imshow(usable_image, cmap='gray', vmin=0.0, vmax=255.0)
         save_path = os.path.join(save_image_path, "{}_predictions".format(name))
         plt.axis('off')
         plt.savefig(save_path, bbox_inches='tight')
