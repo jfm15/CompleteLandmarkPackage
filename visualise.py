@@ -64,11 +64,11 @@ def visualise_aggregations(image, predicted_points_per_model, rec_weighted_model
 def save_final_predictions(loader, predicted_points, target_points, save_image_path):
 
     for idx, (image, _, meta) in enumerate(loader):
-        name = meta['file_name']
+        name = meta['file_name'][0]
 
         # removes the first 2 dimensions from image
         usable_image = np.squeeze(image)
-        
+
         plt.imshow(usable_image, cmap='gray', vmin=0.0, vmax=255.0)
         save_path = os.path.join(save_image_path, "{}_predictions".format(name))
         plt.axis('off')
