@@ -131,7 +131,8 @@ class LandmarkDataset(Dataset):
                 for annotation_path, cache_annotation_path in zip(annotation_paths, cache_annotation_paths):
 
                     # Get annotations
-                    kps_np_array = np.loadtxt(annotation_path, usecols=(1, 2), delimiter=" ", max_rows=cfg_dataset.KEY_POINTS)
+                    kps_np_array = np.loadtxt(annotation_path, usecols=cfg_dataset.USE_COLS,
+                                              delimiter=cfg_dataset.DELIMITER, max_rows=cfg_dataset.KEY_POINTS)
 
                     if cfg_dataset.FLIP_AXIS:
                         kps_np_array = np.flip(kps_np_array, axis=1)
