@@ -1,14 +1,10 @@
 DATASET:
   CACHE_DIR: "cache/ultra_hip/"
   IMAGE_EXT: ".jpg"
-  USE_COLS:
-    - 1
-    - 2
-  DELIMITER: " "
-  KEY_POINTS: 3
+  KEY_POINTS: 5
   PIXEL_SIZE:
-    - 0.143
-    - 0.143
+    - 1
+    - 1
   CACHED_IMAGE_SIZE:
     - 640
     - 480
@@ -30,7 +26,7 @@ TRAIN:
   LR: 0.001
   EPOCHS: 10
   REPEATS: 3
-  LABELED_SUBSET: 168
+  LABELED_SUBSET: 150
   FINE_TUNE_EPOCHS: 0
 
 VALIDATION:
