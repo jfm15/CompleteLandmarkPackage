@@ -90,14 +90,14 @@ def save_final_predictions(loader, predicted_points, target_points, save_image_p
         '''
         base_line_vector = scaled_predicted_points[idx, 1] - scaled_predicted_points[idx, 0]
         base_line_p1 = scaled_predicted_points[idx, 0] - base_line_vector
-        base_line_p2 = scaled_predicted_points[idx, 0] + 3 * base_line_vector
+        base_line_p2 = scaled_predicted_points[idx, 0] + 4 * base_line_vector
 
         cartilage_roof_line_vector = scaled_predicted_points[idx, 4] - scaled_predicted_points[idx, 2]
         cartilage_roof_line_p1 = scaled_predicted_points[idx, 2] - cartilage_roof_line_vector
         cartilage_roof_line_p2 = scaled_predicted_points[idx, 2] + 2 * cartilage_roof_line_vector
 
         bony_roof_line_vector = scaled_predicted_points[idx, 3] - scaled_predicted_points[idx, 2]
-        bony_roof_line_vector_p1 = scaled_predicted_points[idx, 2] - bony_roof_line_vector
+        bony_roof_line_vector_p1 = scaled_predicted_points[idx, 2] - 2 * bony_roof_line_vector
         bony_roof_line_vector_p2 = scaled_predicted_points[idx, 2] + 2 * bony_roof_line_vector
 
         plt.plot([base_line_p1[0], base_line_p2[0]], [base_line_p1[1], base_line_p2[1]], color='red')
