@@ -81,11 +81,31 @@ def save_final_predictions(loader, predicted_points, target_points, save_image_p
 
         plt.imshow(usable_image, cmap='gray', vmin=0.0, vmax=255.0)
 
-        plt.scatter(scaled_predicted_points[idx, :, 0], scaled_predicted_points[idx, :, 1], color='red', s=7)
-        plt.scatter(scaled_target_points[idx, :, 0], scaled_target_points[idx, :, 1], color='lime', s=7)
+        '''
+        plt.scatter(scaled_predicted_points[idx, :, 0], scaled_predicted_points[idx, :, 1], color='red', s=15)
+        plt.scatter(scaled_target_points[idx, :, 0], scaled_target_points[idx, :, 1], color='lime', s=15)
 
         for i, positions in enumerate(scaled_target_points[idx]):
             plt.text(positions[0], positions[1], "{}".format(i + 1), color="yellow", fontsize="small")
+        '''
+        base_line_vector = scaled_predicted_points[idx, 1] - scaled_predicted_points[idx, 0]
+        base_line_p1 = scaled_predicted_points[idx, 0] - base_line_vector
+        base_line_p2 = scaled_predicted_points[idx, 0] + 3 * base_line_vector
+
+        cartilage_roof_line_vector = scaled_predicted_points[idx, 4] - scaled_predicted_points[idx, 2]
+        cartilage_roof_line_p1 = scaled_predicted_points[idx, 2] - cartilage_roof_line_vector
+        cartilage_roof_line_p2 = scaled_predicted_points[idx, 2] + 2 * cartilage_roof_line_vector
+
+        bony_roof_line_vector = scaled_predicted_points[idx, 3] - scaled_predicted_points[idx, 2]
+        bony_roof_line_vector_p1 = scaled_predicted_points[idx, 2] - bony_roof_line_vector
+        bony_roof_line_vector_p2 = scaled_predicted_points[idx, 2] + 2 * bony_roof_line_vector
+
+        plt.plot([base_line_p1[0], base_line_p2[0]], [base_line_p1[1], base_line_p2[1]], color='red')
+        plt.plot([cartilage_roof_line_p1[0], cartilage_roof_line_p2[0]],
+                 [cartilage_roof_line_p1[1], cartilage_roof_line_p2[1]], color='yellow')
+        plt.plot([bony_roof_line_vector_p1[0], bony_roof_line_vector_p2[0]],
+                 [bony_roof_line_vector_p1[1], bony_roof_line_vector_p2[1]], color='cyan')
+
 
         save_path = os.path.join(save_image_path, "{}_predictions".format(name))
         plt.axis('off')
