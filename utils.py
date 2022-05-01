@@ -96,14 +96,26 @@ def compare_angles(predicted_points, target_points):
     :return:
     """
 
-    get_pred_base_lines = predicted_points[:, 1, :] - predicted_points[:, 0, :]
-    get_pred_bony_roof_line = predicted_points[:, 3, :] - predicted_points[:, 2, :]
-    get_pred_cartilage_roof_line = predicted_points[:, 4, :] - predicted_points[:, 2, :]
+    pred_base_lines = predicted_points[:, 1, :] - predicted_points[:, 0, :]
+    pred_bony_roof_lines = predicted_points[:, 3, :] - predicted_points[:, 2, :]
+    pred_cartilage_roof_lines = predicted_points[:, 4, :] - predicted_points[:, 2, :]
 
-    get_tar_base_lines = target_points[:, 1, :] - target_points[:, 0, :]
-    get_tar_bony_roof_line = target_points[:, 3, :] - target_points[:, 2, :]
-    get_tar_cartilage_roof_line = target_points[:, 4, :] - target_points[:, 2, :]
+    tar_base_lines = target_points[:, 1, :] - target_points[:, 0, :]
+    tar_bony_roof_lines = target_points[:, 3, :] - target_points[:, 2, :]
+    tar_cartilage_roof_lines = target_points[:, 4, :] - target_points[:, 2, :]
 
-    print(get_pred_base_lines.shape, get_tar_base_lines.shape)
+    alpha_angle_differences = []
+    beta_angle_differences = []
+
+    for i in range(pred_base_lines.shape[0]):
+        pred_base_line = pred_base_lines[i]
+        pred_bony_roof_line = pred_bony_roof_lines[i]
+        pred_cartilage_roof_line = pred_cartilage_roof_lines[i]
+
+        tar_base_line = tar_base_lines[i]
+        tar_bony_roof_line = tar_bony_roof_lines[i]
+        tar_cartilage_roof_line = tar_cartilage_roof_lines[i]
+
+        print(i, pred_base_line, tar_base_line)
 
     return
