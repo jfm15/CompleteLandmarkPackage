@@ -85,9 +85,9 @@ def print_validation_of_ensemble(cfg, ensemble, validation_set_paths, loaders, l
 
         logger.info('\n-----------Statistics for the Paper-----------')
         mean_error_per_landmark = torch.mean(chosen_radial_errors, dim=0)
-        median_error_per_landmark = torch.mean(chosen_radial_errors, dim=0)
+        median_error_per_landmark = torch.median(chosen_radial_errors, dim=0)[0]
         max_error_per_landmark = torch.max(chosen_radial_errors, dim=0)[0]
-        std_error_per_landmark = torch.mean(chosen_radial_errors, dim=0)
+        std_error_per_landmark = torch.std(chosen_radial_errors, dim=0)
 
         for j in range(mean_error_per_landmark.size()[0]):
             logger.info("Landmark {}: Mean: {:.3f}, Median: {:.3f}, Max: {:.3f}, Std: {:.3f}"
