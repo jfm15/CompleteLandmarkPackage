@@ -95,7 +95,16 @@ def print_validation_of_ensemble(cfg, ensemble, validation_set_paths, loaders, l
                         .format(j + 1, mean_error_per_landmark[j].item(), median_error_per_landmark[j].item(),
                                 max_error_per_landmark[j].item(), std_error_per_landmark[j].item()))
 
-        compare_angles(aggregated_point_dict[cfg.VALIDATION.SDR_AGGREGATION_METHOD], target_points)
+        alpha_angle_differences, beta_angle_differences \
+            = compare_angles(aggregated_point_dict[cfg.VALIDATION.SDR_AGGREGATION_METHOD], target_points)
+
+        mean_aa_error = torch.mean(alpha_angle_differences, dim=0)
+        median_aa_error = torch.median(alpha_angle_differences, dim=0)[0]
+        max_aa_error = torch.max(alpha_angle_differences, dim=0)[0]
+        std_aa_error = torch.std(alpha_angle_differences, dim=0)
+
+        logger.info("Alpha Angle Differences, Mean: {:.3f}, Median: {:.3f}, Max: {:.3f}, Std: {:.3f}"
+            .format(mean_aa_error, median_aa_error, max_aa_error, std_aa_error))
 
         logger.info("")
         logger.info(msg)
