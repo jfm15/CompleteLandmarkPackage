@@ -91,8 +91,8 @@ def print_validation_of_ensemble(cfg, ensemble, validation_set_paths, loaders, l
 
         for j in range(mean_error_per_landmark.size()[0]):
             logger.info("Landmark {}: Mean: {:.3f}, Median: {:.3f}, Max: {:.3f}, Std: {:.3f}"
-                        .format(j + 1, mean_error_per_landmark[j], median_error_per_landmark[j],
-                                max_error_per_landmark[j], std_error_per_landmark[j]))
+                        .format(j + 1, mean_error_per_landmark[j].item(), median_error_per_landmark[j].item(),
+                                max_error_per_landmark[j].item(), std_error_per_landmark[j].item()))
 
         logger.info(msg)
 
