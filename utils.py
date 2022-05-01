@@ -129,8 +129,6 @@ def compare_angles(predicted_points, target_points):
 def get_angle(v1, v2):
     v1_mag = torch.norm(v1)
     v2_mag = torch.norm(v2)
-    v1 = v1 / v1_mag
-    v2 = v2 / v2_mag
     dot_product = torch.dot(v1, v2)
     angle = torch.acos(dot_product / (v1_mag * v2_mag))
     return torch.rad2deg(angle)
