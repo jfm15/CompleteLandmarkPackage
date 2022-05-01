@@ -87,5 +87,23 @@ def get_validation_message(aggregated_point_mres, no_of_base_estimators, aggrega
 
     return msg
 
-def compare_angles():
+
+def compare_angles(predicted_points, target_points):
+    """
+
+    :param predicted_points: torch.Size([no_of_images, 5, 2])
+    :param target_points: torch.Size([no_of_images, 5, 2])
+    :return:
+    """
+
+    get_pred_base_lines = predicted_points[:, 1, :] - predicted_points[:, 0, :]
+    get_pred_bony_roof_line = predicted_points[:, 3, :] - predicted_points[:, 2, :]
+    get_pred_cartilage_roof_line = predicted_points[:, 4, :] - predicted_points[:, 2, :]
+
+    get_tar_base_lines = target_points[:, 1, :] - target_points[:, 0, :]
+    get_tar_bony_roof_line = target_points[:, 3, :] - target_points[:, 2, :]
+    get_tar_cartilage_roof_line = target_points[:, 4, :] - target_points[:, 2, :]
+
+    print(get_pred_base_lines.shape, get_tar_base_lines.shape)
+
     return
