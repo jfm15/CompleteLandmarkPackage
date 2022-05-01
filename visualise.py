@@ -60,7 +60,6 @@ def visualise_aggregations(image, predicted_points_per_model, rec_weighted_model
         plt.savefig(image_path, bbox_inches='tight', dpi=100)
         plt.close()
 
-
 def save_final_predictions(loader, predicted_points, target_points, save_image_path):
 
     for idx, (image, _, meta) in enumerate(loader):

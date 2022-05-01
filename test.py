@@ -94,6 +94,9 @@ def print_validation_of_ensemble(cfg, ensemble, validation_set_paths, loaders, l
                         .format(j + 1, mean_error_per_landmark[j].item(), median_error_per_landmark[j].item(),
                                 max_error_per_landmark[j].item(), std_error_per_landmark[j].item()))
 
+        print(aggregated_point_dict[cfg.VALIDATION.SDR_AGGREGATION_METHOD].shape, target_points.shape)
+
+        logger.info("")
         logger.info(msg)
 
     if len(validation_set_paths) > 1:
