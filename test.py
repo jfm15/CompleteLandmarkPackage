@@ -7,6 +7,7 @@ import model
 from landmark_dataset import LandmarkDataset
 from utils import prepare_for_testing
 from utils import get_validation_message
+from utils import compare_angles
 from function import validate_ensemble
 from evaluate import cal_radial_errors
 from evaluate import use_aggregate_methods
@@ -94,7 +95,7 @@ def print_validation_of_ensemble(cfg, ensemble, validation_set_paths, loaders, l
                         .format(j + 1, mean_error_per_landmark[j].item(), median_error_per_landmark[j].item(),
                                 max_error_per_landmark[j].item(), std_error_per_landmark[j].item()))
 
-        print(aggregated_point_dict[cfg.VALIDATION.SDR_AGGREGATION_METHOD].shape, target_points.shape)
+        compare_angles(aggregated_point_dict[cfg.VALIDATION.SDR_AGGREGATION_METHOD], target_points)
 
         logger.info("")
         logger.info(msg)
