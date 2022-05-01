@@ -120,10 +120,15 @@ def compare_angles(predicted_points, target_points):
 
         pred_alpha_angle = get_angle(pred_base_line, pred_bony_roof_line)
         tar_alpha_angle = get_angle(tar_base_line, tar_bony_roof_line)
+        alpha_angle_difference = abs(tar_alpha_angle - pred_alpha_angle)
+        alpha_angle_differences.append(alpha_angle_difference)
 
-        print(i, pred_alpha_angle, tar_alpha_angle)
+        pred_beta_angle = get_angle(-pred_base_line, pred_cartilage_roof_line)
+        tar_beta_angle = get_angle(-tar_base_line, tar_cartilage_roof_line)
+        beta_angle_difference = abs(tar_beta_angle - pred_beta_angle)
+        beta_angle_differences.append(beta_angle_difference)
 
-    return
+    return torch.Tensor(alpha_angle_differences), torch.Tensor(beta_angle_differences)
 
 
 def get_angle(v1, v2):
@@ -131,4 +136,4 @@ def get_angle(v1, v2):
     v2_mag = torch.norm(v2)
     dot_product = torch.dot(v1, v2)
     angle = torch.acos(dot_product / (v1_mag * v2_mag))
-    return torch.rad2deg(angle)
+    return torch.rad2deg(angle).item()
