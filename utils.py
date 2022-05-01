@@ -2,6 +2,8 @@ import os
 import time
 import logging
 
+import torch
+
 from config import get_cfg_defaults
 
 
@@ -116,6 +118,19 @@ def compare_angles(predicted_points, target_points):
         tar_bony_roof_line = tar_bony_roof_lines[i]
         tar_cartilage_roof_line = tar_cartilage_roof_lines[i]
 
-        print(i, pred_base_line, tar_base_line)
+        pred_alpha_angle = get_angle(pred_base_line, pred_bony_roof_line)
+        tar_alpha_angle = get_angle(tar_base_line, tar_bony_roof_line)
+
+        print(i, pred_alpha_angle, tar_alpha_angle)
 
     return
+
+
+def get_angle(v1, v2):
+    v1_mag = torch.norm(v1)
+    v2_mag = torch.norm(v2)
+    v1 = v1 / v1_mag
+    v2 = v2 / v2_mag
+    dot_product = torch.dot(v1, v2)
+    angle = torch.acos(dot_product / (v1_mag * v2_mag))
+    return torch.rad2deg(angle)
