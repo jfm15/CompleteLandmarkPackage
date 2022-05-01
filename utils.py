@@ -86,3 +86,6 @@ def get_validation_message(aggregated_point_mres, no_of_base_estimators, aggrega
         .format(sdr_method, sdr_thresholds_formatted, sdr_statistics_formatted)
 
     return msg
+
+def compare_angles():
+    return
