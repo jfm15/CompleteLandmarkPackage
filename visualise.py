@@ -80,13 +80,12 @@ def save_final_predictions(loader, predicted_points, target_points, save_image_p
 
         plt.imshow(usable_image, cmap='gray', vmin=0.0, vmax=255.0)
 
-        '''
         plt.scatter(scaled_predicted_points[idx, :, 0], scaled_predicted_points[idx, :, 1], color='red', s=15)
         plt.scatter(scaled_target_points[idx, :, 0], scaled_target_points[idx, :, 1], color='lime', s=15)
 
         for i, positions in enumerate(scaled_target_points[idx]):
             plt.text(positions[0], positions[1], "{}".format(i + 1), color="yellow", fontsize="small")
-        '''
+
         base_line_vector = scaled_predicted_points[idx, 1] - scaled_predicted_points[idx, 0]
         base_line_p1 = scaled_predicted_points[idx, 0] - base_line_vector
         base_line_p2 = scaled_predicted_points[idx, 0] + 4 * base_line_vector
