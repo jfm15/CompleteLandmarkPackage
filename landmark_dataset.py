@@ -216,7 +216,7 @@ class LandmarkDataset(Dataset):
             kps_np_array = np.loadtxt(cached_annotation_path, delimiter=" ")
             landmarks_per_annotator.append(kps_np_array)
 
-        if self.perform_augmentation and False:
+        if self.perform_augmentation:
 
             repeat = True
 
