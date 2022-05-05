@@ -3,6 +3,7 @@ import time
 import logging
 
 import torch
+import numpy as np
 
 from config import get_cfg_defaults
 
@@ -106,6 +107,10 @@ def compare_angles(predicted_points, target_points):
     tar_bony_roof_lines = target_points[:, 3, :] - target_points[:, 2, :]
     tar_cartilage_roof_lines = target_points[:, 4, :] - target_points[:, 2, :]
 
+    predicted_alpha_angles = []
+    tar_alpha_angles = []
+    predicted_beta_angles = []
+    tar_beta_angles = []
     alpha_angle_differences = []
     beta_angle_differences = []
 
@@ -119,16 +124,29 @@ def compare_angles(predicted_points, target_points):
         tar_cartilage_roof_line = tar_cartilage_roof_lines[i]
 
         pred_alpha_angle = get_angle(pred_base_line, pred_bony_roof_line)
+        predicted_alpha_angles.append(pred_alpha_angle)
         tar_alpha_angle = get_angle(tar_base_line, tar_bony_roof_line)
+        tar_alpha_angles.append(tar_alpha_angle)
         alpha_angle_difference = abs(tar_alpha_angle - pred_alpha_angle)
         alpha_angle_differences.append(alpha_angle_difference)
 
         pred_beta_angle = get_angle(-pred_base_line, pred_cartilage_roof_line)
+        predicted_beta_angles.append(pred_beta_angle)
         tar_beta_angle = get_angle(-tar_base_line, tar_cartilage_roof_line)
+        tar_beta_angles.append(tar_beta_angle)
         beta_angle_difference = abs(tar_beta_angle - pred_beta_angle)
         beta_angle_differences.append(beta_angle_difference)
 
-    return torch.Tensor(alpha_angle_differences), torch.Tensor(beta_angle_differences)
+    predicted_alpha_angles = np.array(predicted_alpha_angles)
+    tar_alpha_angles = np.array(tar_alpha_angles)
+    predicted_beta_angles = np.array(predicted_beta_angles)
+    tar_beta_angles = np.array(tar_beta_angles)
+
+    alpha_angle_icc = get_icc(predicted_alpha_angles, tar_alpha_angles)
+    beta_angle_icc = get_icc(predicted_beta_angles, tar_beta_angles)
+
+    return torch.Tensor(alpha_angle_differences), torch.Tensor(beta_angle_differences), \
+           alpha_angle_icc, beta_angle_icc
 
 
 def get_angle(v1, v2):
@@ -137,3 +155,12 @@ def get_angle(v1, v2):
     dot_product = torch.dot(v1, v2)
     angle = torch.acos(dot_product / (v1_mag * v2_mag))
     return torch.rad2deg(angle).item()
+
+
+def get_icc(predictions, targets):
+    # formula for ICC
+    N = len(predictions)
+    x_ = (np.sum(predictions) + np.sum(targets)) / (2.0 * N)
+    s_2 = (np.sum(np.power(predictions - x_, 2)) + np.sum(np.power(targets - x_, 2))) / (2.0 * N)
+    icc = np.sum((predictions - x_) * (targets - x_)) / (N * s_2)
+    return icc

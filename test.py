@@ -95,7 +95,7 @@ def print_validation_of_ensemble(cfg, ensemble, validation_set_paths, loaders, l
                         .format(j + 1, mean_error_per_landmark[j].item(), median_error_per_landmark[j].item(),
                                 max_error_per_landmark[j].item(), std_error_per_landmark[j].item()))
 
-        alpha_angle_differences, beta_angle_differences \
+        alpha_angle_differences, beta_angle_differences, alpha_icc, beta_icc \
             = compare_angles(aggregated_point_dict[cfg.VALIDATION.SDR_AGGREGATION_METHOD], target_points)
 
         mean_aa_error = torch.mean(alpha_angle_differences, dim=0)
@@ -103,16 +103,16 @@ def print_validation_of_ensemble(cfg, ensemble, validation_set_paths, loaders, l
         max_aa_error = torch.max(alpha_angle_differences, dim=0)[0]
         std_aa_error = torch.std(alpha_angle_differences, dim=0)
 
-        logger.info("Alpha Angle Differences, Mean: {:.3f}, Median: {:.3f}, Max: {:.3f}, Std: {:.3f}".
-                    format(mean_aa_error, median_aa_error, max_aa_error, std_aa_error))
+        logger.info("Alpha Angle Differences, Mean: {:.3f}, Median: {:.3f}, Max: {:.3f}, Std: {:.3f}, ICC: {:.3f}".
+                    format(mean_aa_error, median_aa_error, max_aa_error, std_aa_error, alpha_icc))
 
         mean_ba_error = torch.mean(beta_angle_differences, dim=0)
         median_ba_error = torch.median(beta_angle_differences, dim=0)[0]
         max_ba_error = torch.max(beta_angle_differences, dim=0)[0]
         std_ba_error = torch.std(beta_angle_differences, dim=0)
 
-        logger.info("Beta Angle Differences, Mean: {:.3f}, Median: {:.3f}, Max: {:.3f}, Std: {:.3f}".
-                    format(mean_ba_error, median_ba_error, max_ba_error, std_ba_error))
+        logger.info("Beta Angle Differences, Mean: {:.3f}, Median: {:.3f}, Max: {:.3f}, Std: {:.3f}, ICC: {:.3f}".
+                    format(mean_ba_error, median_ba_error, max_ba_error, std_ba_error, beta_icc))
 
         logger.info("")
         logger.info(msg)
