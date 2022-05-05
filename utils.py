@@ -6,6 +6,7 @@ import torch
 import numpy as np
 
 from config import get_cfg_defaults
+from sklearn.metrics import confusion_matrix
 
 
 def prepare_for_training(cfg_path, output_path):
@@ -159,6 +160,8 @@ def compare_angles(predicted_points, target_points):
         total += 1
 
     diagnosis_accuracy = 100 * float(count) / float(total)
+
+    print(confusion_matrix(predicted_diagnosis, tar_diagnosis))
 
     return torch.Tensor(alpha_angle_differences), torch.Tensor(beta_angle_differences), \
            alpha_angle_icc, beta_angle_icc, diagnosis_accuracy
