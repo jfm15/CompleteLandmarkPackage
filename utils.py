@@ -161,6 +161,8 @@ def compare_angles(predicted_points, target_points):
 
     diagnosis_accuracy = 100 * float(count) / float(total)
 
+    print(predicted_diagnosis)
+    print(tar_diagnosis)
     print(confusion_matrix(predicted_diagnosis, tar_diagnosis, labels=["1", "2a/b", "2c", "D", "3/4"]))
 
     return torch.Tensor(alpha_angle_differences), torch.Tensor(beta_angle_differences), \
