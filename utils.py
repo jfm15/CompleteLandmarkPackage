@@ -111,6 +111,8 @@ def compare_angles(predicted_points, target_points):
     tar_alpha_angles = []
     predicted_beta_angles = []
     tar_beta_angles = []
+    predicted_diagnosis = []
+    tar_diagnosis = []
     alpha_angle_differences = []
     beta_angle_differences = []
 
@@ -137,6 +139,10 @@ def compare_angles(predicted_points, target_points):
         beta_angle_difference = abs(tar_beta_angle - pred_beta_angle)
         beta_angle_differences.append(beta_angle_difference)
 
+        # diagnose
+        predicted_diagnosis.append(diagnose(pred_alpha_angle, pred_beta_angle))
+        tar_diagnosis.append(diagnose(tar_alpha_angle, tar_beta_angle))
+
     predicted_alpha_angles = np.array(predicted_alpha_angles)
     tar_alpha_angles = np.array(tar_alpha_angles)
     predicted_beta_angles = np.array(predicted_beta_angles)
@@ -145,8 +151,17 @@ def compare_angles(predicted_points, target_points):
     alpha_angle_icc = get_icc(predicted_alpha_angles, tar_alpha_angles)
     beta_angle_icc = get_icc(predicted_beta_angles, tar_beta_angles)
 
+    total = 0
+    count = 0
+    for pred_diag, tar_diag in zip(predicted_diagnosis, tar_diagnosis):
+        if pred_diag == tar_diag:
+            count += 1
+        total += 1
+
+    diagnosis_accuracy = 100 * float(count) / float(total)
+
     return torch.Tensor(alpha_angle_differences), torch.Tensor(beta_angle_differences), \
-           alpha_angle_icc, beta_angle_icc
+           alpha_angle_icc, beta_angle_icc, diagnosis_accuracy
 
 
 def get_angle(v1, v2):
@@ -164,3 +179,17 @@ def get_icc(predictions, targets):
     s_2 = (np.sum(np.power(predictions - x_, 2)) + np.sum(np.power(targets - x_, 2))) / (2.0 * N)
     icc = np.sum((predictions - x_) * (targets - x_)) / (N * s_2)
     return icc
+
+
+def diagnose(alpha, beta):
+
+    if alpha >= 60:
+        return "1"
+    elif 50 <= alpha <= 59:
+        return "2a/b"
+    elif 43 <= alpha <= 49 and beta < 77:
+        return "2c"
+    elif 43 <= alpha <= 49 and beta > 77:
+        return "D"
+    elif alpha < 43:
+        return "3/4"
