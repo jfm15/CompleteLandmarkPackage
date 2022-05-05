@@ -100,19 +100,21 @@ def print_validation_of_ensemble(cfg, ensemble, validation_set_paths, loaders, l
 
         mean_aa_error = torch.mean(alpha_angle_differences, dim=0)
         median_aa_error = torch.median(alpha_angle_differences, dim=0)[0]
+        min_aa_error = torch.min(alpha_angle_differences, dim=0)[0]
         max_aa_error = torch.max(alpha_angle_differences, dim=0)[0]
         std_aa_error = torch.std(alpha_angle_differences, dim=0)
 
-        logger.info("Alpha Angle Differences, Mean: {:.3f}, Median: {:.3f}, Max: {:.3f}, Std: {:.3f}, ICC: {:.3f}".
-                    format(mean_aa_error, median_aa_error, max_aa_error, std_aa_error, alpha_icc))
+        logger.info("Alpha Angle Differences, Mean: {:.3f}, Median: {:.3f}, Min: {:.3f}, Max: {:.3f}, Std: {:.3f}, ICC: {:.3f}".
+                    format(mean_aa_error, median_aa_error, min_aa_error, max_aa_error, std_aa_error, alpha_icc))
 
         mean_ba_error = torch.mean(beta_angle_differences, dim=0)
         median_ba_error = torch.median(beta_angle_differences, dim=0)[0]
+        min_ba_error = torch.min(beta_angle_differences, dim=0)[0]
         max_ba_error = torch.max(beta_angle_differences, dim=0)[0]
         std_ba_error = torch.std(beta_angle_differences, dim=0)
 
-        logger.info("Beta Angle Differences, Mean: {:.3f}, Median: {:.3f}, Max: {:.3f}, Std: {:.3f}, ICC: {:.3f}".
-                    format(mean_ba_error, median_ba_error, max_ba_error, std_ba_error, beta_icc))
+        logger.info("Beta Angle Differences, Mean: {:.3f}, Median: {:.3f}, Min: {:.3f}, Max: {:.3f}, Std: {:.3f}, ICC: {:.3f}".
+                    format(mean_ba_error, median_ba_error, min_ba_error, max_ba_error, std_ba_error, beta_icc))
 
         logger.info("Diagnostic Accuracy: {:.3f}%".format(diagnostic_accuracy))
 
