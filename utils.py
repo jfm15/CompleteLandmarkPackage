@@ -188,13 +188,16 @@ def get_icc(predictions, targets):
 
 def diagnose(alpha, beta):
 
+    alpha = int(alpha)
+    beta = int(beta)
+
     if alpha >= 60:
         return "1"
     elif 50 <= alpha <= 59:
         return "2a/b"
     elif 43 <= alpha <= 49 and beta < 77:
         return "2c"
-    elif 43 <= alpha <= 49 and beta > 77:
+    elif 43 <= alpha <= 49 and beta >= 77:
         return "D"
     elif alpha < 43:
         return "3/4"
