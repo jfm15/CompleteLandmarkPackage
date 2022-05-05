@@ -92,6 +92,7 @@ def main():
     # Used for debugging
     '''
     for batch, (image, channels, meta) in enumerate(training_loader):
+        print(meta["file_name"])
         plt.imshow(np.moveaxis(image[0].detach().cpu().numpy(), 0, -1), cmap='gray')
         squashed_channels = np.max(channels[0].detach().cpu().numpy(), axis=0)
         # squashed_channels = channels[0].detach().cpu().numpy()[8]
