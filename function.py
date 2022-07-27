@@ -2,6 +2,7 @@ import torch
 import numpy as np
 from evaluate import get_predicted_and_target_points
 from model import two_d_softmax
+import matplotlib.pyplot as plt
 
 
 def train_model(model, final_layer, optimizer, scheduler, loader, loss_function, logger):
@@ -40,9 +41,9 @@ def use_model(model, final_layer, loader, logger=None, print_progress=False):
     with torch.no_grad():
         for idx, (image, _, meta) in enumerate(loader):
             # Put image and channels onto gpu
-            image = image.cuda()
-            meta['landmarks_per_annotator'] = meta['landmarks_per_annotator'].cuda()
-            meta['pixel_size'] = meta['pixel_size'].cuda()
+            # image = image.cuda()
+            #meta['landmarks_per_annotator'] = meta['landmarks_per_annotator'].cuda()
+            #meta['pixel_size'] = meta['pixel_size'].cuda()
 
             output = model(image.float())
             output = final_layer(output)
@@ -55,6 +56,26 @@ def use_model(model, final_layer, loader, logger=None, print_progress=False):
             # predicted_points has size [B, N, 2]
             # target_points has size [B, N, 2]
             # eres has size [B, N]
+
+            output_as_np = output.detach().numpy()
+            normalized_heatmaps = output_as_np[0] / np.max(output_as_np[0], axis=(1, 2), keepdims=True)
+            squashed_output = np.max(normalized_heatmaps, axis=0)
+
+            plt.imshow(image[0, 0], cmap='gray')
+            plt.imshow(squashed_output, cmap='inferno', alpha=0.4)
+            plt.scatter(predicted_points[0, :, 0], predicted_points[0, :, 1], color='red', s=5)
+            plt.scatter(target_points[0, :, 0], target_points[0, :, 1], color='green', s=5)
+
+            '''
+            for idx2, position in enumerate(predicted_points[0, 18:37]):
+                x, y = position
+                plt.text(x + 3, y + 3, "{}".format(idx2 + 1), color="yellow", fontsize=7)
+            '''
+            for ere, position in zip(eres[0], predicted_points[0]):
+                x, y = position
+                plt.text(x + 3, y + 3, "{:.2f}".format(ere), color="white", fontsize=7)
+
+            plt.show()
 
             if print_progress:
                 if (idx + 1) % 30 == 0:
@@ -83,7 +104,7 @@ def validate_ensemble(ensemble, loader, print_progress=False, logger=None):
             logger.info("-----------Running Model {}-----------".format(model_idx))
 
         our_model = ensemble[model_idx]
-        our_model = our_model.cuda()
+        # our_model = our_model.cuda()
 
         all_predicted_points, target_points, all_eres = use_model(our_model, two_d_softmax, loader,
                                                                   logger=logger, print_progress=print_progress)
