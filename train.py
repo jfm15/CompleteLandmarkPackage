@@ -55,6 +55,10 @@ def parse_args():
                         required=True,
                         default='')
 
+    parser.add_argument('-d', '--debug',
+                        action='store_true',
+                        help='show passing the training examples')
+
     args = parser.parse_args()
 
     return args
@@ -90,20 +94,19 @@ def main():
         validation_loaders.append(validation_loader)
 
     # Used for debugging
-    '''
-    for batch, (image, channels, meta) in enumerate(training_loader):
-        print(meta["file_name"])
-        plt.imshow(np.moveaxis(image[0].detach().cpu().numpy(), 0, -1), cmap='gray')
-        squashed_channels = np.max(channels[0].detach().cpu().numpy(), axis=0)
-        # squashed_channels = channels[0].detach().cpu().numpy()[8]
-        plt.imshow(squashed_channels, cmap='inferno', alpha=0.5)
-        landmarks_per_annotator = meta['landmarks_per_annotator'].detach().cpu().numpy()
-        avg_key_point_locations = np.mean(landmarks_per_annotator[0], axis=0)
-        plt.axis("off")
-        for i, positions in enumerate(avg_key_point_locations):
-            plt.text(positions[0], positions[1], "{}".format(i + 1), color="yellow", fontsize="small")
-        plt.show()
-    '''
+    if args.debug:
+        for batch, (image, channels, meta) in enumerate(training_loader):
+            print(meta["file_name"])
+            plt.imshow(np.moveaxis(image[0].detach().cpu().numpy(), 0, -1), cmap='gray')
+            squashed_channels = np.max(channels[0].detach().cpu().numpy(), axis=0)
+            # squashed_channels = channels[0].detach().cpu().numpy()[8]
+            plt.imshow(squashed_channels, cmap='inferno', alpha=0.5)
+            landmarks_per_annotator = meta['landmarks_per_annotator'].detach().cpu().numpy()
+            avg_key_point_locations = np.mean(landmarks_per_annotator[0], axis=0)
+            plt.axis("off")
+            for i, positions in enumerate(avg_key_point_locations):
+                plt.text(positions[0], positions[1], "{}".format(i + 1), color="yellow", fontsize="small")
+            plt.show()
 
     for run in range(cfg.TRAIN.REPEATS):
 
