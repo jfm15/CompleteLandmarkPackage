@@ -98,18 +98,13 @@ def main():
 
     for model_path in model_paths:
         our_model = eval("model." + cfg.MODEL.NAME)(cfg.MODEL, cfg.DATASET.KEY_POINTS)
-        if args.gpu:
-            our_model = our_model.cuda()
         loaded_state_dict = torch.load(model_path)
         our_model.load_state_dict(loaded_state_dict, strict=True)
         our_model.eval()
         ensemble.append(our_model)
 
     logger.info("-----------Model Summary-----------")
-    if args.gpu:
-        model_summary, _ = summary_string(ensemble[0], (1, *cfg.DATASET.CACHED_IMAGE_SIZE))
-    else:
-        model_summary, _ = summary_string(ensemble[0], (1, *cfg.DATASET.CACHED_IMAGE_SIZE), device=torch.device('cpu'))
+    model_summary, _ = summary_string(ensemble[0], (1, *cfg.DATASET.CACHED_IMAGE_SIZE), device=torch.device('cpu'))
     logger.info(model_summary)
 
     image_save_path = os.path.join(output_path, 'images')
