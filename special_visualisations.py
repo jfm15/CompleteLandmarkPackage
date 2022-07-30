@@ -149,3 +149,29 @@ def ap_pelvic_tilt(image, predicted_points, target_points, save=False, save_path
                 plt.close()
         else:
                 plt.show()
+
+
+def ap_acetabular_indices(image, predicted_points, target_points, save=False, save_path=""):
+
+        plt.imshow(image[0], cmap='gray')
+
+        #left
+        plt.plot([predicted_points[0, 0], predicted_points[1, 0]],
+                 [predicted_points[0, 1], predicted_points[1, 1]], color='red')
+        plt.plot([predicted_points[1, 0], predicted_points[1, 0] + 50],
+                 [predicted_points[1, 1], predicted_points[1, 1]], color='red')
+
+        # right
+        plt.plot([predicted_points[15, 0], predicted_points[16, 0]],
+                 [predicted_points[15, 1], predicted_points[16, 1]], color='red')
+        plt.plot([predicted_points[16, 0], predicted_points[16, 0] - 50],
+                 [predicted_points[16, 1], predicted_points[16, 1]], color='red')
+
+
+        plt.axis('off')
+
+        if save:
+                plt.savefig(save_path)
+                plt.close()
+        else:
+                plt.show()
