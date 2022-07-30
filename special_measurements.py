@@ -50,7 +50,7 @@ def ap_left_lce_angle(points):
     lat_point = points[0]
 
     lat_axis = lat_point - center_of_circle
-    up_axis = torch.Tensor([0, -1], device=points.device)
+    up_axis = torch.Tensor([0, -1]).to(points.device)
 
     return get_angle(lat_axis.float(), up_axis)
 
@@ -62,7 +62,7 @@ def ap_right_lce_angle(points):
     lat_point = points[15]
 
     lat_axis = lat_point - center_of_circle
-    up_axis = torch.Tensor([0, -1], device=points.device)
+    up_axis = torch.Tensor([0, -1]).to(points.device)
 
     return get_angle(lat_axis.float(), up_axis)
 
