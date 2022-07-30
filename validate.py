@@ -134,6 +134,8 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
             model_eres = []
 
             for idx, (image, _, meta) in enumerate(loader):
+
+                # allocate
                 image = image.cuda()
                 meta['landmarks_per_annotator'] = meta['landmarks_per_annotator'].cuda()
                 meta['pixel_size'] = meta['pixel_size'].cuda()
@@ -146,6 +148,10 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
                 model_predicted_points.append(predicted_points)
                 dataset_target_points.append(target_points)
                 model_eres.append(eres)
+
+                # decallocated these things
+                meta['landmarks_per_annotator'] = meta['landmarks_per_annotator'].cpu()
+                meta['pixel_size'] = meta['pixel_size'].cpu()
 
                 if print_progress:
                     if (idx + 1) % 1 == 0:
