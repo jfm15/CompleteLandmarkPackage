@@ -93,7 +93,7 @@ def right_neck_shaft_angle(points):
     return get_angle(axis_1, axis_2)
 
 
-def ap_pelvis_tilt(points):
+def ap_pelvic_tilt(points):
 
     pelvic_axis = points[9] - points[24]
     horizontal_axis = torch.Tensor([1, 0]).to(points.device)
