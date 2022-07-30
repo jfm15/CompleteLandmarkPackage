@@ -148,7 +148,7 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
                 model_eres.append(eres)
 
                 if print_progress:
-                    if (idx + 1) % 30 == 0:
+                    if (idx + 1) % 1 == 0:
                         logger.info("[{}/{}]".format(idx + 1, len(loader)))
 
             # move model back to cpu
