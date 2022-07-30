@@ -1,6 +1,9 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import torch
+
+from special_measurements import get_center_of_circle
 
 
 def ultrasound_ddh_angles(image, predicted_points, target_points, save=False, save_path=""):
@@ -38,3 +41,72 @@ def ultrasound_ddh_angles(image, predicted_points, target_points, save=False, sa
                 plt.close()
         else:
                 plt.show()
+
+
+def ap_alpha_angles(image, predicted_points, target_points, save=False, save_path=""):
+
+        plt.imshow(image[0], cmap='gray')
+
+        important_indices = [2, 3, 10, 11, 12, 17, 18, 25, 26, 27]
+        predicted_points = np.take(predicted_points, important_indices, axis=0)
+        target_points = np.take(target_points, important_indices, axis=0)
+
+        plt.scatter(predicted_points[:, 0], predicted_points[:, 1], color='red', s=5)
+        plt.scatter(target_points[:, 0], target_points[:, 1], color='green', s=5)
+
+        # Find center of the circle
+        centers = []
+        for i in [2, 7]:
+             centers.append(get_center_of_circle(predicted_points[i],
+                                                 predicted_points[i + 1],
+                                                 predicted_points[i + 2]).numpy())
+        centers = np.array(centers)
+
+        # left
+        plt.plot([centers[0, 0], predicted_points[0, 0]], [centers[0, 1], predicted_points[0, 1]], color='red')
+        plt.plot([centers[0, 0], predicted_points[1, 0]], [centers[0, 1], predicted_points[1, 1]], color='red')
+
+        # right
+        plt.plot([centers[1, 0], predicted_points[5, 0]], [centers[1, 1], predicted_points[5, 1]], color='red')
+        plt.plot([centers[1, 0], predicted_points[6, 0]], [centers[1, 1], predicted_points[6, 1]], color='red')
+
+        for i, positions in enumerate(target_points):
+            idx = important_indices[i]
+            plt.text(positions[0], positions[1], "{}".format(idx + 1), color="yellow", fontsize="small")
+
+        plt.axis('off')
+
+        if save:
+                plt.savefig(save_path)
+                plt.close()
+        else:
+                plt.show()
+
+
+def ap_lce_angles(image, predicted_points, target_points, save=False, save_path=""):
+
+        plt.imshow(image[0], cmap='gray')
+
+        centers = []
+        for i in [10, 25]:
+             centers.append(get_center_of_circle(predicted_points[i],
+                                                 predicted_points[i + 1],
+                                                 predicted_points[i + 2]).numpy())
+        centers = np.array(centers)
+
+        # left
+        plt.plot([centers[0, 0], predicted_points[0, 0]], [centers[0, 1], predicted_points[0, 1]], color='red')
+        plt.plot([centers[0, 0], centers[0, 0]], [centers[0, 1], centers[0, 1] - 50], color='red')
+
+        # right
+        plt.plot([centers[1, 0], predicted_points[15, 0]], [centers[1, 1], predicted_points[15, 1]], color='red')
+        plt.plot([centers[1, 0], centers[1, 0]], [centers[1, 1], centers[1, 1] - 50], color='red')
+
+        plt.axis('off')
+
+        if save:
+                plt.savefig(save_path)
+                plt.close()
+        else:
+                plt.show()
+
