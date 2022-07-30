@@ -9,6 +9,9 @@ def ground_truth_and_predictions(image, predicted_points, target_points):
     plt.scatter(predicted_points[:, 0], predicted_points[:, 1], color='red', s=5)
     plt.scatter(target_points[:, 0], target_points[:, 1], color='green', s=5)
 
+    for i, positions in enumerate(target_points):
+        plt.text(positions[0], positions[1], "{}".format(i + 1), color="yellow", fontsize="small")
+
     plt.show()
 
 # assumes image is greyscale
