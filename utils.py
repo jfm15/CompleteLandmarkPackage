@@ -186,6 +186,18 @@ def get_icc(predictions, targets):
     return icc
 
 
+def get_stats(predictions, targets):
+    predictions = predictions.detach().cpu().numpy()
+    targets = targets.detach().cpu().numpy()
+
+    differences = predictions - targets
+    avg = np.mean(differences)
+    std = np.std(differences)
+    icc = get_icc(predictions, targets)
+
+    return avg, std, icc
+
+
 def diagnose(alpha, beta):
 
     alpha = int(alpha)
