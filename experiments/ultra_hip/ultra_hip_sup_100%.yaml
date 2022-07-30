@@ -3,8 +3,8 @@ DATASET:
   IMAGE_EXT: ".jpg"
   KEY_POINTS: 5
   PIXEL_SIZE:
-    - 0.2
-    - 0.2
+    - 1.0
+    - 1.0
   CACHED_IMAGE_SIZE:
     - 640
     - 480
