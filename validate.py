@@ -237,7 +237,7 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
 
             for measurement in measurements:
                 measurements_dict[measurement] = torch.Tensor(measurements_dict[measurement])
-                avg, std, icc = get_stats(measurements_dict[measurement][0], measurements_dict[measurement][1])
+                avg, std, icc = get_stats(measurements_dict[measurement][:, 0], measurements_dict[measurement][:, 1])
                 txt += "{}: [{:.2f}, {:.2f}, {:.2f}]\t".format(measurement, avg, std, icc)
 
             logger.info(txt)
