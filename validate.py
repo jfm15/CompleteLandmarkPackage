@@ -227,12 +227,17 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
             # Overall Statistics
             logger.info("\n-----------Final Statistics-----------")
             # Print average landmark localisations
-            msg = "Landmark Localisations:\t"
+            txt = "Landmark Localisations:\t"
             avg_per_landmark = torch.mean(radial_errors, dim=0)
             for avg_for_landmark in avg_per_landmark:
                 txt += "{:.2f}\t".format(avg_for_landmark.item())
             overall_avg = torch.mean(radial_errors)
             txt += "Avg: {:.2f}\t".format(overall_avg.item())
+
+            for measurement in measurements:
+                avg = sum(measurements_dict[measurement]) / len(measurements_dict[measurement])
+                txt += "{}: {:.2f}\t".format(measurement, avg)
+
             logger.info(txt)
 
         else:
