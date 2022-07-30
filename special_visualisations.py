@@ -121,6 +121,7 @@ def ap_neck_shaft_angles(image, predicted_points, target_points, save=False, sav
         plt.plot([predicted_points[5, 0], predicted_points[6, 0]],
                  [predicted_points[5, 1], predicted_points[6, 1]], color='red')
 
+        # right
         plt.plot([predicted_points[17, 0], predicted_points[20, 0]],
                  [predicted_points[17, 1], predicted_points[20, 1]], color='red')
         plt.plot([predicted_points[20, 0], predicted_points[21, 0]],
