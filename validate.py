@@ -151,7 +151,7 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
                     model_eres.append(eres)
 
                     if print_progress:
-                        if (idx + 1) % 1 == 0:
+                        if (idx + 1) % 30 == 0:
                             logger.info("[{}/{}]".format(idx + 1, len(loader)))
 
                 # move model back to cpu
@@ -194,7 +194,7 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
                 txt = "[{}/{}] {}:\t".format(idx + 1, len(loader), name)
                 for err in radial_errors_idx:
                     txt += "{:.2f}\t".format(err.item())
-                txt += "Avg: {:.2f}\t".format(radial_errors_idx.item())
+                txt += "Avg: {:.2f}\t".format(torch.mean(radial_errors_idx).item())
 
                 for measurement in measurements:
                     func = eval("special_measurements." + measurement)
