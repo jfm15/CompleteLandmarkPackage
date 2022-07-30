@@ -124,10 +124,10 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
         dataset_target_points = []
 
         # In gpu mode we run through all images in each model first
-        for model in ensemble:
+        for model_idx in range(len(ensemble)):
 
-            model = model.cuda()
-            model.eval()
+            our_model = ensemble[model_idx].cuda()
+            our_model.eval()
 
             model_predicted_points = []
             dataset_target_points = []
@@ -138,7 +138,7 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
                 meta['landmarks_per_annotator'] = meta['landmarks_per_annotator'].cuda()
                 meta['pixel_size'] = meta['pixel_size'].cuda()
 
-                output = model(image.float())
+                output = our_model(image.float())
                 output = two_d_softmax(output)
 
                 predicted_points, target_points, eres \
@@ -152,7 +152,7 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
                         logger.info("[{}/{}]".format(idx + 1, len(loader)))
 
             # move model back to cpu
-            model.cpu()
+            our_model.cpu()
 
             model_predicted_points = torch.cat(model_predicted_points)
             dataset_target_points = torch.cat(dataset_target_points)
