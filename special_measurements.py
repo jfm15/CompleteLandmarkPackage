@@ -77,3 +77,17 @@ def get_center_of_circle(point1, point2, point3):
     C = (x_1 * x_1 + y_1 * y_1) * (x_2 - x_3) + \
         (x_2 * x_2 + y_2 * y_2) * (x_3 - x_1) + (x_3 * x_3 + y_3 * y_3) * (x_1 - x_2)
     return torch.Tensor([-B / (2 * A), -C / (2 * A)])
+
+
+def left_neck_shaft_angle(points):
+    axis_1 = points[2] - points[5]
+    axis_2 = points[5] - points[6]
+
+    return get_angle(axis_1, axis_2)
+
+
+def right_neck_shaft_angle(points):
+    axis_1 = points[17] - points[20]
+    axis_2 = points[20] - points[21]
+
+    return get_angle(axis_1, axis_2)
