@@ -4,6 +4,7 @@ import special_measurements
 
 from utils import get_validation_message
 from utils import compare_angles
+from utils import get_stats
 from model import two_d_softmax
 from evaluate import cal_radial_errors
 from evaluate import use_aggregate_methods
@@ -209,7 +210,7 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
                     predicted_angle = func(aggregated_points_idx)
                     target_angle = func(target_points_idx)
                     dif = abs(target_angle - predicted_angle)
-                    measurements_dict[measurement].append(dif)
+                    measurements_dict[measurement].append([predicted_angle, target_angle])
                     txt += "{}: {:.2f}\t".format(measurement, dif)
 
                 logger.info(txt)
@@ -235,8 +236,9 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
             txt += "Avg: {:.2f}\t".format(overall_avg.item())
 
             for measurement in measurements:
-                avg = sum(measurements_dict[measurement]) / len(measurements_dict[measurement])
-                txt += "{}: {:.2f}\t".format(measurement, avg)
+                measurements_dict[measurement] = torch.Tensor(measurements_dict[measurement])
+                avg, std, icc = get_stats(measurements_dict[measurement][0], measurements_dict[measurement][1])
+                txt += "{}: [{:.2f}, {:.2f}, {:.2f}]\t".format(measurement, avg, stf, icc)
 
             logger.info(txt)
 
