@@ -121,7 +121,7 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
 
         predicted_points_per_model = []
         eres_per_model = []
-        target_points = None
+        dataset_target_points = []
 
         # In gpu mode we run through all images in each model first
         for model in ensemble:
@@ -130,6 +130,7 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
             model.eval()
 
             model_predicted_points = []
+            dataset_target_points = []
             model_eres = []
 
             for idx, (image, _, meta) in enumerate(loader):
@@ -143,7 +144,7 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
                 predicted_points, target_points, eres \
                     = get_predicted_and_target_points(output, meta['landmarks_per_annotator'], meta['pixel_size'])
                 model_predicted_points.append(predicted_points)
-                target_points.append(target_points)
+                dataset_target_points.append(target_points)
                 model_eres.append(eres)
 
                 if print_progress:
@@ -154,6 +155,7 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
             model.cpu()
 
             model_predicted_points = torch.cat(model_predicted_points)
+            dataset_target_points = torch.cat(dataset_target_points)
             model_eres = torch.cat(model_eres)
             # D = Dataset size
             # predicted_points has size [D, N, 2]
@@ -173,13 +175,13 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
                                                       aggregate_methods=cfg_validation.AGGREGATION_METHODS)
         aggregated_points = aggregated_point_dict[cfg_validation.SDR_AGGREGATION_METHOD]
 
-        radial_errors = cal_radial_errors(aggregated_points, target_points)
+        radial_errors = cal_radial_errors(aggregated_points, dataset_target_points)
 
         # quick pass through the images
         for idx, (image, _, meta) in enumerate(loader):
 
             radial_errors_idx = radial_errors[idx]
-            target_points_idx = target_points[idx]
+            target_points_idx = dataset_target_points[idx]
             aggregated_points_idx = aggregated_points[idx]
 
             b = 0
