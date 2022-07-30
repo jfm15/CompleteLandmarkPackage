@@ -117,167 +117,163 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
     if in gpu_mode the outer loop is the model because it
     takes time to transfer models to and from the gpu
     '''
-    if gpu_mode:
+    with torch.no_grad():
+        if gpu_mode:
 
-        predicted_points_per_model = []
-        eres_per_model = []
-        dataset_target_points = []
-
-        # In gpu mode we run through all images in each model first
-        for model_idx in range(len(ensemble)):
-
-            our_model = ensemble[model_idx].cuda()
-            our_model.eval()
-
-            model_predicted_points = []
+            predicted_points_per_model = []
+            eres_per_model = []
             dataset_target_points = []
-            model_eres = []
+
+            # In gpu mode we run through all images in each model first
+            for model_idx in range(len(ensemble)):
+
+                our_model = ensemble[model_idx].cuda()
+                our_model.eval()
+
+                model_predicted_points = []
+                dataset_target_points = []
+                model_eres = []
+
+                for idx, (image, _, meta) in enumerate(loader):
+
+                    # allocate
+                    image = image.cuda()
+                    meta['landmarks_per_annotator'] = meta['landmarks_per_annotator'].cuda()
+                    meta['pixel_size'] = meta['pixel_size'].cuda()
+
+                    output = our_model(image.float())
+                    output = two_d_softmax(output)
+
+                    predicted_points, target_points, eres \
+                        = get_predicted_and_target_points(output, meta['landmarks_per_annotator'], meta['pixel_size'])
+                    model_predicted_points.append(predicted_points)
+                    dataset_target_points.append(target_points)
+                    model_eres.append(eres)
+
+                    if print_progress:
+                        if (idx + 1) % 1 == 0:
+                            logger.info("[{}/{}]".format(idx + 1, len(loader)))
+
+                # move model back to cpu
+                our_model.cpu()
+
+                model_predicted_points = torch.cat(model_predicted_points)
+                dataset_target_points = torch.cat(dataset_target_points)
+                model_eres = torch.cat(model_eres)
+                # D = Dataset size
+                # predicted_points has size [D, N, 2]
+                # eres has size [D, N]
+                # target_points has size [D, N, 2]
+
+                predicted_points_per_model.append(model_predicted_points)
+                eres_per_model.append(model_eres)
+
+            # predicted_points_per_model is size [M, D, N, 2]
+            # eres_per_model is size [M, D, N]
+            # target_points is size [D, N, 2]
+            predicted_points_per_model = torch.stack(predicted_points_per_model)
+            eres_per_model = torch.stack(eres_per_model)
+
+            aggregated_point_dict = use_aggregate_methods(predicted_points_per_model, eres_per_model,
+                                                          aggregate_methods=cfg_validation.AGGREGATION_METHODS)
+            aggregated_points = aggregated_point_dict[cfg_validation.SDR_AGGREGATION_METHOD]
+
+            radial_errors = cal_radial_errors(aggregated_points, dataset_target_points)
+
+            # quick pass through the images
+            for idx, (image, _, meta) in enumerate(loader):
+
+                radial_errors_idx = radial_errors[idx]
+                target_points_idx = dataset_target_points[idx]
+                aggregated_points_idx = aggregated_points[idx]
+
+                b = 0
+
+                name = meta['file_name'][b]
+                txt = "[{}/{}] {}:\t".format(idx + 1, len(loader), name)
+                for err in radial_errors_idx:
+                    txt += "{:.2f}\t".format(err.item())
+                txt += "Avg: {:.2f}\t".format(radial_errors_idx.item())
+
+                for measurement in measurements:
+                    func = eval("special_measurements." + measurement)
+                    predicted_angle = func(aggregated_points_idx)
+                    target_angle = func(target_points_idx)
+                    dif = abs(target_angle - predicted_angle)
+                    txt += "{}: {:.2f}\t".format(measurement, dif)
+
+                logger.info(txt)
+
+                # display predictions and ground truth
+                if "pg" in visuals:
+                    ground_truth_and_predictions(image[b].detach().numpy(),
+                                                 aggregated_points_idx.detach().numpy(),
+                                                 target_points_idx.detach().numpy())
+
+                for visual_name in special_visuals:
+                    eval("special_visualisations." + visual_name)(image[b].detach().numpy(),
+                                                                  aggregated_points_idx.detach().numpy(),
+                                                                  target_points_idx.detach().numpy())
+
+        else:
 
             for idx, (image, _, meta) in enumerate(loader):
 
-                # allocate
-                image = image.cuda()
-                meta['landmarks_per_annotator'] = meta['landmarks_per_annotator'].cuda()
-                meta['pixel_size'] = meta['pixel_size'].cuda()
+                image_predicted_points = []
+                image_target_points = []
+                image_eres = []
 
-                output = our_model(image.float())
-                output = two_d_softmax(output)
+                for model in ensemble:
 
-                predicted_points, target_points, eres \
-                    = get_predicted_and_target_points(output, meta['landmarks_per_annotator'], meta['pixel_size'])
-                model_predicted_points.append(predicted_points.cpu())
-                dataset_target_points.append(target_points.cpu())
-                model_eres.append(eres.cpu())
+                    model.eval()
+                    output = model(image.float())
+                    output = two_d_softmax(output)
+                    predicted_points, target_points, eres \
+                        = get_predicted_and_target_points(output, meta['landmarks_per_annotator'], meta['pixel_size'])
+                    image_predicted_points.append(predicted_points)
+                    image_target_points.append(target_points)
+                    image_eres.append(eres)
 
-                # decallocated these things
-                meta['landmarks_per_annotator'] = meta['landmarks_per_annotator'].cpu()
-                meta['pixel_size'] = meta['pixel_size'].cpu()
+                # put these arrays into a format suitable for the aggregate methods function
+                image_predicted_points = torch.unsqueeze(torch.cat(image_predicted_points), 1).float()
+                image_target_points = torch.unsqueeze(torch.cat(image_target_points), 1).float()
+                image_eres = torch.unsqueeze(torch.cat(image_eres), 1).float()
 
-                if print_progress:
-                    if (idx + 1) % 1 == 0:
-                        logger.info("[{}/{}]".format(idx + 1, len(loader)))
+                aggregated_point_dict = use_aggregate_methods(image_predicted_points, image_eres,
+                                                              aggregate_methods=cfg_validation.AGGREGATION_METHODS)
 
-            # move model back to cpu
-            our_model.cpu()
+                aggregated_points = aggregated_point_dict[cfg_validation.SDR_AGGREGATION_METHOD]
 
-            model_predicted_points = torch.cat(model_predicted_points)
-            dataset_target_points = torch.cat(dataset_target_points)
-            model_eres = torch.cat(model_eres)
-            # D = Dataset size
-            # predicted_points has size [D, N, 2]
-            # eres has size [D, N]
-            # target_points has size [D, N, 2]
+                # assumes the batch size is 1
+                b = 0
 
-            predicted_points_per_model.append(model_predicted_points)
-            eres_per_model.append(model_eres)
+                radial_errors = cal_radial_errors(aggregated_points, target_points)[b]
+                avg_radial_error = torch.mean(radial_errors[b])
 
-        # predicted_points_per_model is size [M, D, N, 2]
-        # eres_per_model is size [M, D, N]
-        # target_points is size [D, N, 2]
-        predicted_points_per_model = torch.stack(predicted_points_per_model).cuda()
-        dataset_target_points = dataset_target_points.cuda()
-        eres_per_model = torch.stack(eres_per_model).cuda()
+                name = meta['file_name'][b]
+                txt = "[{}/{}] {}:\t".format(idx + 1, len(loader), name)
+                for err in radial_errors:
+                    txt += "{:.2f}\t".format(err.item())
+                txt += "Avg: {:.2f}\t".format(avg_radial_error.item())
 
-        aggregated_point_dict = use_aggregate_methods(predicted_points_per_model, eres_per_model,
-                                                      aggregate_methods=cfg_validation.AGGREGATION_METHODS)
-        aggregated_points = aggregated_point_dict[cfg_validation.SDR_AGGREGATION_METHOD]
+                for measurement in measurements:
+                    func = eval("special_measurements." + measurement)
+                    predicted_angle = func(aggregated_points[b])
+                    target_angle = func(target_points[b])
+                    dif = abs(target_angle - predicted_angle)
+                    txt += "{}: {:.2f}\t".format(measurement, dif)
 
-        radial_errors = cal_radial_errors(aggregated_points, dataset_target_points)
+                logger.info(txt)
 
-        # quick pass through the images
-        for idx, (image, _, meta) in enumerate(loader):
+                # TODO: If singular experiment print out heatmaps and eres
 
-            radial_errors_idx = radial_errors[idx]
-            target_points_idx = dataset_target_points[idx]
-            aggregated_points_idx = aggregated_points[idx]
+                # display predictions and ground truth
+                if "pg" in visuals:
+                    ground_truth_and_predictions(image[b].detach().numpy(),
+                                                 aggregated_points[b].detach().numpy(),
+                                                 target_points[b].detach().numpy())
 
-            b = 0
-
-            name = meta['file_name'][b]
-            txt = "[{}/{}] {}:\t".format(idx + 1, len(loader), name)
-            for err in radial_errors_idx:
-                txt += "{:.2f}\t".format(err.item())
-            txt += "Avg: {:.2f}\t".format(radial_errors_idx.item())
-
-            for measurement in measurements:
-                func = eval("special_measurements." + measurement)
-                predicted_angle = func(aggregated_points_idx)
-                target_angle = func(target_points_idx)
-                dif = abs(target_angle - predicted_angle)
-                txt += "{}: {:.2f}\t".format(measurement, dif)
-
-            logger.info(txt)
-
-            # display predictions and ground truth
-            if "pg" in visuals:
-                ground_truth_and_predictions(image[b].detach().numpy(),
-                                             aggregated_points_idx.detach().numpy(),
-                                             target_points_idx.detach().numpy())
-
-            for visual_name in special_visuals:
-                eval("special_visualisations." + visual_name)(image[b].detach().numpy(),
-                                                              aggregated_points_idx.detach().numpy(),
-                                                              target_points_idx.detach().numpy())
-
-    else:
-
-        for idx, (image, _, meta) in enumerate(loader):
-
-            image_predicted_points = []
-            image_target_points = []
-            image_eres = []
-
-            for model in ensemble:
-
-                model.eval()
-                output = model(image.float())
-                output = two_d_softmax(output)
-                predicted_points, target_points, eres \
-                    = get_predicted_and_target_points(output, meta['landmarks_per_annotator'], meta['pixel_size'])
-                image_predicted_points.append(predicted_points)
-                image_target_points.append(target_points)
-                image_eres.append(eres)
-
-            # put these arrays into a format suitable for the aggregate methods function
-            image_predicted_points = torch.unsqueeze(torch.cat(image_predicted_points), 1).float()
-            image_target_points = torch.unsqueeze(torch.cat(image_target_points), 1).float()
-            image_eres = torch.unsqueeze(torch.cat(image_eres), 1).float()
-
-            aggregated_point_dict = use_aggregate_methods(image_predicted_points, image_eres,
-                                                          aggregate_methods=cfg_validation.AGGREGATION_METHODS)
-
-            aggregated_points = aggregated_point_dict[cfg_validation.SDR_AGGREGATION_METHOD]
-
-            # assumes the batch size is 1
-            b = 0
-
-            radial_errors = cal_radial_errors(aggregated_points, target_points)[b]
-            avg_radial_error = torch.mean(radial_errors[b])
-
-            name = meta['file_name'][b]
-            txt = "[{}/{}] {}:\t".format(idx + 1, len(loader), name)
-            for err in radial_errors:
-                txt += "{:.2f}\t".format(err.item())
-            txt += "Avg: {:.2f}\t".format(avg_radial_error.item())
-
-            for measurement in measurements:
-                func = eval("special_measurements." + measurement)
-                predicted_angle = func(aggregated_points[b])
-                target_angle = func(target_points[b])
-                dif = abs(target_angle - predicted_angle)
-                txt += "{}: {:.2f}\t".format(measurement, dif)
-
-            logger.info(txt)
-
-            # TODO: If singular experiment print out heatmaps and eres
-
-            # display predictions and ground truth
-            if "pg" in visuals:
-                ground_truth_and_predictions(image[b].detach().numpy(),
-                                             aggregated_points[b].detach().numpy(),
-                                             target_points[b].detach().numpy())
-
-            for visual_name in special_visuals:
-                eval("special_visualisations." + visual_name)(image[b].detach().numpy(),
-                                                       aggregated_points[b].detach().numpy(),
-                                                       target_points[b].detach().numpy())
+                for visual_name in special_visuals:
+                    eval("special_visualisations." + visual_name)(image[b].detach().numpy(),
+                                                           aggregated_points[b].detach().numpy(),
+                                                           target_points[b].detach().numpy())
