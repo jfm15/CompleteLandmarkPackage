@@ -21,6 +21,7 @@ def ultrasound_beta_angle(points):
 
 def ap_left_alpha_angle(points):
     center_of_circle = get_center_of_circle(points[10], points[11], points[12])
+    center_of_circle.to(points.device)
     neck_point = points[2]
     cam_point = points[3]
 
@@ -32,6 +33,7 @@ def ap_left_alpha_angle(points):
 
 def ap_right_alpha_angle(points):
     center_of_circle = get_center_of_circle(points[25], points[26], points[27])
+    center_of_circle.to(points.device)
     neck_point = points[17]
     cam_point = points[18]
 
@@ -44,10 +46,11 @@ def ap_right_alpha_angle(points):
 def ap_left_lce_angle(points):
 
     center_of_circle = get_center_of_circle(points[10], points[11], points[12])
+    center_of_circle.to(points.device)
     lat_point = points[0]
 
     lat_axis = lat_point - center_of_circle
-    up_axis = torch.Tensor([0, -1])
+    up_axis = torch.Tensor([0, -1], device=points.device)
 
     return get_angle(lat_axis.float(), up_axis)
 
@@ -55,10 +58,11 @@ def ap_left_lce_angle(points):
 def ap_right_lce_angle(points):
 
     center_of_circle = get_center_of_circle(points[25], points[26], points[27])
+    center_of_circle.to(points.device)
     lat_point = points[15]
 
     lat_axis = lat_point - center_of_circle
-    up_axis = torch.Tensor([0, -1])
+    up_axis = torch.Tensor([0, -1], device=points.device)
 
     return get_angle(lat_axis.float(), up_axis)
 
