@@ -26,8 +26,9 @@ def get_eres(output_stack, predicted_points_scaled, pixel_sizes, significant_pix
     filtered_heatmaps = torch.where(normalized_heatmaps > significant_pixel_cutoff, normalized_heatmaps,
                                    torch.tensor(0.0).cuda())
     '''
+    zero_tensor = torch.tensor(0.0).cuda() if output_stack.is_cuda else torch.tensor(0.0)
     filtered_heatmaps = torch.where(normalized_heatmaps > significant_pixel_cutoff, normalized_heatmaps,
-                                    torch.tensor(0.0))
+                                    zero_tensor)
     flattened_filtered_heatmaps = torch.flatten(filtered_heatmaps, start_dim=2)
     sum_per_heatmap = torch.sum(flattened_filtered_heatmaps, dim=2, keepdim=True)
     sum_per_heatmap = torch.unsqueeze(sum_per_heatmap, dim=3)
