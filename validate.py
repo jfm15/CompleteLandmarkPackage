@@ -125,10 +125,10 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
             dataset_target_points = []
 
             # In gpu mode we run through all images in each model first
-            for model_idx in range(len(ensemble)):
+            for model in ensemble:
 
-                our_model = ensemble[model_idx].cuda()
-                our_model.eval()
+                mode = model.cuda()
+                model.eval()
 
                 model_predicted_points = []
                 dataset_target_points = []
@@ -141,7 +141,7 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
                     meta['landmarks_per_annotator'] = meta['landmarks_per_annotator'].cuda()
                     meta['pixel_size'] = meta['pixel_size'].cuda()
 
-                    output = our_model(image.float())
+                    output = model(image.float())
                     output = two_d_softmax(output)
 
                     predicted_points, target_points, eres \
@@ -155,7 +155,7 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
                             logger.info("[{}/{}]".format(idx + 1, len(loader)))
 
                 # move model back to cpu
-                our_model.cpu()
+                model.cpu()
 
                 model_predicted_points = torch.cat(model_predicted_points)
                 dataset_target_points = torch.cat(dataset_target_points)
@@ -171,8 +171,9 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
             # predicted_points_per_model is size [M, D, N, 2]
             # eres_per_model is size [M, D, N]
             # target_points is size [D, N, 2]
-            predicted_points_per_model = torch.stack(predicted_points_per_model)
-            eres_per_model = torch.stack(eres_per_model)
+            predicted_points_per_model = torch.stack(predicted_points_per_model).float()
+            dataset_target_points = dataset_target_points.float()
+            eres_per_model = torch.stack(eres_per_model).float()
 
             aggregated_point_dict = use_aggregate_methods(predicted_points_per_model, eres_per_model,
                                                           aggregate_methods=cfg_validation.AGGREGATION_METHODS)
