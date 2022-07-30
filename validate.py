@@ -145,9 +145,9 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
 
                 predicted_points, target_points, eres \
                     = get_predicted_and_target_points(output, meta['landmarks_per_annotator'], meta['pixel_size'])
-                model_predicted_points.append(predicted_points)
-                dataset_target_points.append(target_points)
-                model_eres.append(eres)
+                model_predicted_points.append(predicted_points.cpu())
+                dataset_target_points.append(target_points.cpu())
+                model_eres.append(eres.cpu())
 
                 # decallocated these things
                 meta['landmarks_per_annotator'] = meta['landmarks_per_annotator'].cpu()
@@ -174,8 +174,9 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
         # predicted_points_per_model is size [M, D, N, 2]
         # eres_per_model is size [M, D, N]
         # target_points is size [D, N, 2]
-        predicted_points_per_model = torch.stack(predicted_points_per_model)
-        eres_per_model = torch.stack(eres_per_model)
+        predicted_points_per_model = torch.stack(predicted_points_per_model).cuda()
+        dataset_target_points = dataset_target_points.cuda()
+        eres_per_model = torch.stack(eres_per_model).cuda()
 
         aggregated_point_dict = use_aggregate_methods(predicted_points_per_model, eres_per_model,
                                                       aggregate_methods=cfg_validation.AGGREGATION_METHODS)
