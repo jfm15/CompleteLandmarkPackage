@@ -110,3 +110,26 @@ def ap_lce_angles(image, predicted_points, target_points, save=False, save_path=
         else:
                 plt.show()
 
+
+def ap_neck_shaft_angles(image, predicted_points, target_points, save=False, save_path=""):
+
+        plt.imshow(image[0], cmap='gray')
+
+        # left
+        plt.plot([predicted_points[2, 0], predicted_points[5, 0]],
+                 [predicted_points[2, 1], predicted_points[5, 1]], color='red')
+        plt.plot([predicted_points[5, 0], predicted_points[6, 0]],
+                 [predicted_points[5, 1], predicted_points[6, 1]], color='red')
+
+        plt.plot([predicted_points[17, 0], predicted_points[20, 0]],
+                 [predicted_points[17, 1], predicted_points[20, 1]], color='red')
+        plt.plot([predicted_points[20, 0], predicted_points[21, 0]],
+                 [predicted_points[20, 1], predicted_points[21, 1]], color='red')
+
+        plt.axis('off')
+
+        if save:
+                plt.savefig(save_path)
+                plt.close()
+        else:
+                plt.show()

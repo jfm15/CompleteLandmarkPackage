@@ -190,7 +190,7 @@ def get_stats(predictions, targets):
     predictions = predictions.detach().cpu().numpy()
     targets = targets.detach().cpu().numpy()
 
-    differences = predictions - targets
+    differences = np.abs(predictions - targets)
     avg = np.mean(differences)
     std = np.std(differences)
     icc = get_icc(predictions, targets)
