@@ -185,6 +185,10 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
 
             radial_errors = cal_radial_errors(aggregated_points, dataset_target_points)
 
+            measurements_dict = {}
+            for measurement in measurements:
+                measurements_dict[measurement] = []
+
             # quick pass through the images
             for idx, (image, _, meta) in enumerate(loader):
 
@@ -205,6 +209,7 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
                     predicted_angle = func(aggregated_points_idx)
                     target_angle = func(target_points_idx)
                     dif = abs(target_angle - predicted_angle)
+                    measurements_dict[measurement].append(dif)
                     txt += "{}: {:.2f}\t".format(measurement, dif)
 
                 logger.info(txt)
@@ -219,6 +224,16 @@ def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, 
                     eval("special_visualisations." + visual_name)(image[b].detach().numpy(),
                                                                   aggregated_points_idx.detach().numpy(),
                                                                   target_points_idx.detach().numpy())
+            # Overall Statistics
+            logger.info("\n-----------Final Statistics-----------")
+            # Print average landmark localisations
+            msg = "Landmark Localisations:\t"
+            avg_per_landmark = torch.mean(radial_errors, dim=0)
+            for avg_for_landmark in avg_per_landmark:
+                txt += "{:.2f}\t".format(avg_for_landmark.item())
+            overall_avg = torch.mean(radial_errors)
+            txt += "Avg: {:.2f}\t".format(overall_avg.item())
+            logger.info(txt)
 
         else:
 
