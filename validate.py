@@ -30,9 +30,11 @@ def validate(cfg, ensemble, validation_set_paths, loaders, visuals, special_visu
     :return:
     """
 
+    '''
     aggregated_mres_per_test_set = []
     sdr_statistics_per_test_set = []
     no_per_test_set = []
+    '''
 
     # This loops over the validation sets
     for loader, validation_images_path in zip(loaders, validation_set_paths):
@@ -42,6 +44,7 @@ def validate(cfg, ensemble, validation_set_paths, loaders, visuals, special_visu
         validate_over_set(ensemble, loader, visuals, special_visuals, measurements, cfg.VALIDATION,
                           gpu_mode, print_progress=print_progress, logger=logger)
 
+        '''
         no_per_test_set.append(len(loader))
 
         aggregated_point_mres = [cal_radial_errors(predicted_points, target_points, mean=True) for
@@ -109,6 +112,7 @@ def validate(cfg, ensemble, validation_set_paths, loaders, visuals, special_visu
                                      cfg.VALIDATION.SDR_AGGREGATION_METHOD, cfg.VALIDATION.SDR_THRESHOLDS,
                                      combined_sdr_statistics)
         logger.info(msg)
+    '''
 
 
 def validate_over_set(ensemble, loader, visuals, special_visuals, measurements, cfg_validation, gpu_mode, print_progress=False, logger=None):
