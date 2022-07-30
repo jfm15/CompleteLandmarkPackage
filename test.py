@@ -4,16 +4,11 @@ import glob
 import os
 
 import model
+
 from landmark_dataset import LandmarkDataset
 from utils import prepare_for_testing
-from utils import get_validation_message
-from utils import compare_angles
-from function import validate_ensemble
-from evaluate import cal_radial_errors
-from evaluate import use_aggregate_methods
-from evaluate import get_sdr_statistics
-from evaluate import combined_test_results
-from visualise import save_final_predictions
+from validate import validate
+
 from torchsummary.torchsummary import summary_string
 
 
@@ -43,95 +38,32 @@ def parse_args():
                         type=str,
                         required=True)
 
+    parser.add_argument('--gpu',
+                        action='store_true',
+                        help='run in gpu mode or not')
+
+    parser.add_argument('--visuals',
+                        help='list of graphics: p = predictions, g = ground truth,'
+                             'h = heatmaps, e = ere scores, a = aggregation',
+                        nargs='+',
+                        required=False,
+                        default=[])
+
+    parser.add_argument('--special_visuals',
+                        help='list of functions to call in special_visualisations',
+                        nargs='+',
+                        required=False,
+                        default=[])
+
+    parser.add_argument('--measurements',
+                        help='list of functions to call in measurements',
+                        nargs='+',
+                        required=False,
+                        default=[])
+
     args = parser.parse_args()
 
     return args
-
-
-def print_validation_of_ensemble(cfg, ensemble, validation_set_paths, loaders, logger, print_progress=False,
-                                 print_predictions=False, image_save_path=None):
-
-    aggregated_mres_per_test_set = []
-    sdr_statistics_per_test_set = []
-    no_per_test_set = []
-    for i, validation_images_path in enumerate(validation_set_paths):
-        logger.info("\n-----------Validating over {}-----------".format(validation_images_path))
-        predicted_points_per_model, eres_per_model, target_points = \
-            validate_ensemble(ensemble, loaders[i], print_progress=print_progress, logger=logger)
-        no_per_test_set.append(len(loaders[i]))
-
-        aggregated_point_dict = use_aggregate_methods(predicted_points_per_model, eres_per_model,
-                                                      aggregate_methods=cfg.VALIDATION.AGGREGATION_METHODS)
-
-        # output images
-        if print_predictions:
-            logger.info('\n-----------Save Images In {}-----------'.format(image_save_path))
-            save_final_predictions(loaders[i], aggregated_point_dict[cfg.VALIDATION.SDR_AGGREGATION_METHOD],
-                                   target_points, image_save_path)
-
-        aggregated_point_mres = [cal_radial_errors(predicted_points, target_points, mean=True) for
-                                 predicted_points in aggregated_point_dict.values()]
-        aggregated_mres_per_test_set.append(aggregated_point_mres)
-
-        chosen_radial_errors = cal_radial_errors(aggregated_point_dict[cfg.VALIDATION.SDR_AGGREGATION_METHOD],
-                                                 target_points)
-        sdr_statistics = get_sdr_statistics(chosen_radial_errors, cfg.VALIDATION.SDR_THRESHOLDS)
-        sdr_statistics_per_test_set.append(sdr_statistics)
-
-        logger.info('\n-----------Statistics for {}-----------'.format(validation_images_path))
-        msg = get_validation_message(aggregated_point_mres, cfg.TRAIN.ENSEMBLE_MODELS,
-                                     cfg.VALIDATION.AGGREGATION_METHODS,
-                                     cfg.VALIDATION.SDR_AGGREGATION_METHOD, cfg.VALIDATION.SDR_THRESHOLDS,
-                                     sdr_statistics)
-
-        logger.info('\n-----------Statistics for the Paper-----------')
-        mean_error_per_landmark = torch.mean(chosen_radial_errors, dim=0)
-        median_error_per_landmark = torch.median(chosen_radial_errors, dim=0)[0]
-        max_error_per_landmark = torch.max(chosen_radial_errors, dim=0)[0]
-        std_error_per_landmark = torch.std(chosen_radial_errors, dim=0)
-
-        for j in range(mean_error_per_landmark.size()[0]):
-            logger.info("Landmark {}: Mean: {:.3f}, Median: {:.3f}, Max: {:.3f}, Std: {:.3f}"
-                        .format(j + 1, mean_error_per_landmark[j].item(), median_error_per_landmark[j].item(),
-                                max_error_per_landmark[j].item(), std_error_per_landmark[j].item()))
-
-        alpha_angle_differences, beta_angle_differences, alpha_icc, beta_icc, diagnostic_accuracy \
-            = compare_angles(aggregated_point_dict[cfg.VALIDATION.SDR_AGGREGATION_METHOD], target_points)
-
-        mean_aa_error = torch.mean(alpha_angle_differences, dim=0)
-        median_aa_error = torch.median(alpha_angle_differences, dim=0)[0]
-        min_aa_error = torch.min(alpha_angle_differences, dim=0)[0]
-        max_aa_error = torch.max(alpha_angle_differences, dim=0)[0]
-        std_aa_error = torch.std(alpha_angle_differences, dim=0)
-
-        logger.info("Alpha Angle Differences, Mean: {:.3f}, Median: {:.3f}, Min: {:.3f}, Max: {:.3f}, Std: {:.3f}, ICC: {:.3f}".
-                    format(mean_aa_error, median_aa_error, min_aa_error, max_aa_error, std_aa_error, alpha_icc))
-
-        mean_ba_error = torch.mean(beta_angle_differences, dim=0)
-        median_ba_error = torch.median(beta_angle_differences, dim=0)[0]
-        min_ba_error = torch.min(beta_angle_differences, dim=0)[0]
-        max_ba_error = torch.max(beta_angle_differences, dim=0)[0]
-        std_ba_error = torch.std(beta_angle_differences, dim=0)
-
-        logger.info("Beta Angle Differences, Mean: {:.3f}, Median: {:.3f}, Min: {:.3f}, Max: {:.3f}, Std: {:.3f}, ICC: {:.3f}".
-                    format(mean_ba_error, median_ba_error, min_ba_error, max_ba_error, std_ba_error, beta_icc))
-
-        logger.info("Diagnostic Accuracy: {:.3f}%".format(diagnostic_accuracy))
-
-        logger.info("")
-        logger.info(msg)
-
-    if len(validation_set_paths) > 1:
-        combined_aggregated_mres, combined_sdr_statistics = combined_test_results(aggregated_mres_per_test_set,
-                                                                                  sdr_statistics_per_test_set,
-                                                                                  no_per_test_set)
-
-        logger.info('\n-----------Combined Statistics-----------')
-        msg = get_validation_message(combined_aggregated_mres, cfg.TRAIN.ENSEMBLE_MODELS,
-                                     cfg.VALIDATION.AGGREGATION_METHODS,
-                                     cfg.VALIDATION.SDR_AGGREGATION_METHOD, cfg.VALIDATION.SDR_THRESHOLDS,
-                                     combined_sdr_statistics)
-        logger.info(msg)
 
 
 def main():
@@ -178,8 +110,10 @@ def main():
     image_save_path = os.path.join(output_path, 'images')
     if not os.path.exists(image_save_path):
         os.makedirs(image_save_path)
-    print_validation_of_ensemble(cfg, ensemble, args.testing_images, test_loaders, logger, print_progress=True,
-                                 print_predictions=True, image_save_path=image_save_path)
+
+    # call the validate function
+    validate(cfg, ensemble, args.testing_images, test_loaders, args.visuals, args.special_visuals, args.measurements,
+             logger, args.gpu, print_progress=True, image_save_path=image_save_path)
 
 
 if __name__ == '__main__':
