@@ -134,3 +134,18 @@ def ap_neck_shaft_angles(image, predicted_points, target_points, save=False, sav
                 plt.close()
         else:
                 plt.show()
+
+
+def ap_pelvic_tilt(image, predicted_points, target_points, save=False, save_path=""):
+        plt.imshow(image[0], cmap='gray')
+
+        plt.plot([predicted_points[9, 0], predicted_points[24, 0]],
+                 [predicted_points[9, 1], predicted_points[24, 1]], color='red')
+
+        plt.axis('off')
+
+        if save:
+                plt.savefig(save_path)
+                plt.close()
+        else:
+                plt.show()
