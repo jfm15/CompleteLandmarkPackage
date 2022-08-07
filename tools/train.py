@@ -2,16 +2,14 @@ import argparse
 import torch
 import os
 
-import model
-
 import numpy as np
 import matplotlib.pyplot as plt
 
-from model import two_d_softmax
-from model import nll_across_batch
-from landmark_dataset import LandmarkDataset
-from utils import prepare_for_training
-from function import train_model
+from lib.models.model import two_d_softmax
+from lib.models.model import nll_across_batch
+from lib.dataset.landmark_dataset import LandmarkDataset
+from lib.utils.utils import prepare_for_training
+from lib.core.function import train_model
 from test import print_validation_of_ensemble
 from torchsummary.torchsummary import summary_string
 

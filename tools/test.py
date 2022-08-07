@@ -3,11 +3,11 @@ import torch
 import glob
 import os
 
-import model
+import lib
 
-from landmark_dataset import LandmarkDataset
-from utils import prepare_for_testing
-from validate import validate
+from lib.dataset.landmark_dataset import LandmarkDataset
+from lib.utils import prepare_for_testing
+from lib.core.validate import validate
 
 from torchsummary.torchsummary import summary_string
 
@@ -38,19 +38,9 @@ def parse_args():
                         type=str,
                         required=True)
 
-    parser.add_argument('--gpu',
-                        action='store_true',
-                        help='run in gpu mode or not')
-
     parser.add_argument('--visuals',
                         help='list of graphics: p = predictions, g = ground truth,'
                              'h = heatmaps, e = ere scores, a = aggregation',
-                        nargs='+',
-                        required=False,
-                        default=[])
-
-    parser.add_argument('--special_visuals',
-                        help='list of functions to call in special_visualisations',
                         nargs='+',
                         required=False,
                         default=[])
@@ -97,7 +87,7 @@ def main():
     model_paths = sorted(glob.glob(args.pretrained_model_directory + "/*.pth"))
 
     for model_path in model_paths:
-        our_model = eval("model." + cfg.MODEL.NAME)(cfg.MODEL, cfg.DATASET.KEY_POINTS)
+        our_model = eval("lib.models." + cfg.MODEL.NAME)(cfg.MODEL, cfg.DATASET.KEY_POINTS)
         loaded_state_dict = torch.load(model_path)
         our_model.load_state_dict(loaded_state_dict, strict=True)
         our_model.eval()
@@ -107,13 +97,13 @@ def main():
     model_summary, _ = summary_string(ensemble[0], (1, *cfg.DATASET.CACHED_IMAGE_SIZE), device=torch.device('cpu'))
     logger.info(model_summary)
 
-    image_save_path = os.path.join(output_path, 'images')
+    image_save_path = os.path.join(output_path, '../images')
     if not os.path.exists(image_save_path):
         os.makedirs(image_save_path)
 
     # call the validate function
-    validate(cfg, ensemble, args.testing_images, test_loaders, args.visuals, args.special_visuals, args.measurements,
-             logger, args.gpu, print_progress=True, image_save_path=image_save_path)
+    validate(cfg, ensemble, args.testing_images, test_loaders, args.visuals, args.measurements,
+             logger, print_progress=True, image_save_path=image_save_path)
 
 
 if __name__ == '__main__':

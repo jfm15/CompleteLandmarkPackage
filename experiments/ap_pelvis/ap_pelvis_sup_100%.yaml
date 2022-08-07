@@ -43,6 +43,7 @@ VALIDATION:
     - 3.0
     - 4.0
   SAVE_IMAGE_PATH: "images/ap_pelvis/"
+  MEASUREMENTS_SUFFIX: "ap"
 
 MODEL:
   ENCODER_NAME: 'resnet34'
