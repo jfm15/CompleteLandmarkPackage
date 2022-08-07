@@ -40,6 +40,7 @@ VALIDATION:
     - 3.0
     - 4.0
   SAVE_IMAGE_PATH: "images/ultra_hip/"
+  MEASUREMENTS_SUFFIX: "ultra"
 
 MODEL:
   ENCODER_NAME: 'resnet34'
