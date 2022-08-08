@@ -9,8 +9,7 @@ from visualisations import figure
 from measures import measure
 
 
-def validate_over_set(ensemble, loader, visuals, measurements, cfg_validation,
-                      print_progress=False, logger=None):
+def validate_over_set(ensemble, loader, visuals, cfg_validation, print_progress=False, logger=None):
 
     for idx, (image, _, meta) in enumerate(loader):
 
@@ -43,7 +42,7 @@ def validate_over_set(ensemble, loader, visuals, measurements, cfg_validation,
         b = 0
 
         radial_errors = cal_radial_errors(aggregated_points, target_points)[b]
-        avg_radial_error = torch.mean(radial_errors[b])
+        avg_radial_error = torch.mean(radial_errors)
 
         name = meta['file_name'][b]
         txt = "[{}/{}] {}:\t".format(idx + 1, len(loader), name)
@@ -51,7 +50,7 @@ def validate_over_set(ensemble, loader, visuals, measurements, cfg_validation,
             txt += "{:.2f}\t".format(err.item())
         txt += "Avg: {:.2f}\t".format(avg_radial_error.item())
 
-        for measurement in measurements:
+        for measurement in cfg_validation.MEASUREMENTS:
             _, _, dif = measure(aggregated_points[b], target_points[b],
                                 cfg_validation.MEASUREMENTS_SUFFIX, measurement)
             txt += "{}: {:.2f}\t".format(measurement, dif)

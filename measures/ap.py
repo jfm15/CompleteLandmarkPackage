@@ -30,7 +30,7 @@ def lce_angle(points, startIdx):
     lat_point = points[startIdx]
 
     lat_axis = lat_point - center_of_circle
-    up_axis = torch.Tensor([0, -1]).to(points.device)
+    up_axis = torch.Tensor([0, -1]).to(points.device).float()
 
     return get_angle(lat_axis.float(), up_axis)
 
@@ -44,8 +44,8 @@ def right_lce_angle(points):
 
 
 def neck_shaft_angle(points, startIdx):
-    axis_1 = points[points + 2] - points[points + 5]
-    axis_2 = points[points + 5] - points[points + 6]
+    axis_1 = points[startIdx + 2] - points[startIdx + 5]
+    axis_2 = points[startIdx + 5] - points[startIdx + 6]
 
     return get_angle(axis_1, axis_2)
 
@@ -63,9 +63,9 @@ def acetabular_index(points, side):
     vector = [0, -1] if side == "left" else [0, 1]
 
     axis_1 = points[startIdx + 1] - points[startIdx]
-    horizontal_axis = torch.Tensor(vector).to(points.device)
+    horizontal_axis = torch.Tensor(vector).to(points.device).float()
 
-    return get_angle(axis_1, horizontal_axis)
+    return get_angle(axis_1.float(), horizontal_axis)
 
 
 def left_acetabular_index(points):
@@ -76,9 +76,9 @@ def right_acetabular_index(points):
     return acetabular_index(points, "right")
 
 
-def ap_pelvic_tilt(points):
+def pelvic_tilt(points):
 
     pelvic_axis = points[9] - points[24]
-    horizontal_axis = torch.Tensor([1, 0]).to(points.device)
+    horizontal_axis = torch.Tensor([1, 0]).to(points.device).float()
 
-    return get_angle(pelvic_axis, horizontal_axis)
+    return get_angle(pelvic_axis.float(), horizontal_axis)

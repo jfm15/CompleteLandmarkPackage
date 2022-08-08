@@ -41,6 +41,9 @@ VALIDATION:
     - 4.0
   SAVE_IMAGE_PATH: "images/ultra_hip/"
   MEASUREMENTS_SUFFIX: "ultra"
+  MEASUREMENTS:
+    - alpha_angle
+    - beta_angle
 
 MODEL:
   ENCODER_NAME: 'resnet34'

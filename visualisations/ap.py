@@ -37,8 +37,7 @@ def alpha_angles(ax, predicted_points, target_points):
         ax.text(positions[0], positions[1], "{}".format(idx + 1), color="yellow", fontsize="small")
 
 
-def lce_angles(image, predicted_points, target_points, save=False, save_path=""):
-    plt.imshow(image[0], cmap='gray')
+def lce_angles(ax, predicted_points, target_points):
 
     centers = []
     for i in [10, 25]:
@@ -48,80 +47,45 @@ def lce_angles(image, predicted_points, target_points, save=False, save_path="")
     centers = np.array(centers)
 
     # left
-    plt.plot([centers[0, 0], predicted_points[0, 0]], [centers[0, 1], predicted_points[0, 1]], color='red')
-    plt.plot([centers[0, 0], centers[0, 0]], [centers[0, 1], centers[0, 1] - 50], color='red')
+    ax.plot([centers[0, 0], predicted_points[0, 0]], [centers[0, 1], predicted_points[0, 1]], color='red')
+    ax.plot([centers[0, 0], centers[0, 0]], [centers[0, 1], centers[0, 1] - 50], color='red')
 
     # right
-    plt.plot([centers[1, 0], predicted_points[15, 0]], [centers[1, 1], predicted_points[15, 1]], color='red')
-    plt.plot([centers[1, 0], centers[1, 0]], [centers[1, 1], centers[1, 1] - 50], color='red')
-
-    plt.axis('off')
-
-    if save:
-        plt.savefig(save_path)
-        plt.close()
-    else:
-        plt.show()
+    ax.plot([centers[1, 0], predicted_points[15, 0]], [centers[1, 1], predicted_points[15, 1]], color='red')
+    ax.plot([centers[1, 0], centers[1, 0]], [centers[1, 1], centers[1, 1] - 50], color='red')
 
 
-def neck_shaft_angles(image, predicted_points, target_points, save=False, save_path=""):
-    plt.imshow(image[0], cmap='gray')
+def neck_shaft_angles(ax, predicted_points, target_points):
 
     # left
-    plt.plot([predicted_points[2, 0], predicted_points[5, 0]],
-             [predicted_points[2, 1], predicted_points[5, 1]], color='red')
-    plt.plot([predicted_points[5, 0], predicted_points[6, 0]],
-             [predicted_points[5, 1], predicted_points[6, 1]], color='red')
+    ax.plot([predicted_points[2, 0], predicted_points[5, 0]],
+            [predicted_points[2, 1], predicted_points[5, 1]], color='red')
+    ax.plot([predicted_points[5, 0], predicted_points[6, 0]],
+            [predicted_points[5, 1], predicted_points[6, 1]], color='red')
 
     # right
-    plt.plot([predicted_points[17, 0], predicted_points[20, 0]],
-             [predicted_points[17, 1], predicted_points[20, 1]], color='red')
-    plt.plot([predicted_points[20, 0], predicted_points[21, 0]],
-             [predicted_points[20, 1], predicted_points[21, 1]], color='red')
-
-    plt.axis('off')
-
-    if save:
-        plt.savefig(save_path)
-        plt.close()
-    else:
-        plt.show()
+    ax.plot([predicted_points[17, 0], predicted_points[20, 0]],
+            [predicted_points[17, 1], predicted_points[20, 1]], color='red')
+    ax.plot([predicted_points[20, 0], predicted_points[21, 0]],
+            [predicted_points[20, 1], predicted_points[21, 1]], color='red')
 
 
-def pelvic_tilt(image, predicted_points, target_points, save=False, save_path=""):
-    plt.imshow(image[0], cmap='gray')
+def pelvic_tilt(ax, predicted_points, target_points):
 
-    plt.plot([predicted_points[9, 0], predicted_points[24, 0]],
+    ax.plot([predicted_points[9, 0], predicted_points[24, 0]],
              [predicted_points[9, 1], predicted_points[24, 1]], color='red')
 
-    plt.axis('off')
 
-    if save:
-        plt.savefig(save_path)
-        plt.close()
-    else:
-        plt.show()
-
-
-def acetabular_indices(image, predicted_points, target_points, save=False, save_path=""):
-    plt.imshow(image[0], cmap='gray')
+def acetabular_indices(ax, predicted_points, target_points):
 
     # left
-    plt.plot([predicted_points[0, 0], predicted_points[1, 0]],
-             [predicted_points[0, 1], predicted_points[1, 1]], color='red')
-    plt.plot([predicted_points[1, 0], predicted_points[1, 0] + 50],
-             [predicted_points[1, 1], predicted_points[1, 1]], color='red')
+    ax.plot([predicted_points[0, 0], predicted_points[1, 0]],
+            [predicted_points[0, 1], predicted_points[1, 1]], color='red')
+    ax.plot([predicted_points[1, 0], predicted_points[1, 0] + 50],
+            [predicted_points[1, 1], predicted_points[1, 1]], color='red')
 
     # right
-    plt.plot([predicted_points[15, 0], predicted_points[16, 0]],
-             [predicted_points[15, 1], predicted_points[16, 1]], color='red')
-    plt.plot([predicted_points[16, 0], predicted_points[16, 0] - 50],
-             [predicted_points[16, 1], predicted_points[16, 1]], color='red')
-
-    plt.axis('off')
-
-    if save:
-        plt.savefig(save_path)
-        plt.close()
-    else:
-        plt.show()
+    ax.plot([predicted_points[15, 0], predicted_points[16, 0]],
+            [predicted_points[15, 1], predicted_points[16, 1]], color='red')
+    ax.plot([predicted_points[16, 0], predicted_points[16, 0] - 50],
+            [predicted_points[16, 1], predicted_points[16, 1]], color='red')
