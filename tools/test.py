@@ -45,12 +45,6 @@ def parse_args():
                         required=False,
                         default=[])
 
-    parser.add_argument('--measurements',
-                        help='list of functions to call in measurements',
-                        nargs='+',
-                        required=False,
-                        default=[])
-
     args = parser.parse_args()
 
     return args
@@ -102,7 +96,7 @@ def main():
         os.makedirs(image_save_path)
 
     # call the validate function
-    validate(cfg, ensemble, args.testing_images, test_loaders, args.visuals, args.measurements,
+    validate(cfg, ensemble, args.testing_images, test_loaders, args.visuals,
              logger, print_progress=True, image_save_path=image_save_path)
 
 

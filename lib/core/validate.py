@@ -4,7 +4,7 @@ import lib.core.validate_gpu as validate_gpu
 import lib.core.validate_cpu as validate_cpu
 
 
-def validate(cfg, ensemble, validation_set_paths, loaders, visuals, measurements,
+def validate(cfg, ensemble, validation_set_paths, loaders, visuals,
              logger, print_progress=False, image_save_path=None):
     """
 
@@ -26,5 +26,4 @@ def validate(cfg, ensemble, validation_set_paths, loaders, visuals, measurements
         logger.info("\n-----------Validating over {}-----------".format(validation_images_path))
 
         eval("{}.validate_over_set".format(validate_file))\
-            (ensemble, loader, visuals, measurements, cfg.VALIDATION,
-             print_progress=print_progress, logger=logger)
+            (ensemble, loader, visuals, cfg.VALIDATION, print_progress=print_progress, logger=logger)
