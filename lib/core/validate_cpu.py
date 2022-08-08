@@ -1,12 +1,11 @@
 import torch
 
-from lib.utils import get_stats
 from lib.models import two_d_softmax
 from lib.core.evaluate import cal_radial_errors
 from lib.core.evaluate import use_aggregate_methods
 from lib.core.evaluate import get_predicted_and_target_points
-from visualisations import figure
-from measures import measure
+from lib.visualisations import figure
+from lib.measures import measure
 
 
 def validate_over_set(ensemble, loader, visuals, cfg_validation, print_progress=False, logger=None):
