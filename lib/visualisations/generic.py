@@ -1,5 +1,5 @@
+import lib
 import matplotlib.pyplot as plt
-import visualisations
 
 
 def figure(image, predicted_points, target_points, suffix, figure_name, save=False, save_path=""):
@@ -7,7 +7,7 @@ def figure(image, predicted_points, target_points, suffix, figure_name, save=Fal
 
     ax.imshow(image[0], cmap='gray')
 
-    function_name = ".".join(["visualisations", suffix, figure_name])
+    function_name = ".".join(["lib", "visualisations", suffix, figure_name])
     eval(function_name)(ax, predicted_points, target_points)
 
     ax.axis('off')

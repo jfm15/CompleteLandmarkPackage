@@ -1,7 +1,5 @@
-import matplotlib.pyplot as plt
-
 # These are here because they can be called from other files
-from visualisations.generic import gt_and_preds
+from lib.visualisations.generic import gt_and_preds
 
 
 def ddh_angles(ax, predicted_points, target_points):

@@ -2,6 +2,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 # assumes image is greyscale
 def singular_only_graphics(image, heatmaps, predicted_points, target_points, eres, code):
 
