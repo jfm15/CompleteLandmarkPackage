@@ -57,8 +57,10 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path,
                 image_name = meta["file_name"][b]
                 figure_save_path = os.path.join(save_path, visual_name,
                                                 "{}_{}_{}".format(image_name, model_idx, visual_name))
-                intermediate_figure(image[b], output[b].numpy(), predicted_points[b],
-                                    target_points[b], eres[b], visual_name, save=True, save_path=figure_save_path)
+                intermediate_figure(image[b], output[b].detach().cpu().numpy(),
+                                    predicted_points[b].detach().cpu().numpy(),
+                                    target_points[b].detach().cpu().numpy(), eres[b].detach().cpu().numpy(),
+                                    visual_name, save=True, save_path=figure_save_path)
 
             if print_progress:
                 if (idx + 1) % 30 == 0:
