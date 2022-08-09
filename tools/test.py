@@ -3,6 +3,7 @@ import torch
 import glob
 import os
 
+import _init_paths
 import lib
 
 from lib.dataset import LandmarkDataset
