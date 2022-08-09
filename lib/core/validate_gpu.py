@@ -125,8 +125,8 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path,
             image_name = meta["file_name"][b]
             figure_save_path = os.path.join(save_path, visual_name,
                                             "{}_{}".format(image_name, visual_name))
-            final_figure(image[b], aggregated_points_idx,
-                         aggregated_point_dict, target_points_idx,
+            final_figure(image[b], aggregated_points_idx.detach().cpu().numpy(),
+                         aggregated_point_dict, target_points_idx.detach().cpu().numpy(),
                          cfg_validation.MEASUREMENTS_SUFFIX, visual_name,
                          save=True, save_path=figure_save_path)
 
