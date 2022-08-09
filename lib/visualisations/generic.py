@@ -44,7 +44,7 @@ def final_figure(image, aggregated_points, aggregated_point_dict, target_points,
         return
     else:
         graphics_function = eval(".".join(["lib", "visualisations", suffix, figure_name]))
-        figure(image, graphics_function, (aggregated_points, target_points))
+        figure(image, graphics_function, (aggregated_points, target_points), save=save, save_path=save_path)
 
 
 def gt_and_preds(ax, predicted_points, target_points, show_indices=True):
