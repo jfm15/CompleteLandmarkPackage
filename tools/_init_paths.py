@@ -9,5 +9,5 @@ def add_path(path):
 
 this_dir = os.path.dirname(__file__)
 
-lib_path = os.path.join(this_dir, '..', 'lib')
-add_path(lib_path)
+base_path = os.path.join(this_dir, '..')
+add_path(base_path)
