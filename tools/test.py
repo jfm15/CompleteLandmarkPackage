@@ -92,7 +92,7 @@ def main():
     model_summary, _ = summary_string(ensemble[0], (1, *cfg.DATASET.CACHED_IMAGE_SIZE), device=torch.device('cpu'))
     logger.info(model_summary)
 
-    image_save_path = os.path.join(output_path, '../images')
+    image_save_path = os.path.join(output_path, 'images')
     if not os.path.exists(image_save_path):
         os.makedirs(image_save_path)
 
