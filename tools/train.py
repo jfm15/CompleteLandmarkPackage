@@ -5,12 +5,12 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-from lib.models.model import two_d_softmax
-from lib.models.model import nll_across_batch
-from lib.dataset.landmark_dataset import LandmarkDataset
-from lib.utils.utils import prepare_for_training
+from lib.models import two_d_softmax
+from lib.models import nll_across_batch
+from lib.dataset import LandmarkDataset
+from lib.utils import prepare_for_training
 from lib.core.function import train_model
-from test import print_validation_of_ensemble
+from lib.visualisations import preliminary_figure
 from torchsummary.torchsummary import summary_string
 
 
@@ -95,16 +95,12 @@ def main():
     if args.debug:
         for batch, (image, channels, meta) in enumerate(training_loader):
             print(meta["file_name"])
-            plt.imshow(np.moveaxis(image[0].detach().cpu().numpy(), 0, -1), cmap='gray')
-            squashed_channels = np.max(channels[0].detach().cpu().numpy(), axis=0)
-            # squashed_channels = channels[0].detach().cpu().numpy()[8]
-            plt.imshow(squashed_channels, cmap='inferno', alpha=0.5)
             landmarks_per_annotator = meta['landmarks_per_annotator'].detach().cpu().numpy()
-            avg_key_point_locations = np.mean(landmarks_per_annotator[0], axis=0)
-            plt.axis("off")
-            for i, positions in enumerate(avg_key_point_locations):
-                plt.text(positions[0], positions[1], "{}".format(i + 1), color="yellow", fontsize="small")
-            plt.show()
+            target_points = np.mean(landmarks_per_annotator[0], axis=0)
+            preliminary_figure(image[0].detach().cpu().numpy(),
+                               channels[0].detach().cpu().numpy(),
+                               target_points,
+                               "show_channels")
 
     for run in range(cfg.TRAIN.REPEATS):
 
