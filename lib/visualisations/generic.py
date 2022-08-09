@@ -22,14 +22,14 @@ def figure(image, graphics_function, args, save=False, save_path=""):
 def preliminary_figure(image, channels, target_points, figure_name, save=False, save_path=""):
 
     if figure_name == "show_channels":
-        figure(image, show_channels, (channels, target_points))
+        figure(image, show_channels, (channels, target_points),  save=save, save_path=save_path)
 
 
 def intermediate_figure(image, output, predicted_points, target_points, eres,
                         figure_name, save=False, save_path=""):
 
     if figure_name == "heatmaps_and_ere":
-        figure(image, heatmaps_and_ere, (output, predicted_points, target_points, eres))
+        figure(image, heatmaps_and_ere, (output, predicted_points, target_points, eres), save=save, save_path=save_path)
 
 
 def final_figure(image, aggregated_points, aggregated_point_dict, target_points, suffix,
@@ -37,9 +37,9 @@ def final_figure(image, aggregated_points, aggregated_point_dict, target_points,
 
     # search for generic figure names
     if figure_name == "gt_and_preds":
-        figure(image, gt_and_preds, (aggregated_points, target_points))
+        figure(image, gt_and_preds, (aggregated_points, target_points), save=save, save_path=save_path)
     elif figure_name == "aggregates":
-        figure(image, aggregates, (aggregated_point_dict, target_points))
+        figure(image, aggregates, (aggregated_point_dict, target_points), save=save, save_path=save_path)
     elif figure_name == "heatmaps_and_ere":
         return
     else:
