@@ -1,14 +1,17 @@
+import os
 import torch
 
 from lib.models import two_d_softmax
 from lib.core.evaluate import cal_radial_errors
 from lib.core.evaluate import use_aggregate_methods
 from lib.core.evaluate import get_predicted_and_target_points
-from lib.visualisations import figure
+from lib.visualisations import intermediate_figure
+from lib.visualisations import final_figure
 from lib.measures import measure
 
 
-def validate_over_set(ensemble, loader, visuals, cfg_validation, print_progress=False, logger=None):
+def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path,
+                      print_progress=False, logger=None):
 
     for idx, (image, _, meta) in enumerate(loader):
 
@@ -26,6 +29,12 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, print_progress=
             image_predicted_points.append(predicted_points)
             image_target_points.append(target_points)
             image_eres.append(eres)
+
+            # print figures
+            b = 0
+            for visual_name in visuals:
+                intermediate_figure(image[b], output[b].numpy(), predicted_points[b],
+                                    target_points[b], eres[b], visual_name)
 
         # put these arrays into a format suitable for the aggregate methods function
         image_predicted_points = torch.unsqueeze(torch.cat(image_predicted_points), 1).float()
@@ -56,8 +65,7 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, print_progress=
 
         logger.info(txt)
 
-        # TODO: If singular experiment print out heatmaps and eres
-
         for visual_name in visuals:
-            figure(image[b].detach().numpy(), aggregated_points[b].detach().numpy(),
-                   target_points[b].detach().numpy(), cfg_validation.MEASUREMENTS_SUFFIX, visual_name)
+            final_figure(image[b], aggregated_points[b],
+                         aggregated_point_dict, target_points[b],
+                         cfg_validation.MEASUREMENTS_SUFFIX, visual_name)

@@ -5,7 +5,7 @@ import os
 
 import lib
 
-from lib.dataset.landmark_dataset import LandmarkDataset
+from lib.dataset import LandmarkDataset
 from lib.utils import prepare_for_testing
 from lib.core.validate import validate
 

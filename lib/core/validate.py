@@ -19,11 +19,18 @@ def validate(cfg, ensemble, validation_set_paths, loaders, visuals,
     :return:
     """
 
-    validate_file = "validate_gpu" if torch.cuda.is_available() else "validate_cpu"
+    # setup the two modes
+    if torch.cuda.is_available():
+        validate_file = "validate_gpu"
+    else:
+        validate_file = "validate_cpu"
 
-    # This loops over the validation sets
-    for loader, validation_images_path in zip(loaders, validation_set_paths):
-        logger.info("\n-----------Validating over {}-----------".format(validation_images_path))
+    with torch.no_grad():
 
-        eval("{}.validate_over_set".format(validate_file))\
-            (ensemble, loader, visuals, cfg.VALIDATION, print_progress=print_progress, logger=logger)
+        # This loops over the validation sets
+        for loader, validation_images_path in zip(loaders, validation_set_paths):
+            logger.info("\n-----------Validating over {}-----------".format(validation_images_path))
+
+            eval("{}.validate_over_set".format(validate_file))\
+                (ensemble, loader, visuals, cfg.VALIDATION, image_save_path,
+                 print_progress=print_progress, logger=logger)
