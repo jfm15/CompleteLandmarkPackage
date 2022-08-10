@@ -2,16 +2,18 @@ import argparse
 import torch
 import os
 
-import numpy as np
-import matplotlib.pyplot as plt
+import _init_paths
+import lib
 
-from lib.models import two_d_softmax
-from lib.models import nll_across_batch
+import numpy as np
+
+
 from lib.dataset import LandmarkDataset
 from lib.utils import prepare_for_training
-from lib.core.function import train_model
+from lib.core.function import train_ensemble
 from lib.visualisations import preliminary_figure
 from torchsummary.torchsummary import summary_string
+from lib.core.validate import validate
 
 
 '''
@@ -122,25 +124,10 @@ def main():
             logger.info(model_summary)
 
         logger.info("-----------Experiment {}-----------".format(run + 1))
-
-        for epoch in range(cfg.TRAIN.EPOCHS):
-
-            logger.info('-----------Epoch {} Supervised Training-----------'.format(epoch))
-
-            for model_idx in range(len(ensemble)):
-
-                logger.info('-----------Training Model {}-----------'.format(model_idx))
-
-                our_model = ensemble[model_idx]
-                our_model = our_model.cuda()
-                train_model(our_model, two_d_softmax, optimizers[model_idx], schedulers[model_idx], training_loader,
-                            nll_across_batch, logger)
-
-                # move model back to cpu
-                our_model.cpu()
+        train_ensemble(ensemble, optimizers, schedulers, training_loader, cfg.TRAIN.EPOCHS, logger)
 
         # Validate
-        print_validation_of_ensemble(cfg, ensemble, args.validation_images, validation_loaders, logger)
+        validate(cfg, ensemble, args.validation_images, validation_loaders, [], logger, training_mode=True)
 
         logger.info('-----------Saving Models-----------')
         model_run_path = os.path.join(output_path, "run:{}_models".format(run))

@@ -5,7 +5,7 @@ import lib.core.validate_cpu as validate_cpu
 
 
 def validate(cfg, ensemble, validation_set_paths, loaders, visuals,
-             logger, print_progress=False, image_save_path=None):
+             logger, print_progress=False, image_save_path=None, training_mode=False):
     """
 
     :param cfg: the config file
@@ -33,4 +33,4 @@ def validate(cfg, ensemble, validation_set_paths, loaders, visuals,
 
             eval("{}.validate_over_set".format(validate_file))\
                 (ensemble, loader, visuals, cfg.VALIDATION, image_save_path,
-                 print_progress=print_progress, logger=logger)
+                 print_progress=print_progress, logger=logger, training_mode=training_mode)
