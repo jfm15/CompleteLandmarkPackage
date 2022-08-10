@@ -11,6 +11,11 @@ def figure(image, graphics_function, args, save=False, save_path=""):
     graphics_function(ax, *args)
 
     ax.axis('off')
+    plt.tight_layout()
+
+    w, h = image[0].size()
+    fig.set_size_inches(w / 100.0, h / 100.0)
+    fig.set_dpi(100)
 
     if save:
         plt.savefig(save_path)
