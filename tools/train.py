@@ -84,13 +84,11 @@ def main():
                                        subset=("below", cfg.TRAIN.LABELED_SUBSET))
     training_loader = torch.utils.data.DataLoader(training_dataset, batch_size=cfg.TRAIN.BATCH_SIZE, shuffle=True)
 
-    validation_datasets = []
     validation_loaders = []
     for validation_images_path in args.validation_images:
         validation_dataset = LandmarkDataset(validation_images_path, args.annotations, cfg.DATASET, gaussian=False,
                                          perform_augmentation=False)
         validation_loader = torch.utils.data.DataLoader(validation_dataset, batch_size=1, shuffle=False)
-        validation_datasets.append(validation_dataset)
         validation_loaders.append(validation_loader)
 
     # Used for debugging
@@ -111,7 +109,7 @@ def main():
         schedulers = []
 
         for _ in range(cfg.TRAIN.ENSEMBLE_MODELS):
-            this_model = eval("model." + cfg.MODEL.NAME)(cfg.MODEL, cfg.DATASET.KEY_POINTS)
+            this_model = eval("lib.models." + cfg.MODEL.NAME)(cfg.MODEL, cfg.DATASET.KEY_POINTS)
             optimizer = torch.optim.Adam(this_model.parameters(), lr=cfg.TRAIN.LR)
             scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[4, 6, 8], gamma=0.1)
             ensemble.append(this_model)
