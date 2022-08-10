@@ -13,7 +13,7 @@ from lib.measures import measure
 
 
 def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path,
-                      print_progress=False, logger=None):
+                      logger=None, training_mode=False):
 
     predicted_points_per_model = []
     eres_per_model = []
@@ -62,9 +62,8 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path,
                                     target_points[b].detach().cpu().numpy(), eres[b].detach().cpu().numpy(),
                                     visual_name, save=True, save_path=figure_save_path)
 
-            if print_progress:
-                if (idx + 1) % 30 == 0:
-                    logger.info("[{}/{}]".format(idx + 1, len(loader)))
+            if (idx + 1) % 30 == 0:
+                logger.info("[{}/{}]".format(idx + 1, len(loader)))
 
         # move model back to cpu
         model.cpu()
@@ -118,7 +117,8 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path,
             measurements_dict[measurement].append([predicted_angle, target_angle])
             txt += "{}: {:.2f}\t".format(measurement, dif)
 
-        logger.info(txt)
+        if not training_mode:
+            logger.info(txt)
 
         # display visuals
         for visual_name in visuals:
