@@ -33,4 +33,4 @@ def validate(cfg, ensemble, validation_set_paths, loaders, visuals,
 
             eval("{}.validate_over_set".format(validate_file))\
                 (ensemble, loader, visuals, cfg.VALIDATION, image_save_path,
-                 print_progress=print_progress, logger=logger, training_mode=training_mode)
+                 logger=logger, training_mode=training_mode)
