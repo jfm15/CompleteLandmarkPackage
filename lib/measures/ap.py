@@ -13,7 +13,7 @@ def alpha_angle(points, startIdx):
     neck_axis = center_of_circle - neck_point
     cam_axis = cam_point - center_of_circle
 
-    return get_angle(cam_axis, neck_axis)
+    return 180 - get_angle(cam_axis, neck_axis)
 
 
 def left_alpha_angle(points):
@@ -22,6 +22,12 @@ def left_alpha_angle(points):
 
 def right_alpha_angle(points):
     return alpha_angle(points, 15)
+
+
+def average_alpha_angle(points):
+    left_aa = left_alpha_angle(points)
+    right_aa = right_alpha_angle(points)
+    return (left_aa + right_aa) / 2.0
 
 
 def lce_angle(points, startIdx):
@@ -60,7 +66,7 @@ def right_neck_shaft_angle(points):
 
 def acetabular_index(points, side):
     startIdx = 0 if side == "left" else 15
-    vector = [0, -1] if side == "left" else [0, 1]
+    vector = [0, 1]
 
     axis_1 = points[startIdx + 1] - points[startIdx]
     horizontal_axis = torch.Tensor(vector).to(points.device).float()

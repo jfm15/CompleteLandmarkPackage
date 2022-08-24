@@ -8,7 +8,9 @@ import lib
 
 from lib.dataset import LandmarkDataset
 from lib.utils import prepare_for_testing
-from lib.core.validate import validate
+
+import lib.core.validate_cpu as validate_cpu
+import lib.core.validate_gpu as validate_gpu
 
 from torchsummary.torchsummary import summary_string
 
@@ -21,15 +23,20 @@ def parse_args():
                         required=True,
                         type=str)
 
-    parser.add_argument('--testing_images',
-                        help='The path to the validation images',
+    parser.add_argument('--images',
+                        help='The path to the training images',
                         type=str,
-                        nargs='+',
                         required=True,
                         default='')
 
     parser.add_argument('--annotations',
                         help='The path to the directory where annotations are stored',
+                        type=str,
+                        required=True,
+                        default='')
+
+    parser.add_argument('--partition',
+                        help='The path to the partition file',
                         type=str,
                         required=True,
                         default='')
@@ -68,14 +75,9 @@ def main():
     logger.info(cfg)
     logger.info("")
 
-    test_datasets = []
-    test_loaders = []
-    for test_images_path in args.testing_images:
-        test_dataset = LandmarkDataset(test_images_path, args.annotations, cfg.DATASET, gaussian=False,
-                                         perform_augmentation=False)
-        test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1, shuffle=False)
-        test_datasets.append(test_dataset)
-        test_loaders.append(test_loader)
+    test_dataset = LandmarkDataset(args.images, args.partition, "testing", args.annotations, cfg.DATASET,
+                                   gaussian=False, perform_augmentation=False)
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1, shuffle=False)
 
     # Load models and state dict from file
     ensemble = []
@@ -96,9 +98,17 @@ def main():
     if not os.path.exists(image_save_path):
         os.makedirs(image_save_path)
 
-    # call the validate function
-    validate(cfg, ensemble, args.testing_images, test_loaders, args.visuals,
-             logger, print_progress=True, image_save_path=image_save_path)
+    # Validate
+    with torch.no_grad():
+
+        if torch.cuda.is_available():
+            validate_file = "validate_gpu"
+        else:
+            validate_file = "validate_cpu"
+
+        eval("{}.validate_over_set".format(validate_file)) \
+            (ensemble, test_loader, args.visuals, cfg.VALIDATION, image_save_path,
+             logger=logger)
 
 
 if __name__ == '__main__':

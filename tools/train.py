@@ -13,7 +13,9 @@ from lib.utils import prepare_for_training
 from lib.core.function import train_ensemble
 from lib.visualisations import preliminary_figure
 from torchsummary.torchsummary import summary_string
-from lib.core.validate import validate
+
+import lib.core.validate_cpu as validate_cpu
+import lib.core.validate_gpu as validate_gpu
 
 
 '''
@@ -30,21 +32,20 @@ def parse_args():
                         required=True,
                         type=str)
 
-    parser.add_argument('--training_images',
+    parser.add_argument('--images',
                         help='The path to the training images',
                         type=str,
                         required=True,
                         default='')
 
-    parser.add_argument('--validation_images',
-                        help='The path to the validation images',
+    parser.add_argument('--annotations',
+                        help='The path to the directory where annotations are stored',
                         type=str,
-                        nargs='+',
                         required=True,
                         default='')
 
-    parser.add_argument('--annotations',
-                        help='The path to the directory where annotations are stored',
+    parser.add_argument('--partition',
+                        help='The path to the partition file',
                         type=str,
                         required=True,
                         default='')
@@ -80,16 +81,13 @@ def main():
     logger.info(cfg)
     logger.info("")
 
-    training_dataset = LandmarkDataset(args.training_images, args.annotations, cfg.DATASET, perform_augmentation=True,
-                                       subset=("below", cfg.TRAIN.LABELED_SUBSET))
+    training_dataset = LandmarkDataset(args.images, args.partition, "training", args.annotations, cfg.DATASET,
+                                       perform_augmentation=True, subset=("below", cfg.TRAIN.LABELED_SUBSET))
     training_loader = torch.utils.data.DataLoader(training_dataset, batch_size=cfg.TRAIN.BATCH_SIZE, shuffle=True)
 
-    validation_loaders = []
-    for validation_images_path in args.validation_images:
-        validation_dataset = LandmarkDataset(validation_images_path, args.annotations, cfg.DATASET, gaussian=False,
-                                         perform_augmentation=False)
-        validation_loader = torch.utils.data.DataLoader(validation_dataset, batch_size=1, shuffle=False)
-        validation_loaders.append(validation_loader)
+    validation_dataset = LandmarkDataset(args.images, args.partition, "validation", args.annotations, cfg.DATASET,
+                                         gaussian=False, perform_augmentation=False)
+    validation_loader = torch.utils.data.DataLoader(validation_dataset, batch_size=1, shuffle=False)
 
     # Used for debugging
     if args.debug:
@@ -125,7 +123,16 @@ def main():
         train_ensemble(ensemble, optimizers, schedulers, training_loader, cfg.TRAIN.EPOCHS, logger)
 
         # Validate
-        validate(cfg, ensemble, args.validation_images, validation_loaders, [], logger, training_mode=True)
+        with torch.no_grad():
+
+            if torch.cuda.is_available():
+                validate_file = "validate_gpu"
+            else:
+                validate_file = "validate_cpu"
+
+            eval("{}.validate_over_set".format(validate_file)) \
+                (ensemble, validation_loader, [], cfg.VALIDATION, None,
+                 logger=logger, training_mode=True)
 
         logger.info('-----------Saving Models-----------')
         model_run_path = os.path.join(output_path, "run:{}_models".format(run))

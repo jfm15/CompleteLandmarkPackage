@@ -16,7 +16,7 @@ import imgaug.augmenters as iaa
 
 
 class LandmarkDataset(Dataset):
-    def __init__(self, image_dir, annotation_dir, cfg_dataset, allow_ground_truth_setting=False,
+    def __init__(self, image_dir, partition, partition_label, annotation_dir, cfg_dataset, allow_ground_truth_setting=False,
                  gaussian=True, subset=None, perform_augmentation=False):
 
         self.cfg_dataset = cfg_dataset
@@ -44,12 +44,12 @@ class LandmarkDataset(Dataset):
 
         self.gaussian = gaussian
 
-        self.db = self.cache(image_dir, annotation_dir, cfg_dataset, subset)
+        self.db = self.cache(image_dir, partition, partition_label, annotation_dir, cfg_dataset, subset)
         self.length = len(self.db)
 
 
     @staticmethod
-    def cache(images_dir, annotation_dir, cfg_dataset, subset):
+    def cache(images_dir, partition, partition_label, annotation_dir, cfg_dataset, subset):
 
         db = []
 
@@ -73,8 +73,14 @@ class LandmarkDataset(Dataset):
         if not os.path.exists(cache_data_dir):
             os.makedirs(cache_data_dir)
 
+        # open partition
+        partition_file = open(partition)
+        partition_dict = json.load(partition_file)
+
         # get the file names of all images in the directory
-        image_paths = sorted(glob.glob(images_dir + "/*" + cfg_dataset.IMAGE_EXT))
+        image_paths = []
+        for id in partition_dict[partition_label]:
+            image_paths.append(os.path.join(images_dir, id + cfg_dataset.IMAGE_EXT))
 
         if subset:
             if subset[0] == 'below':
