@@ -6,3 +6,5 @@ from lib.visualisations.generic import preliminary_figure
 from lib.visualisations.generic import intermediate_figure
 from lib.visualisations.generic import final_figure
 from lib.visualisations.generic import gt_and_preds
+
+from lib.visualisations.miscellaneous import display_measurement_distribution
