@@ -1,6 +1,8 @@
 import lib
+import torch
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 
 
 def figure(image, graphics_function, args, save=False, save_path=""):
@@ -43,6 +45,14 @@ def final_figure(image, aggregated_points, aggregated_point_dict, target_points,
     # search for generic figure names
     if figure_name == "gt_and_preds":
         figure(image, gt_and_preds, (aggregated_points, target_points), save=save, save_path=save_path)
+    elif figure_name == "preds":
+            figure(image, preds, (aggregated_points, target_points), save=save, save_path=save_path)
+    elif figure_name == "gt":
+            figure(image, targets, (aggregated_points, target_points), save=save, save_path=save_path)
+    elif figure_name == "gt_no_indices":
+            figure(image, targets, (aggregated_points, target_points, False, False, False), save=save, save_path=save_path)
+    elif figure_name == "gt_bounding_box":
+        figure(image, targets, (aggregated_points, target_points, True, True, False, image[0].size()), save=save, save_path=save_path)
     elif figure_name == "aggregates":
         figure(image, aggregates, (aggregated_point_dict, target_points), save=save, save_path=save_path)
     elif figure_name == "heatmaps_and_ere":
@@ -54,12 +64,53 @@ def final_figure(image, aggregated_points, aggregated_point_dict, target_points,
 
 def gt_and_preds(ax, predicted_points, target_points, show_indices=True):
 
-    ax.scatter(predicted_points[:, 0], predicted_points[:, 1], color='red', s=5)
-    ax.scatter(target_points[:, 0], target_points[:, 1], color='green', s=5)
+    ax.scatter(target_points[:, 0], target_points[:, 1], color='lime', s=30)
+    ax.scatter(predicted_points[:, 0], predicted_points[:, 1], color='red', s=30)
 
+    '''
     if show_indices:
         for i, positions in enumerate(target_points):
             ax.text(positions[0], positions[1], "{}".format(i + 1), color="yellow", fontsize="small")
+    '''
+
+
+def preds(ax, predicted_points, target_points, show_indices=True):
+
+    ax.scatter(predicted_points[:, 0], predicted_points[:, 1], color='red', s=30)
+
+    if show_indices:
+        for i, positions in enumerate(predicted_points):
+            ax.text(positions[0] + 5, positions[1] - 5, "{}".format(i + 1), color="yellow", fontsize="x-large")
+
+
+def targets(ax, predicted_points, target_points, show_bounding_box=False, show_mean_point=False, show_indices=True, image_size=None):
+
+    if show_indices:
+        for i, positions in enumerate(target_points):
+            ax.text(positions[0] + 5, positions[1] - 5, "{}".format(i + 1), color="yellow", fontsize="large")
+
+    if show_bounding_box:
+        min_x = torch.min(target_points[:, 0]).item()
+        max_x = torch.max(target_points[:, 0]).item()
+        min_y = torch.min(target_points[:, 1]).item()
+        max_y = torch.max(target_points[:, 1]).item()
+        width = max_x - min_x
+        height = max_y - min_y
+        rect = patches.Rectangle((min_x, min_y), width, height, linewidth=1, edgecolor='gold', facecolor='none', zorder=1)
+        ax.add_patch(rect)
+        bounding_box_area = width * height
+        area = image_size[0] * image_size[1]
+        area_percentage = bounding_box_area / area
+
+        ax.text(0.40, 0.05, "Area Percentage = {:.0f}%".format(area_percentage * 100), backgroundcolor=(0.8, 0.8, 0.8, 0.8), size='x-large',
+                 transform=ax.transAxes)
+
+    if show_mean_point:
+        mean_point = torch.mean(target_points, dim=0)
+        ax.scatter([mean_point[0]], [mean_point[1]], color='red', s=100, marker="x", zorder=2)
+
+
+    ax.scatter(target_points[:, 0], target_points[:, 1], color='green', s=20, zorder=2)
 
 
 # assumes aggregated_point_dict contains keys -> Tensors[B, N, 2] where B=1

@@ -39,6 +39,7 @@ VALIDATION:
     - 3.0
     - 4.0
   SAVE_IMAGE_PATH: "images/cephalometric/"
+  MEASUREMENTS_SUFFIX: "ceph"
 
 MODEL:
   ENCODER_NAME: 'resnet34'

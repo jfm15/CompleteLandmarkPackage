@@ -16,8 +16,8 @@ import imgaug.augmenters as iaa
 
 
 class LandmarkDataset(Dataset):
-    def __init__(self, image_dir, partition, partition_label, annotation_dir, cfg_dataset, allow_ground_truth_setting=False,
-                 gaussian=True, subset=None, perform_augmentation=False):
+    def __init__(self, image_dir, annotation_dir, cfg_dataset, allow_ground_truth_setting=False,
+                 gaussian=True, subset=None, perform_augmentation=False, partition=None, partition_label=None):
 
         self.cfg_dataset = cfg_dataset
         self.perform_augmentation = perform_augmentation
@@ -44,12 +44,14 @@ class LandmarkDataset(Dataset):
 
         self.gaussian = gaussian
 
-        self.db = self.cache(image_dir, partition, partition_label, annotation_dir, cfg_dataset, subset)
+        self.db = self.cache(image_dir, annotation_dir, cfg_dataset, subset,
+                             partition=partition, partition_label=partition_label)
         self.length = len(self.db)
 
 
     @staticmethod
-    def cache(images_dir, partition, partition_label, annotation_dir, cfg_dataset, subset):
+    def cache(images_dir, annotation_dir, cfg_dataset, subset, partition=None,
+              partition_label=None):
 
         db = []
 
@@ -74,13 +76,16 @@ class LandmarkDataset(Dataset):
             os.makedirs(cache_data_dir)
 
         # open partition
-        partition_file = open(partition)
-        partition_dict = json.load(partition_file)
+        if partition:
+            partition_file = open(partition)
+            partition_dict = json.load(partition_file)
 
-        # get the file names of all images in the directory
-        image_paths = []
-        for id in partition_dict[partition_label]:
-            image_paths.append(os.path.join(images_dir, id + cfg_dataset.IMAGE_EXT))
+            # get the file names of all images in the directory
+            image_paths = []
+            for id in partition_dict[partition_label]:
+                image_paths.append(os.path.join(images_dir, id + cfg_dataset.IMAGE_EXT))
+        else:
+            image_paths = sorted(glob.glob(images_dir + "/*" + cfg_dataset.IMAGE_EXT))
 
         if subset:
             if subset[0] == 'below':

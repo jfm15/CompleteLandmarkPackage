@@ -53,6 +53,10 @@ def parse_args():
                         required=False,
                         default=[])
 
+    parser.add_argument('--validation',
+                        action='store_true',
+                        help='If this is given run over the validation set instead of the test set')
+
     args = parser.parse_args()
 
     return args
@@ -75,8 +79,10 @@ def main():
     logger.info(cfg)
     logger.info("")
 
-    test_dataset = LandmarkDataset(args.images, args.partition, "testing", args.annotations, cfg.DATASET,
-                                   gaussian=False, perform_augmentation=False)
+    partition_label = "validation" if args.validation else "testing"
+
+    test_dataset = LandmarkDataset(args.images, args.annotations, cfg.DATASET, gaussian=False,
+                                   perform_augmentation=False, partition=args.partition, partition_label=partition_label)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1, shuffle=False)
 
     # Load models and state dict from file
