@@ -11,8 +11,9 @@ def alpha_angles(ax, predicted_points, target_points):
     predicted_points = np.take(predicted_points, important_indices, axis=0)
     target_points = np.take(target_points, important_indices, axis=0)
 
-    ax.scatter(predicted_points[:, 0], predicted_points[:, 1], color='red', s=5)
-    ax.scatter(target_points[:, 0], target_points[:, 1], color='green', s=5)
+    #ax.scatter(predicted_points[:, 0], predicted_points[:, 1], color='red', s=5)
+    #ax.scatter(target_points[:, 0], target_points[:, 1], color='green', s=5)
+
 
     # Find center of the circle
     centers = []
@@ -30,9 +31,10 @@ def alpha_angles(ax, predicted_points, target_points):
     ax.plot([centers[1, 0], predicted_points[5, 0]], [centers[1, 1], predicted_points[5, 1]], color='red')
     ax.plot([centers[1, 0], predicted_points[6, 0]], [centers[1, 1], predicted_points[6, 1]], color='red')
 
-    for i, positions in enumerate(target_points):
-        idx = important_indices[i]
-        ax.text(positions[0], positions[1], "{}".format(idx + 1), color="yellow", fontsize="small")
+
+    #for i, positions in enumerate(target_points):
+    #    idx = important_indices[i]
+    #    ax.text(positions[0], positions[1], "{}".format(idx + 1), color="yellow", fontsize="small")
 
 
 def lce_angles(ax, predicted_points, target_points):

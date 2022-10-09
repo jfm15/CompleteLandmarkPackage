@@ -81,24 +81,23 @@ def main():
     logger.info(cfg)
     logger.info("")
 
-    training_dataset = LandmarkDataset(args.images, args.partition, "training", args.annotations, cfg.DATASET,
-                                       perform_augmentation=True, subset=("below", cfg.TRAIN.LABELED_SUBSET))
+    training_dataset = LandmarkDataset(args.images, args.annotations, cfg.DATASET, perform_augmentation=True,
+                                       subset=("below", cfg.TRAIN.LABELED_SUBSET), partition=args.partition,
+                                       partition_label="training")
     training_loader = torch.utils.data.DataLoader(training_dataset, batch_size=cfg.TRAIN.BATCH_SIZE, shuffle=True)
 
-    validation_dataset = LandmarkDataset(args.images, args.partition, "validation", args.annotations, cfg.DATASET,
-                                         gaussian=False, perform_augmentation=False)
+    validation_dataset = LandmarkDataset(args.images, args.annotations, cfg.DATASET, gaussian=False,
+                                         perform_augmentation=False, partition=args.partition,
+                                         partition_label="validation")
     validation_loader = torch.utils.data.DataLoader(validation_dataset, batch_size=1, shuffle=False)
 
     # Used for debugging
     if args.debug:
         for batch, (image, channels, meta) in enumerate(training_loader):
             print(meta["file_name"])
-            landmarks_per_annotator = meta['landmarks_per_annotator'].detach().cpu().numpy()
-            target_points = np.mean(landmarks_per_annotator[0], axis=0)
-            preliminary_figure(image[0].detach().cpu().numpy(),
-                               channels[0].detach().cpu().numpy(),
-                               target_points,
-                               "show_channels")
+            landmarks_per_annotator = meta['landmarks_per_annotator']
+            target_points = torch.mean(landmarks_per_annotator[0], dim=0)
+            preliminary_figure(image[0], channels[0].detach().cpu().numpy(), target_points, "show_channels")
 
     for run in range(cfg.TRAIN.REPEATS):
 

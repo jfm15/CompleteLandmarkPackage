@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 
 from lib.dataset import LandmarkDataset
 from lib.utils import prepare_for_dataset_preperation
+from lib.visualisations import display_ks_score_of_partition
+from lib.visualisations import display_ks_scores
 
 from lib.measures import measure
 
@@ -32,9 +34,8 @@ def parse_args():
                         type=str)
 
     parser.add_argument('--images',
-                        help='The path to the validation images',
+                        help='The path to the training images',
                         type=str,
-                        nargs='+',
                         required=True,
                         default='')
 
@@ -74,11 +75,8 @@ def main():
 
     cfg, output_path = prepare_for_dataset_preperation(args.cfg)
 
-    loaders = []
-    for image_directory in args.images:
-        dataset = LandmarkDataset(image_directory, args.annotations, cfg.DATASET)
-        loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
-        loaders.append(loader)
+    dataset = LandmarkDataset(args.images, args.annotations, cfg.DATASET)
+    loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
 
     # Create a dict like this:
     #
@@ -90,18 +88,16 @@ def main():
 
     dict = {}
 
-    for loader in loaders:
+    for _, _, meta in loader:
 
-        for _, _, meta in loader:
+        b = 0
+        id = meta['file_name'][b]
+        target_points = torch.mean(meta['landmarks_per_annotator'], dim=1)
+        scaled_target_points = torch.multiply(target_points, meta['pixel_size'])
 
-            b = 0
-            id = meta['file_name'][b]
-            target_points = torch.mean(meta['landmarks_per_annotator'], dim=1)
-            scaled_target_points = torch.multiply(target_points, meta['pixel_size'])
-
-            true_value, _, _ = measure(scaled_target_points[b], scaled_target_points[b],
-                                cfg.VALIDATION.MEASUREMENTS_SUFFIX, args.measurement)
-            dict[id] = true_value
+        true_value, _, _ = measure(scaled_target_points[b], scaled_target_points[b],
+                            cfg.VALIDATION.MEASUREMENTS_SUFFIX, args.measurement)
+        dict[id] = true_value
 
     keys = list(dict.keys())
     values = list(dict.values())
@@ -116,9 +112,10 @@ def main():
     # create partition loop
     best_partition = {}
     best_ks_score = 1
-    best_ys_for_each_label = {}
 
     xs = np.linspace(np.min(values) - 4, np.max(values) + 4, num=1000)
+
+    ks_scores = []
     for _ in tqdm(range(10 ** 5)):
 
         random.shuffle(keys)
@@ -144,37 +141,19 @@ def main():
         ptp = np.ptp(stack, axis=0)
 
         ks_score = np.max(ptp)
+        ks_scores.append(ks_score)
 
         if ks_score < best_ks_score:
             best_ks_score = ks_score
             best_partition = partition_ids
-            best_ys_for_each_label = ys_for_each_label
+
+    display_ks_scores(ks_scores)
+    mean_ks_score = np.mean(ks_scores)
+    std_ks_score = np.std(ks_scores)
+    print("The average KS score is {:.4f} \u00B1 {:.4f}".format(mean_ks_score, std_ks_score))
 
     # graph the KS
-    stack = np.stack(best_ys_for_each_label)
-    ptp = np.ptp(stack, axis=0)
-    ks_score = np.max(ptp)
-    ks_index = np.argmax(ptp)
-    aa_index = xs[ks_index]
-    print("KS score", ks_score)
-
-    plt.figure(
-        figsize=(6, 6))
-    # plt.rcParams["font.weight"] = "bold"
-    plt.rcParams["font.size"] = "12"
-    plt.xlabel('Alpha Angle', fontsize=12)
-    plt.ylabel('Cumulative Proportion of Dataset', fontsize=12)
-    colors = ['r', 'g', 'b']
-    for i, ys in enumerate(best_ys_for_each_label):
-        plt.plot(xs, ys, (colors[i] + "-"))
-    x = aa_index
-    y = np.min(stack[:, ks_index])
-    dx = 0
-    dy = np.ptp(stack[:, ks_index])
-    plt.plot([x, x], [y, y + dy], color='k')
-    plt.text(x + dx - 20, y + dy, "KS test = {:.4f}".format(ks_score), fontsize=12)
-    plt.grid(True)
-    plt.show()
+    display_ks_score_of_partition(best_partition, dict, args.measurement)
 
     partition_filename = "partition_{}_".format(args.measurement)
     for split in args.split:

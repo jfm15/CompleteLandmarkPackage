@@ -12,6 +12,9 @@ from lib.measures import measure
 
 def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path, logger=None, training_mode=False):
 
+    all_radial_errors = []
+    all_measurement_difs = []
+
     for idx, (image, _, meta) in enumerate(loader):
 
         image_predicted_points = []
@@ -49,6 +52,7 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path, logg
         b = 0
 
         radial_errors = cal_radial_errors(aggregated_points, target_points)[b]
+        all_radial_errors.append(radial_errors)
         avg_radial_error = torch.mean(radial_errors)
 
         name = meta['file_name'][b]
@@ -58,9 +62,10 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path, logg
         txt += "Avg: {:.2f}\t".format(avg_radial_error.item())
 
         for measurement in cfg_validation.MEASUREMENTS:
-            _, _, dif = measure(aggregated_points[b], target_points[b],
+            predicted_angle, target_angle, dif = measure(aggregated_points[b], target_points[b],
                                 cfg_validation.MEASUREMENTS_SUFFIX, measurement)
-            txt += "{}: {:.2f}\t".format(measurement, dif)
+            all_measurement_difs.append(dif)
+            txt += "{}: [{:.2f}, {:.2f}, {:.2f}]\t".format(measurement, predicted_angle, target_angle, dif)
 
         logger.info(txt)
 
@@ -68,3 +73,17 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path, logg
             final_figure(image[b], aggregated_points[b],
                          aggregated_point_dict, target_points[b],
                          cfg_validation.MEASUREMENTS_SUFFIX, visual_name)
+
+    all_radial_errors = torch.stack(all_radial_errors)
+    average_radial_error = torch.mean(all_radial_errors)
+    std_radial_error = torch.std(all_radial_errors)
+    txt = "The average landmark localisation error is: {:.3f}\u00B1{:.3f}".format(average_radial_error, std_radial_error)
+    logger.info(txt)
+
+    all_measurement_difs = torch.FloatTensor(all_measurement_difs)
+    average_measurement_dif = torch.mean(all_measurement_difs)
+    std_measurement_dif = torch.std(all_measurement_difs)
+    txt = "The average measurement error is: {:.3f}\u00B1{:.3f}".format(average_measurement_dif,
+                                                                        std_measurement_dif)
+    logger.info(txt)
+

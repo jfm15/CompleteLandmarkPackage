@@ -29,7 +29,6 @@ def average_alpha_angle(points):
     right_aa = right_alpha_angle(points)
     return (left_aa + right_aa) / 2.0
 
-
 def lce_angle(points, startIdx):
     center_of_circle = get_center_of_circle(points[startIdx + 10], points[startIdx + 11], points[startIdx + 12])
     center_of_circle = center_of_circle.to(points.device)

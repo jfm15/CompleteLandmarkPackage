@@ -4,8 +4,6 @@ from lib.visualisations.generic import gt_and_preds
 
 def ddh_angles(ax, predicted_points, target_points):
 
-    gt_and_preds(ax, predicted_points, target_points)
-
     base_line_vector = predicted_points[1] - predicted_points[0]
     base_line_p1 = predicted_points[0] - base_line_vector
     base_line_p2 = predicted_points[0] + 4 * base_line_vector
@@ -23,3 +21,5 @@ def ddh_angles(ax, predicted_points, target_points):
              [cartilage_roof_line_p1[1], cartilage_roof_line_p2[1]], color='yellow')
     ax.plot([bony_roof_line_vector_p1[0], bony_roof_line_vector_p2[0]],
              [bony_roof_line_vector_p1[1], bony_roof_line_vector_p2[1]], color='cyan')
+
+    ax.scatter(predicted_points[:, 0], predicted_points[:, 1], color='green', s=20)

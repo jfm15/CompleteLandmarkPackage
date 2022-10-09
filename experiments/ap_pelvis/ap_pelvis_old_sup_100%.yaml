@@ -38,6 +38,12 @@ VALIDATION:
     - "mean average"
     - "confidence weighted"
   SDR_AGGREGATION_METHOD: "confidence weighted"
+  MEASUREMENTS_SUFFIX: "ap_old"
+  MEASUREMENTS:
+    - left_alpha_angle
+    - right_alpha_angle
+    - left_lce_angle
+    - right_lce_angle
   SDR_THRESHOLDS:
     - 2.0
     - 2.5
