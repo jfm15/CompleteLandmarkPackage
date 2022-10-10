@@ -14,3 +14,4 @@ from lib.visualisations.generic import preds
 from lib.visualisations.miscellaneous import display_measurement_distribution
 from lib.visualisations.miscellaneous import display_ks_score_of_partition
 from lib.visualisations.miscellaneous import display_ks_scores
+from lib.visualisations.miscellaneous import display_box_plot

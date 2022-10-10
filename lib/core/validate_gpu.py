@@ -9,6 +9,7 @@ from lib.core.evaluate import get_predicted_and_target_points
 
 from lib.visualisations import intermediate_figure
 from lib.visualisations import final_figure
+from lib.visualisations import display_box_plot
 from lib.measures import measure
 
 
@@ -158,5 +159,10 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path,
         measurements_dict[measurement] = torch.Tensor(measurements_dict[measurement])
         avg, std, icc = get_stats(measurements_dict[measurement][:, 0], measurements_dict[measurement][:, 1])
         txt += "{}: [{:.2f}, {:.2f}, {:.2f}]\t".format(measurement, avg, std, icc)
+
+    # Final graphics
+    figure_save_path = os.path.join(save_path, "box_plot")
+    logger.info("Saving Box Plot to {}". format(figure_save_path))
+    display_box_plot(radial_errors, figure_save_path)
 
     logger.info(txt)
