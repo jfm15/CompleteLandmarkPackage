@@ -163,6 +163,6 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path,
     # Final graphics
     figure_save_path = os.path.join(save_path, "box_plot")
     logger.info("Saving Box Plot to {}". format(figure_save_path))
-    display_box_plot(radial_errors, figure_save_path)
+    display_box_plot(radial_errors.detach().cpu().numpy(), figure_save_path)
 
     logger.info(txt)
