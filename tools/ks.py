@@ -152,6 +152,7 @@ def main():
     std_ks_score = np.std(ks_scores)
     print("The average KS score is {:.4f} \u00B1 {:.4f}".format(mean_ks_score, std_ks_score))
 
+
     # graph the KS
     display_ks_score_of_partition(best_partition, dict, args.measurement)
 
