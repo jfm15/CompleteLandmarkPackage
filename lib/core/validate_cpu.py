@@ -18,7 +18,7 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path, logg
     for idx, (image, _, meta) in enumerate(loader):
 
         image_predicted_points = []
-        image_target_points = []
+        image_scaled_predicted_points = []
         image_eres = []
 
         for model in ensemble:
@@ -26,10 +26,10 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path, logg
             model.eval()
             output = model(image.float())
             output = two_d_softmax(output)
-            predicted_points, target_points, eres \
+            predicted_points, target_points, eres, scaled_predicted_points, scaled_target_points \
                 = get_predicted_and_target_points(output, meta['landmarks_per_annotator'], meta['pixel_size'])
             image_predicted_points.append(predicted_points)
-            image_target_points.append(target_points)
+            image_scaled_predicted_points.append(scaled_predicted_points)
             image_eres.append(eres)
 
             # print figures
@@ -40,18 +40,22 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path, logg
 
         # put these arrays into a format suitable for the aggregate methods function
         image_predicted_points = torch.unsqueeze(torch.cat(image_predicted_points), 1).float()
-        image_target_points = torch.unsqueeze(torch.cat(image_target_points), 1).float()
+        image_scaled_predicted_points = torch.unsqueeze(torch.cat(image_scaled_predicted_points), 1).float()
+
         image_eres = torch.unsqueeze(torch.cat(image_eres), 1).float()
 
         aggregated_point_dict = use_aggregate_methods(image_predicted_points, image_eres,
                                                       aggregate_methods=cfg_validation.AGGREGATION_METHODS)
-
         aggregated_points = aggregated_point_dict[cfg_validation.SDR_AGGREGATION_METHOD]
+
+        aggregated_scaled_point_dict = use_aggregate_methods(image_scaled_predicted_points, image_eres,
+                                                             aggregate_methods=cfg_validation.AGGREGATION_METHODS)
+        aggregated_scaled_points = aggregated_scaled_point_dict[cfg_validation.SDR_AGGREGATION_METHOD]
 
         # assumes the batch size is 1
         b = 0
 
-        radial_errors = cal_radial_errors(aggregated_points, target_points)[b]
+        radial_errors = cal_radial_errors(aggregated_scaled_points, scaled_target_points)[b]
         all_radial_errors.append(radial_errors)
         avg_radial_error = torch.mean(radial_errors)
 
