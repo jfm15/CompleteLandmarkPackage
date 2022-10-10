@@ -83,8 +83,9 @@ def display_ks_scores(ks_scores):
 
 
 def display_box_plot(radial_errors, save_path):
+    width = max(int(radial_errors.shape[1] * 0.7), 6)
     plt.figure(
-        figsize=(int(radial_errors.shape[1] * 0.7), 4))
+        figsize=(width, 4))
     plt.boxplot(radial_errors)
     plt.xlabel('Landmark', fontsize=12)
     plt.ylabel('Radial Error (mm)', fontsize=12)
