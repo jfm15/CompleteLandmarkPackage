@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -79,3 +80,9 @@ def display_ks_scores(ks_scores):
     plt.ylabel('Proportion of Subset Splits', fontsize=12)
     plt.grid(True)
     plt.show()
+
+
+def display_box_plot(radial_errors, save_path):
+    plt.boxplot(radial_errors)
+    plt.savefig(save_path)
+    plt.close()
