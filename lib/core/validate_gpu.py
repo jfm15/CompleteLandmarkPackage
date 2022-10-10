@@ -14,7 +14,7 @@ from lib.measures import measure
 
 
 def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path,
-                      logger=None, training_mode=False):
+                      logger=None, training_mode=False, show_final_figures=False):
 
     predicted_points_per_model = []
     eres_per_model = []
@@ -161,8 +161,9 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path,
         txt += "{}: [{:.2f}, {:.2f}, {:.2f}]\t".format(measurement, avg, std, icc)
 
     # Final graphics
-    figure_save_path = os.path.join(save_path, "box_plot")
-    logger.info("Saving Box Plot to {}". format(figure_save_path))
-    display_box_plot(radial_errors.detach().cpu().numpy(), figure_save_path)
+    if show_final_figures:
+        figure_save_path = os.path.join(save_path, "box_plot")
+        logger.info("Saving Box Plot to {}". format(figure_save_path))
+        display_box_plot(radial_errors.detach().cpu().numpy(), figure_save_path)
 
     logger.info(txt)

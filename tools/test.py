@@ -114,7 +114,7 @@ def main():
 
         eval("{}.validate_over_set".format(validate_file)) \
             (ensemble, test_loader, args.visuals, cfg.VALIDATION, image_save_path,
-             logger=logger)
+             logger=logger, show_final_figures=True)
 
 
 if __name__ == '__main__':
