@@ -67,7 +67,7 @@ def get_predicted_and_target_points(output_stack, landmarks_per_annotator, pixel
     eres = get_eres(output_stack, scaled_predicted_points, pixels_sizes)
 
     # return scaled_predicted_points, scaled_target_points, eres
-    return predicted_points, target_points, eres
+    return predicted_points, target_points, eres, scaled_predicted_points, scaled_target_points
 
 
 def cal_radial_errors(predicted_points, target_points, mean=False):

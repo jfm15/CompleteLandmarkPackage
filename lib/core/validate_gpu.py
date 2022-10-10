@@ -18,6 +18,8 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path,
     predicted_points_per_model = []
     eres_per_model = []
     dataset_target_points = []
+    scaled_predicted_points_per_model = []
+    dataset_target_scaled_points = []
 
     # Create folders for images
     for visual_name in visuals:
@@ -32,7 +34,9 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path,
         model.eval()
 
         model_predicted_points = []
+        model_predicted_scaled_points = []
         dataset_target_points = []
+        dataset_target_scaled_points = []
         model_eres = []
 
         for idx, (image, _, meta) in enumerate(loader):
@@ -45,10 +49,12 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path,
             output = model(image.float())
             output = two_d_softmax(output)
 
-            predicted_points, target_points, eres \
+            predicted_points, target_points, eres, scaled_predicted_points, scaled_target_points \
                 = get_predicted_and_target_points(output, meta['landmarks_per_annotator'], meta['pixel_size'])
             model_predicted_points.append(predicted_points)
             dataset_target_points.append(target_points)
+            model_predicted_scaled_points.append(scaled_predicted_points)
+            dataset_target_scaled_points.append(scaled_target_points)
             model_eres.append(eres)
 
             # print intermediate figures
@@ -70,6 +76,8 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path,
 
         model_predicted_points = torch.cat(model_predicted_points)
         dataset_target_points = torch.cat(dataset_target_points)
+        model_predicted_scaled_points = torch.cat(model_predicted_scaled_points)
+        dataset_target_scaled_points = torch.cat(dataset_target_scaled_points)
         model_eres = torch.cat(model_eres)
         # D = Dataset size
         # predicted_points has size [D, N, 2]
@@ -77,20 +85,26 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path,
         # target_points has size [D, N, 2]
 
         predicted_points_per_model.append(model_predicted_points)
+        scaled_predicted_points_per_model.append(model_predicted_scaled_points)
         eres_per_model.append(model_eres)
 
     # predicted_points_per_model is size [M, D, N, 2]
     # eres_per_model is size [M, D, N]
     # target_points is size [D, N, 2]
     predicted_points_per_model = torch.stack(predicted_points_per_model).float()
+    scaled_predicted_points_per_model = torch.stack(scaled_predicted_points_per_model).float()
     dataset_target_points = dataset_target_points.float()
+    dataset_target_scaled_points = dataset_target_scaled_points.float()
     eres_per_model = torch.stack(eres_per_model).float()
 
     aggregated_point_dict = use_aggregate_methods(predicted_points_per_model, eres_per_model,
                                                   aggregate_methods=cfg_validation.AGGREGATION_METHODS)
     aggregated_points = aggregated_point_dict[cfg_validation.SDR_AGGREGATION_METHOD]
+    aggregated_sacled_point_dict = use_aggregate_methods(scaled_predicted_points_per_model, eres_per_model,
+                                                  aggregate_methods=cfg_validation.AGGREGATION_METHODS)
+    aggregated_scaled_points = aggregated_sacled_point_dict[cfg_validation.SDR_AGGREGATION_METHOD]
 
-    radial_errors = cal_radial_errors(aggregated_points, dataset_target_points)
+    radial_errors = cal_radial_errors(aggregated_scaled_points, dataset_target_scaled_points)
 
     measurements_dict = {}
     for measurement in cfg_validation.MEASUREMENTS:
