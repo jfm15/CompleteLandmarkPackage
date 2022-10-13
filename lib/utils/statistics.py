@@ -20,3 +20,11 @@ def get_stats(predictions, targets):
     icc = get_icc(predictions, targets)
 
     return avg, std, icc
+
+
+def produce_sdr_statistics(radial_errors, thresholds):
+    successful_detection_rates = []
+    for threshold in thresholds:
+        sdr = 100 * np.sum(radial_errors < threshold) / len(radial_errors)
+        successful_detection_rates.append(sdr)
+    return successful_detection_rates
