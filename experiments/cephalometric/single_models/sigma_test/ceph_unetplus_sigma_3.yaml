@@ -1,0 +1,53 @@
+DATASET:
+  CACHE_DIR: "cache/cephalometric/"
+  IMAGE_EXT: ".bmp"
+  KEY_POINTS: 19
+  PIXEL_SIZE:
+    - 0.1
+    - 0.1
+  CACHED_IMAGE_SIZE:
+    - 640
+    - 800
+  SIGMA: 3
+  NO_OF_ANNOTATORS: 2
+
+  AUGMENTATION:
+    ROTATION_FACTOR: 10
+    INTENSITY_FACTOR: 0.5
+    SF: 0.05
+    TRANSLATION_X: 30
+    TRANSLATION_Y: 30
+    ELASTIC_STRENGTH: 500
+    ELASTIC_SMOOTHNESS: 50
+
+TRAIN:
+  BATCH_SIZE: 6
+  LR: 0.001
+  EPOCHS: 10
+  REPEATS: 3
+  LABELED_SUBSET: 150
+  FINE_TUNE_EPOCHS: 0
+  ENSEMBLE_MODELS: 1
+
+VALIDATION:
+  AGGREGATION_METHODS:
+    - "mean average"
+  SDR_AGGREGATION_METHOD: "mean average"
+  SDR_THRESHOLDS:
+    - 2.0
+    - 2.5
+    - 3.0
+    - 4.0
+  SAVE_IMAGE_PATH: "images/cephalometric/"
+  MEASUREMENTS_SUFFIX: "ceph"
+
+MODEL:
+  ENCODER_NAME: 'resnet34'
+  ENCODER_WEIGHTS: 'imagenet'
+  DECODER_CHANNELS:
+    - 256
+    - 256
+    - 256
+    - 128
+    - 64
+  IN_CHANNELS: 1
