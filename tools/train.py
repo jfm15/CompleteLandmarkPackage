@@ -91,6 +91,11 @@ def main():
                                          partition_label="validation")
     validation_loader = torch.utils.data.DataLoader(validation_dataset, batch_size=1, shuffle=False)
 
+    test_dataset = LandmarkDataset(args.images, args.annotations, cfg.DATASET, gaussian=False,
+                                   perform_augmentation=False, partition=args.partition,
+                                   partition_label="testing")
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1, shuffle=False)
+
     # Used for debugging
     if args.debug:
         for batch, (image, channels, meta) in enumerate(training_loader):
@@ -129,8 +134,14 @@ def main():
             else:
                 validate_file = "validate_cpu"
 
+            logger.info('-----------Validation Set-----------')
             eval("{}.validate_over_set".format(validate_file)) \
                 (ensemble, validation_loader, [], cfg.VALIDATION, None,
+                 logger=logger, training_mode=True)
+
+            logger.info('-----------Test Set-----------')
+            eval("{}.validate_over_set".format(validate_file)) \
+                (ensemble, test_loader, [], cfg.VALIDATION, None,
                  logger=logger, training_mode=True)
 
         logger.info('-----------Saving Models-----------')
