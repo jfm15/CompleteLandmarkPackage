@@ -10,13 +10,14 @@ from lib.visualisations import final_figure
 from lib.measures import measure
 
 
-def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path, logger=None, training_mode=False,
+def validate_over_set(ensemble, loader, loss_function, visuals, cfg_validation, save_path, logger=None, training_mode=False,
                       show_final_figures=False):
 
     all_radial_errors = []
     all_measurement_difs = []
+    losses = []
 
-    for idx, (image, _, meta) in enumerate(loader):
+    for idx, (image, channels, meta) in enumerate(loader):
 
         image_predicted_points = []
         image_scaled_predicted_points = []
@@ -27,6 +28,8 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path, logg
             model.eval()
             output = model(image.float())
             output = two_d_softmax(output)
+            loss = loss_function(output, channels)
+            losses.append(loss.item())
             predicted_points, target_points, eres, scaled_predicted_points, scaled_target_points \
                 = get_predicted_and_target_points(output, meta['landmarks_per_annotator'], meta['pixel_size'])
             image_predicted_points.append(predicted_points)
@@ -79,6 +82,10 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path, logg
                          aggregated_point_dict, target_points[b],
                          cfg_validation.MEASUREMENTS_SUFFIX, visual_name)
 
+    average_loss = sum(losses) / len(losses)
+    txt = "Average loss: {:.3f}".format(average_loss)
+    logger.info(txt)
+
     all_radial_errors = torch.stack(all_radial_errors)
     average_radial_error = torch.mean(all_radial_errors)
     std_radial_error = torch.std(all_radial_errors)
@@ -92,3 +99,4 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path, logg
                                                                         std_measurement_dif)
     logger.info(txt)
 
+    return average_loss

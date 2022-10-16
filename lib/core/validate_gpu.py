@@ -13,7 +13,7 @@ from lib.visualisations import display_box_plot
 from lib.measures import measure
 
 
-def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path,
+def validate_over_set(ensemble, loader, loss_function, visuals, cfg_validation, save_path,
                       logger=None, training_mode=False, show_final_figures=False):
 
     predicted_points_per_model = []
@@ -21,6 +21,7 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path,
     dataset_target_points = []
     scaled_predicted_points_per_model = []
     dataset_target_scaled_points = []
+    losses = []
 
     # Create folders for images
     for visual_name in visuals:
@@ -40,15 +41,18 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path,
         dataset_target_scaled_points = []
         model_eres = []
 
-        for idx, (image, _, meta) in enumerate(loader):
+        for idx, (image, channels, meta) in enumerate(loader):
 
             # allocate
             image = image.cuda()
+            channels = channels.cuda()
             meta['landmarks_per_annotator'] = meta['landmarks_per_annotator'].cuda()
             meta['pixel_size'] = meta['pixel_size'].cuda()
 
             output = model(image.float())
             output = two_d_softmax(output)
+            loss = loss_function(output, channels)
+            losses.append(loss.item())
 
             predicted_points, target_points, eres, scaled_predicted_points, scaled_target_points \
                 = get_predicted_and_target_points(output, meta['landmarks_per_annotator'], meta['pixel_size'])
@@ -147,6 +151,12 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path,
 
     # Overall Statistics
     logger.info("\n-----------Final Statistics-----------")
+
+    # loss
+    average_loss = sum(losses) / len(losses)
+    txt = "Average loss: {:.3f}".format(average_loss)
+    logger.info(txt)
+
     # Print average landmark localisations
     txt = "Landmark Localisations:\t"
     avg_per_landmark = torch.mean(radial_errors, dim=0)
@@ -167,3 +177,5 @@ def validate_over_set(ensemble, loader, visuals, cfg_validation, save_path,
         display_box_plot(radial_errors.detach().cpu().numpy(), figure_save_path)
 
     logger.info(txt)
+
+    return average_loss
