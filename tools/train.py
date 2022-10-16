@@ -152,6 +152,7 @@ def main():
                 if current_validation_loss < best_validation_loss:
                     logger.info('-----------Best Results So Far-----------')
                     # keep track of best models
+                    no_better_count = 0
                     best_validation_loss = current_validation_loss
                     ensemble_state_dict = []
                     for model_idx in range(len(ensemble)):
