@@ -1,6 +1,7 @@
 import argparse
 import torch
 import os
+import math
 
 import _init_paths
 import lib
@@ -11,6 +12,7 @@ import numpy as np
 from lib.dataset import LandmarkDataset
 from lib.utils import prepare_for_training
 from lib.core.function import train_ensemble
+from lib.models import nll_across_batch
 from lib.visualisations import preliminary_figure
 from torchsummary.torchsummary import summary_string
 
@@ -104,6 +106,11 @@ def main():
             target_points = torch.mean(landmarks_per_annotator[0], dim=0)
             preliminary_figure(image[0], channels[0].detach().cpu().numpy(), target_points, "show_channels")
 
+    if torch.cuda.is_available():
+        validate_file = "validate_gpu"
+    else:
+        validate_file = "validate_cpu"
+
     for run in range(cfg.TRAIN.REPEATS):
 
         ensemble = []
@@ -124,24 +131,49 @@ def main():
             logger.info(model_summary)
 
         logger.info("-----------Experiment {}-----------".format(run + 1))
-        train_ensemble(ensemble, optimizers, schedulers, training_loader, cfg.TRAIN.EPOCHS, logger)
 
-        # Validate
+        best_validation_loss = math.inf
+        best_state_dicts = []
+        no_better_count = 0
+
+        for epoch in range(cfg.TRAIN.EPOCHS):
+
+            logger.info('-----------Epoch {} Supervised Training-----------'.format(epoch))
+            train_ensemble(ensemble, optimizers, schedulers, training_loader, nll_across_batch, logger)
+
+            # Validate
+            with torch.no_grad():
+
+                logger.info('-----------Validation Set-----------')
+                current_validation_loss = eval("{}.validate_over_set".format(validate_file)) \
+                    (ensemble, validation_loader, nll_across_batch, [], cfg.VALIDATION, None,
+                     logger=logger, training_mode=True)
+
+                if current_validation_loss < best_validation_loss:
+                    logger.info('-----------Best Results So Far-----------')
+                    # keep track of best models
+                    best_validation_loss = current_validation_loss
+                    ensemble_state_dict = []
+                    for model_idx in range(len(ensemble)):
+                        ensemble_state_dict.append(ensemble[model_idx].state_dict())
+                    best_state_dicts = ensemble_state_dict
+                else:
+                    no_better_count += 1
+
+            if no_better_count == cfg.TRAIN.EARLY_STOPPING:
+                logger.info('-----------Halting Training As No Improvment Seen For {} Epochs-----------'
+                            .format(no_better_count))
+                break
+
+        # reload best models
+        for model_idx in range(len(ensemble)):
+            our_model = ensemble[model_idx]
+            our_model.load_state_dict(best_state_dicts[model_idx], strict=True)
+
         with torch.no_grad():
-
-            if torch.cuda.is_available():
-                validate_file = "validate_gpu"
-            else:
-                validate_file = "validate_cpu"
-
-            logger.info('-----------Validation Set-----------')
-            eval("{}.validate_over_set".format(validate_file)) \
-                (ensemble, validation_loader, [], cfg.VALIDATION, None,
-                 logger=logger, training_mode=True)
-
             logger.info('-----------Test Set-----------')
             eval("{}.validate_over_set".format(validate_file)) \
-                (ensemble, test_loader, [], cfg.VALIDATION, None,
+                (ensemble, test_loader, nll_across_batch, [], cfg.VALIDATION, None,
                  logger=logger, training_mode=True)
 
         logger.info('-----------Saving Models-----------')
