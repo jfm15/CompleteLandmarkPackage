@@ -132,7 +132,7 @@ def main():
 
         logger.info("-----------Experiment {}-----------".format(run + 1))
 
-        best_validation_loss = math.inf
+        best_mre = math.inf
         best_state_dicts = []
         no_better_count = 0
 
@@ -145,15 +145,15 @@ def main():
             with torch.no_grad():
 
                 logger.info('-----------Validation Set-----------')
-                current_validation_loss = eval("{}.validate_over_set".format(validate_file)) \
+                _, current_mre = eval("{}.validate_over_set".format(validate_file)) \
                     (ensemble, validation_loader, nll_across_batch, [], cfg.VALIDATION, None,
                      logger=logger, training_mode=True)
 
-                if current_validation_loss < best_validation_loss:
+                if current_mre < best_mre:
                     logger.info('-----------Best Results So Far-----------')
                     # keep track of best models
                     no_better_count = 0
-                    best_validation_loss = current_validation_loss
+                    best_mre = current_mre
                     ensemble_state_dict = []
                     for model_idx in range(len(ensemble)):
                         ensemble_state_dict.append(ensemble[model_idx].state_dict())

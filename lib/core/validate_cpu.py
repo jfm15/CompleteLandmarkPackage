@@ -66,14 +66,14 @@ def validate_over_set(ensemble, loader, loss_function, visuals, cfg_validation, 
         name = meta['file_name'][b]
         txt = "[{}/{}] {}:\t".format(idx + 1, len(loader), name)
         for err in radial_errors:
-            txt += "{:.2f}\t".format(err.item())
-        txt += "Avg: {:.2f}\t".format(avg_radial_error.item())
+            txt += "{:.3f}\t".format(err.item())
+        txt += "Avg: {:.3f}\t".format(avg_radial_error.item())
 
         for measurement in cfg_validation.MEASUREMENTS:
             predicted_angle, target_angle, dif = measure(aggregated_points[b], target_points[b],
                                 cfg_validation.MEASUREMENTS_SUFFIX, measurement)
             all_measurement_difs.append(dif)
-            txt += "{}: [{:.2f}, {:.2f}, {:.2f}]\t".format(measurement, predicted_angle, target_angle, dif)
+            txt += "{}: [{:.3f}, {:.3f}, {:.3f}]\t".format(measurement, predicted_angle, target_angle, dif)
 
         logger.info(txt)
 
@@ -87,8 +87,8 @@ def validate_over_set(ensemble, loader, loss_function, visuals, cfg_validation, 
     logger.info(txt)
 
     all_radial_errors = torch.stack(all_radial_errors)
-    average_radial_error = torch.mean(all_radial_errors)
-    std_radial_error = torch.std(all_radial_errors)
+    average_radial_error = torch.mean(all_radial_errors).item()
+    std_radial_error = torch.std(all_radial_errors).item()
     txt = "The average landmark localisation error is: {:.3f}\u00B1{:.3f}".format(average_radial_error, std_radial_error)
     logger.info(txt)
 
@@ -99,4 +99,4 @@ def validate_over_set(ensemble, loader, loss_function, visuals, cfg_validation, 
                                                                         std_measurement_dif)
     logger.info(txt)
 
-    return average_loss
+    return average_loss, average_radial_error
