@@ -148,7 +148,7 @@ def heatmaps_and_ere(ax, output, predicted_points, target_points, eres):
 
     for ere, position in zip(eres, predicted_points):
         x, y = position
-        ax.text(x + 3, y + 3, "{:.2f}".format(ere), color="white", fontsize=7)
+        ax.text(x + 3, y + 3, "{:.3f}".format(ere), color="white", fontsize=7)
 
 
 def show_channels(ax, channels, target_points):

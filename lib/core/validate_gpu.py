@@ -127,14 +127,14 @@ def validate_over_set(ensemble, loader, loss_function, visuals, cfg_validation, 
         name = meta['file_name'][b]
         txt = "[{}/{}] {}:\t".format(idx + 1, len(loader), name)
         for err in radial_errors_idx:
-            txt += "{:.2f}\t".format(err.item())
-        txt += "Avg: {:.2f}\t".format(torch.mean(radial_errors_idx).item())
+            txt += "{:.3f}\t".format(err.item())
+        txt += "Avg: {:.3f}\t".format(torch.mean(radial_errors_idx).item())
 
         for measurement in cfg_validation.MEASUREMENTS:
             predicted_angle, target_angle, dif = measure(aggregated_points_idx, target_points_idx,
                                 cfg_validation.MEASUREMENTS_SUFFIX, measurement)
             measurements_dict[measurement].append([predicted_angle, target_angle])
-            txt += "{}: {:.2f}\t".format(measurement, dif)
+            txt += "{}: {:.3f}\t".format(measurement, dif)
 
         if not training_mode:
             logger.info(txt)
@@ -161,14 +161,14 @@ def validate_over_set(ensemble, loader, loss_function, visuals, cfg_validation, 
     txt = "Landmark Localisations:\t"
     avg_per_landmark = torch.mean(radial_errors, dim=0)
     for avg_for_landmark in avg_per_landmark:
-        txt += "{:.2f}\t".format(avg_for_landmark.item())
-    overall_avg = torch.mean(radial_errors)
-    txt += "Avg: {:.2f}\t".format(overall_avg.item())
+        txt += "{:.3f}\t".format(avg_for_landmark.item())
+    overall_avg = torch.mean(radial_errors).item()
+    txt += "Avg: {:.3f}\t".format(overall_avg)
 
     for measurement in cfg_validation.MEASUREMENTS:
         measurements_dict[measurement] = torch.Tensor(measurements_dict[measurement])
         avg, std, icc = get_stats(measurements_dict[measurement][:, 0], measurements_dict[measurement][:, 1])
-        txt += "{}: [{:.2f}, {:.2f}, {:.2f}]\t".format(measurement, avg, std, icc)
+        txt += "{}: [{:.3f}, {:.3f}, {:.3f}]\t".format(measurement, avg, std, icc)
 
     # Final graphics
     if show_final_figures:
@@ -178,4 +178,4 @@ def validate_over_set(ensemble, loader, loss_function, visuals, cfg_validation, 
 
     logger.info(txt)
 
-    return average_loss
+    return average_loss, overall_avg
