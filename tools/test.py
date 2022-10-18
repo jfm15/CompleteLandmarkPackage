@@ -8,6 +8,7 @@ import lib
 
 from lib.dataset import LandmarkDataset
 from lib.utils import prepare_for_testing
+from lib.models import nll_across_batch
 
 import lib.core.validate_cpu as validate_cpu
 import lib.core.validate_gpu as validate_gpu
@@ -113,7 +114,7 @@ def main():
             validate_file = "validate_cpu"
 
         eval("{}.validate_over_set".format(validate_file)) \
-            (ensemble, test_loader, args.visuals, cfg.VALIDATION, image_save_path,
+            (ensemble, test_loader, nll_across_batch, args.visuals, cfg.VALIDATION, image_save_path,
              logger=logger, show_final_figures=True)
 
 
