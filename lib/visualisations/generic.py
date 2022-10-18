@@ -15,7 +15,7 @@ def figure(image, graphics_function, args, save=False, save_path=""):
     ax.axis('off')
     plt.tight_layout()
 
-    w, h = image[0].size()
+    h, w = image[0].size()
     fig.set_size_inches(w / 100.0, h / 100.0)
     fig.set_dpi(100)
 
