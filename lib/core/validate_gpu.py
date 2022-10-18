@@ -6,6 +6,7 @@ from lib.models import two_d_softmax
 from lib.core.evaluate import cal_radial_errors
 from lib.core.evaluate import use_aggregate_methods
 from lib.core.evaluate import get_predicted_and_target_points
+from lib.core.evaluate import get_sdr_statistics
 
 from lib.visualisations import intermediate_figure
 from lib.visualisations import final_figure
@@ -169,6 +170,12 @@ def validate_over_set(ensemble, loader, loss_function, visuals, cfg_validation, 
         measurements_dict[measurement] = torch.Tensor(measurements_dict[measurement])
         avg, std, icc = get_stats(measurements_dict[measurement][:, 0], measurements_dict[measurement][:, 1])
         txt += "{}: [{:.3f}, {:.3f}, {:.3f}]\t".format(measurement, avg, std, icc)
+
+    sdr_rates = get_sdr_statistics(radial_errors, cfg_validation.SDR_THRESHOLDS)
+    txt = "Successful Detection Rates are: "
+    for sdr_rate in sdr_rates:
+        txt += "{:.2f}%\t".format(sdr_rate)
+    logger.info(txt)
 
     # Final graphics
     if show_final_figures:
