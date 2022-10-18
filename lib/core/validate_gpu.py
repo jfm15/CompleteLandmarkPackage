@@ -171,6 +171,8 @@ def validate_over_set(ensemble, loader, loss_function, visuals, cfg_validation, 
         avg, std, icc = get_stats(measurements_dict[measurement][:, 0], measurements_dict[measurement][:, 1])
         txt += "{}: [{:.3f}, {:.3f}, {:.3f}]\t".format(measurement, avg, std, icc)
 
+    logger.info(txt)
+
     sdr_rates = get_sdr_statistics(radial_errors, cfg_validation.SDR_THRESHOLDS)
     txt = "Successful Detection Rates are: "
     for sdr_rate in sdr_rates:
@@ -182,7 +184,5 @@ def validate_over_set(ensemble, loader, loss_function, visuals, cfg_validation, 
         figure_save_path = os.path.join(save_path, "box_plot")
         logger.info("Saving Box Plot to {}". format(figure_save_path))
         display_box_plot(radial_errors.detach().cpu().numpy(), figure_save_path)
-
-    logger.info(txt)
 
     return average_loss, overall_avg
