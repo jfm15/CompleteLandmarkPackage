@@ -15,10 +15,10 @@ DATASET:
     ROTATION_FACTOR: 10
     INTENSITY_FACTOR: 0.5
     SF: 0.05
-    TRANSLATION_X: 0
-    TRANSLATION_Y: 0
-    ELASTIC_STRENGTH: 0
-    ELASTIC_SMOOTHNESS: 0
+    TRANSLATION_X: 30
+    TRANSLATION_Y: 30
+    ELASTIC_STRENGTH: 500
+    ELASTIC_SMOOTHNESS: 50
 
 TRAIN:
   BATCH_SIZE: 6
@@ -34,16 +34,20 @@ VALIDATION:
     - "mean average"
   SDR_AGGREGATION_METHOD: "mean average"
   SDR_THRESHOLDS:
+    - 0.5
+    - 1.0
+    - 1.5
     - 2.0
     - 2.5
     - 3.0
     - 4.0
+    - 10.0
   SAVE_IMAGE_PATH: "images/cephalometric/"
   MEASUREMENTS_SUFFIX: "ceph"
 
 MODEL:
   ENCODER_NAME: 'resnet34'
-  ENCODER_WEIGHTS: 'imagenet'
+  ENCODER_WEIGHTS: None
   DECODER_CHANNELS:
     - 256
     - 256
