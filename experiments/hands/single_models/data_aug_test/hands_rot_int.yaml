@@ -1,4 +1,4 @@
-\DATASET:
+DATASET:
   CACHE_DIR: "cache/hands/"
   IMAGE_EXT: ".jpg"
   KEY_POINTS: 37
