@@ -12,7 +12,7 @@ DATASET:
   CACHED_IMAGE_SIZE:
     - 512
     - 512
-  SIGMA: 3
+  SIGMA: 2
   NO_OF_ANNOTATORS: 1
   FLIP_AXIS: True
 
@@ -28,6 +28,7 @@ DATASET:
 TRAIN:
   BATCH_SIZE: 6
   LR: 0.001
+
   REPEATS: 3
   LABELED_SUBSET: 262
   FINE_TUNE_EPOCHS: 0
@@ -52,9 +53,8 @@ VALIDATION:
   SAVE_IMAGE_PATH: "images/ap_pelvis/"
 
 MODEL:
-  NAME: 'UnetPlusPlus'
   ENCODER_NAME: 'resnet34'
-  ENCODER_WEIGHTS: None
+  ENCODER_WEIGHTS: 'imagenet'
   DECODER_CHANNELS:
     - 256
     - 256
