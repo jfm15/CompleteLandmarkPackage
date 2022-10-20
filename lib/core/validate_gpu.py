@@ -2,7 +2,6 @@ import os
 import torch
 
 from lib.utils import get_stats
-from lib.models import two_d_softmax
 from lib.core.evaluate import cal_radial_errors
 from lib.core.evaluate import use_aggregate_methods
 from lib.core.evaluate import get_predicted_and_target_points
@@ -14,7 +13,7 @@ from lib.visualisations import display_box_plot
 from lib.measures import measure
 
 
-def validate_over_set(ensemble, loader, loss_function, visuals, cfg_validation, save_path,
+def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg_validation, save_path,
                       logger=None, training_mode=False, show_final_figures=False):
 
     predicted_points_per_model = []
@@ -51,7 +50,7 @@ def validate_over_set(ensemble, loader, loss_function, visuals, cfg_validation, 
             meta['pixel_size'] = meta['pixel_size'].cuda()
 
             output = model(image.float())
-            output = two_d_softmax(output)
+            output = final_layer(output)
             loss = loss_function(output, channels)
             losses.append(loss.item())
 

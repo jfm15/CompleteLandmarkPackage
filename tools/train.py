@@ -12,7 +12,6 @@ import numpy as np
 from lib.dataset import LandmarkDataset
 from lib.utils import prepare_for_training
 from lib.core.function import train_ensemble
-from lib.models import nll_across_batch
 from lib.visualisations import preliminary_figure
 from torchsummary.torchsummary import summary_string
 
@@ -111,6 +110,9 @@ def main():
     else:
         validate_file = "validate_cpu"
 
+    final_layer = eval("lib.models." + cfg.TRAIN.FINAL_LAYER)
+    loss_function = eval("lib.models." + cfg.TRAIN.LOSS_FUNCTION)
+
     for run in range(cfg.TRAIN.REPEATS):
 
         ensemble = []
@@ -139,14 +141,14 @@ def main():
         for epoch in range(cfg.TRAIN.EPOCHS):
 
             logger.info('-----------Epoch {} Supervised Training-----------'.format(epoch))
-            train_ensemble(ensemble, optimizers, schedulers, training_loader, nll_across_batch, logger)
+            train_ensemble(ensemble, optimizers, schedulers, training_loader, final_layer, loss_function, logger)
 
             # Validate
             with torch.no_grad():
 
                 logger.info('-----------Validation Set-----------')
                 _, current_mre = eval("{}.validate_over_set".format(validate_file)) \
-                    (ensemble, validation_loader, nll_across_batch, [], cfg.VALIDATION, None,
+                    (ensemble, validation_loader, final_layer, loss_function, [], cfg.VALIDATION, None,
                      logger=logger, training_mode=True)
 
                 if current_mre < best_mre:
@@ -174,7 +176,7 @@ def main():
         with torch.no_grad():
             logger.info('-----------Test Set-----------')
             eval("{}.validate_over_set".format(validate_file)) \
-                (ensemble, test_loader, nll_across_batch, [], cfg.VALIDATION, None,
+                (ensemble, test_loader, final_layer, loss_function, [], cfg.VALIDATION, None,
                  logger=logger, training_mode=True)
 
         logger.info('-----------Saving Models-----------')

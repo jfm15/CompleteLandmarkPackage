@@ -1,17 +1,15 @@
 import torch
 import numpy as np
 
-from lib.models import two_d_softmax
 
-
-def train_ensemble(ensemble, optimizers, schedulers, training_loader, loss_function, logger):
+def train_ensemble(ensemble, optimizers, schedulers, training_loader, final_layer, loss_function, logger):
 
     for model_idx in range(len(ensemble)):
         logger.info('-----------Training Model {}-----------'.format(model_idx))
 
         our_model = ensemble[model_idx]
         our_model = our_model.cuda()
-        train_model(our_model, two_d_softmax, optimizers[model_idx], schedulers[model_idx], training_loader,
+        train_model(our_model, final_layer, optimizers[model_idx], schedulers[model_idx], training_loader,
                     loss_function, logger)
 
         # move model back to cpu
