@@ -116,13 +116,15 @@ def main():
     print("Std of landmarks over dataset: {:.1f}%".format(average_std * 100))
 
     mean_percentage_area = np.mean(percentage_areas)
+    std_percentage_area = np.std(percentage_areas)
 
-    print("Percentage Area: {:.1f}%".format(mean_percentage_area * 100))
+    print("Percentage Area: {:.2f}\%\:$\pm$\:{:.2f}\%".format(mean_percentage_area * 100,
+                                                         std_percentage_area * 100))
 
     std_x = np.std(centers_x)
     std_y = np.std(centers_y)
 
-    print("Std x: {:.1f}% Std y: {:.1f}%".format(std_x * 100, std_y * 100))
+    print("Std x: {:.2f}% Std y: {:.2f}%".format(std_x * 100, std_y * 100))
 
 
 
