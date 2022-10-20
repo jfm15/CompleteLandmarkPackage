@@ -27,8 +27,8 @@ class LandmarkDataset(Dataset):
         # Define augmentation
         data_aug_params = cfg_dataset.AUGMENTATION
         self.augmentation = iaa.Sequential([
-            iaa.Affine(translate_px={"x": (-data_aug_params.TRANSLATION_X, data_aug_params.TRANSLATION_X),
-                                     "y": (-data_aug_params.TRANSLATION_Y, data_aug_params.TRANSLATION_Y)},
+            iaa.Affine(translate_percent={"x": (-data_aug_params.TRANSLATION_X, data_aug_params.TRANSLATION_X),
+                                          "y": (-data_aug_params.TRANSLATION_Y, data_aug_params.TRANSLATION_Y)},
                        scale=(1 - data_aug_params.SF, 1 + data_aug_params.SF),
                        rotate=(-data_aug_params.ROTATION_FACTOR, data_aug_params.ROTATION_FACTOR),
                        mode='edge'),
