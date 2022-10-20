@@ -5,6 +5,7 @@ import os
 
 import _init_paths
 import lib
+import lib.models
 
 from lib.dataset import LandmarkDataset
 from lib.utils import prepare_for_testing

@@ -5,6 +5,7 @@ import math
 
 import _init_paths
 import lib
+import lib.models
 
 import numpy as np
 
