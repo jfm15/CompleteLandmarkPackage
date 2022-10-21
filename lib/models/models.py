@@ -58,6 +58,6 @@ def bce_across_batch(output, target):
     return -torch.mean(torch.sum(bce, dim=(2, 3)))
 
 
-def mse_loss(output, target):
+def mse_across_batch(output, target):
     mse = torch.pow(target - output.double(), 2)
     return -torch.mean(torch.sum(mse, dim=(2, 3)))
