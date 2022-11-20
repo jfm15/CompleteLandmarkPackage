@@ -37,6 +37,9 @@ def intermediate_figure(image, output, predicted_points, target_points, eres,
 
     if figure_name == "heatmaps_and_ere":
         figure(image, heatmaps_and_ere, (output, predicted_points, target_points, eres), save=save, save_path=save_path)
+    elif figure_name == "heatmaps_and_preds":
+        figure(image, heatmaps_and_preds, (output, predicted_points, target_points, eres), save=save, save_path=save_path)
+
 
 
 def final_figure(image, aggregated_points, aggregated_point_dict, target_points, suffix,
@@ -55,7 +58,7 @@ def final_figure(image, aggregated_points, aggregated_point_dict, target_points,
         figure(image, targets, (aggregated_points, target_points, True, True, False, image[0].size()), save=save, save_path=save_path)
     elif figure_name == "aggregates":
         figure(image, aggregates, (aggregated_point_dict, target_points), save=save, save_path=save_path)
-    elif figure_name == "heatmaps_and_ere":
+    elif figure_name == "heatmaps_and_ere" or figure_name == "heatmaps_and_preds":
         return
     else:
         graphics_function = eval(".".join(["lib", "visualisations", suffix, figure_name]))
@@ -74,9 +77,9 @@ def gt_and_preds(ax, predicted_points, target_points, show_indices=True):
     '''
 
 
-def preds(ax, predicted_points, target_points, show_indices=True):
+def preds(ax, predicted_points, target_points, show_indices=False, s=20):
 
-    ax.scatter(predicted_points[:, 0], predicted_points[:, 1], color='red', s=30)
+    ax.scatter(predicted_points[:, 0], predicted_points[:, 1], color='pink', s=s)
 
     if show_indices:
         for i, positions in enumerate(predicted_points):
@@ -149,6 +152,16 @@ def heatmaps_and_ere(ax, output, predicted_points, target_points, eres):
     for ere, position in zip(eres, predicted_points):
         x, y = position
         ax.text(x + 3, y + 3, "{:.3f}".format(ere), color="white", fontsize=7)
+
+
+def heatmaps_and_preds(ax, output, predicted_points, target_points, eres):
+
+    normalized_heatmaps = output / np.max(output, axis=(1, 2), keepdims=True)
+    squashed_output = np.max(normalized_heatmaps, axis=0)
+
+    ax.imshow(squashed_output, cmap='inferno', alpha=0.4)
+
+    preds(ax, predicted_points, target_points, show_indices=False, s=2)
 
 
 def show_channels(ax, channels, target_points):
