@@ -119,6 +119,7 @@ def main():
         eval("{}.validate_over_set".format(validate_file)) \
             (ensemble, test_loader, final_layer, loss_function, args.visuals, cfg.VALIDATION, image_save_path,
              logger=logger, show_final_figures=True)
+        
 
 
 if __name__ == '__main__':
