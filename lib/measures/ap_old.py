@@ -45,3 +45,28 @@ def left_lce_angle(points):
 
 def right_lce_angle(points):
     return lce_angle(points, 0, 1)
+
+
+def fai(points):
+
+    l_aa = left_alpha_angle(points)
+    l_lce = left_lce_angle(points)
+
+    r_aa = right_alpha_angle(points)
+    r_lce = right_lce_angle(points)
+
+    # diagnose left
+    aa_threshold = 65
+    lce_threshold = 40
+
+    if l_aa < aa_threshold and l_lce < lce_threshold:
+        l_fai = 0
+    else:
+        l_fai = 1
+
+    if r_aa < aa_threshold and r_lce < lce_threshold:
+        r_fai = 0
+    else:
+        r_fai = 1
+
+    return [l_fai, r_fai]

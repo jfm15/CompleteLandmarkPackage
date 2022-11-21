@@ -9,8 +9,7 @@ from lib.visualisations import final_figure
 from lib.measures import measure
 
 
-def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg_validation, save_path, logger=None, training_mode=False,
-                      show_final_figures=False):
+def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg_validation, save_path, logger=None, training_mode=False):
 
     all_radial_errors = []
     all_measurement_difs = []
