@@ -33,7 +33,9 @@ def diagnose_set(aggregated_scaled_points, dataset_target_scaled_points, suffix,
         ground_truth_diagnoses.extend(true_diagnosis)
 
     tn, fp, fn, tp = confusion_matrix(ground_truth_diagnoses, predicted_diagnoses).ravel()
-    accuracy = 100 * float(tn + tp) / float(n)
+    # don't use n because lists are returned
+    total = tn + fp + fn + tp
+    accuracy = 100 * float(tn + tp) / float(total)
     precision = 100 * float(tp) / float(tp + fp)
     recall = 100 * float(tp) / float(tp + fn)
-    return n, tn, fp, fn, tp, precision, recall, accuracy
+    return total, tn, fp, fn, tp, precision, recall, accuracy
