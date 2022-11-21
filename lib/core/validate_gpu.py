@@ -10,11 +10,13 @@ from lib.core.evaluate import get_sdr_statistics
 from lib.visualisations import intermediate_figure
 from lib.visualisations import final_figure
 from lib.visualisations import display_box_plot
+
 from lib.measures import measure
+from lib.measures import diagnose_set
 
 
 def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg_validation, save_path,
-                      logger=None, training_mode=False, show_final_figures=False):
+                      logger=None, training_mode=False):
 
     predicted_points_per_model = []
     eres_per_model = []
@@ -181,7 +183,21 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
     logger.info(txt)
 
     # Final graphics
-    if show_final_figures:
+    if not training_mode:
+        # Run the diagnosis experiments
+        # I need to find the predicted points and the ground truth points
+        # aggregated_scaled_points, dataset_target_scaled_points
+        for diagnosis in cfg_validation.DIAGNOSES:
+            n, tn, fp, fn, tp, precision, recall, accuracy = diagnose_set(aggregated_scaled_points,
+                                                                          dataset_target_scaled_points,
+                                                                          cfg_validation.MEASUREMENTS_SUFFIX,
+                                                                          diagnosis)
+
+            txt = "Results for {} are n: {}, tn: {}, fp: {}, fn: {}, tp: {}, " \
+                  "precision: {:.3f}, recall: {:.3f}, accuracy: {:.3f}".format(
+                   diagnosis, n, tn, fp, fn, tp, precision, recall, accuracy)
+            logger.info(txt)
+
         figure_save_path = os.path.join(save_path, "box_plot")
         logger.info("Saving Box Plot to {}". format(figure_save_path))
         display_box_plot(radial_errors.detach().cpu().numpy(), figure_save_path)

@@ -15,3 +15,14 @@ def beta_angle(points):
     cartilage_roof_lines = points[4, :] - points[2, :]
 
     return get_angle(baseline, cartilage_roof_lines)
+
+
+def ddh(points):
+
+    aa = alpha_angle(points)
+    ba = beta_angle(points)
+
+    if aa < 60:
+        return [1]
+    else:
+        return [0]
