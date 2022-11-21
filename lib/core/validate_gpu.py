@@ -171,8 +171,8 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
 
     for measurement in cfg_validation.MEASUREMENTS:
         measurements_dict[measurement] = torch.Tensor(measurements_dict[measurement])
-        avg, std, icc = get_stats(measurements_dict[measurement][:, 0], measurements_dict[measurement][:, 1])
-        txt += "{}: [{:.3f}, {:.3f}, {:.3f}]\t".format(measurement, avg, std, icc)
+        avg, std, med, icc = get_stats(measurements_dict[measurement][:, 0], measurements_dict[measurement][:, 1])
+        txt += "{}: [MEAN: {:.3f}\u00B1{:.3f}, MED: {:.3f}, ICC: {:.3f}]\t".format(measurement, avg, std, med, icc)
 
     logger.info(txt)
 

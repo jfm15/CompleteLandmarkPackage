@@ -16,10 +16,11 @@ def get_stats(predictions, targets):
 
     differences = np.abs(predictions - targets)
     avg = np.mean(differences)
+    med = np.median(differences)
     std = np.std(differences)
     icc = get_icc(predictions, targets)
 
-    return avg, std, icc
+    return avg, std, med, icc
 
 
 def produce_sdr_statistics(radial_errors, thresholds):
