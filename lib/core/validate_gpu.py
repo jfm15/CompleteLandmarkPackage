@@ -165,7 +165,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
     txt = "Landmark Localisations:\t"
     avg_per_landmark = torch.mean(radial_errors, dim=0)
     std_per_landmark = torch.std(radial_errors, dim=0)
-    median_per_landmark = torch.median(radial_errors, dim=0)
+    median_per_landmark = torch.median(radial_errors, dim=0)[0]
     for avg_for_landmark, std_for_landmark, median_for_landmark \
             in zip(avg_per_landmark, std_per_landmark, median_per_landmark):
         txt += "[MEAN: {:.3f}\u00B1{:.3f}, MED: {:.3f}]\t".format(avg_for_landmark.item(),
@@ -173,7 +173,8 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
                                                                   median_for_landmark.item())
     overall_avg = torch.mean(radial_errors).item()
     overall_std = torch.std(radial_errors).item()
-    txt += "Avg: {:.3f}\t".format(overall_avg)
+    overall_med = torch.median(radial_errors).item()
+    txt += "[MEAN: {:.3f}\u00B1{:.3f}, MED: {:.3f}]\t".format(overall_avg, overall_std, overall_med)
 
     for measurement in cfg_validation.MEASUREMENTS:
         measurements_dict[measurement] = torch.Tensor(measurements_dict[measurement])
