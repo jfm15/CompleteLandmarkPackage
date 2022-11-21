@@ -22,7 +22,7 @@ def ddh(points):
     aa = alpha_angle(points)
     ba = beta_angle(points)
 
-    if aa < 60:
+    if aa < 50:
         return [1]
     else:
         return [0]
