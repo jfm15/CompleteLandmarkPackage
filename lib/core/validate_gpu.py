@@ -146,12 +146,18 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             image_name = meta["file_name"][b]
             figure_save_path = os.path.join(save_path, visual_name,
                                             "{}_{}".format(image_name, visual_name))
-            txt = "Saving Images in {} for {}".format(figure_save_path, visual_name)
-            logger.info(txt)
+            #txt = "Saving Images in {} for {}".format(figure_save_path, visual_name)
+            #logger.info(txt)
             final_figure(image[b], aggregated_points_idx.detach().cpu().numpy(),
                              aggregated_point_dict, target_points_idx.detach().cpu().numpy(),
                              cfg_validation.MEASUREMENTS_SUFFIX, visual_name,
                              save=True, save_path=figure_save_path)
+
+    # Write where images have been saved
+    for visual_name in visuals:
+        figure_save_path = os.path.join(save_path, visual_name)
+        txt = "Saved Images in {} for {}".format(figure_save_path, visual_name)
+        logger.info(txt)
 
     # Overall Statistics
     logger.info("\n-----------Final Statistics-----------")
