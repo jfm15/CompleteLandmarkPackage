@@ -48,6 +48,8 @@ def final_figure(image, aggregated_points, aggregated_point_dict, target_points,
     # search for generic figure names
     if figure_name == "gt_and_preds":
         figure(image, gt_and_preds, (aggregated_points, target_points), save=save, save_path=save_path)
+    elif figure_name == "gt_and_preds_small":
+        figure(image, gt_and_preds_small, (aggregated_points, target_points), save=save, save_path=save_path)
     elif figure_name == "preds":
             figure(image, preds, (aggregated_points, target_points), save=save, save_path=save_path)
     elif figure_name == "gt":
@@ -69,6 +71,18 @@ def gt_and_preds(ax, predicted_points, target_points, show_indices=True):
 
     ax.scatter(target_points[:, 0], target_points[:, 1], color='lime', s=30)
     ax.scatter(predicted_points[:, 0], predicted_points[:, 1], color='red', s=30)
+
+    '''
+    if show_indices:
+        for i, positions in enumerate(target_points):
+            ax.text(positions[0], positions[1], "{}".format(i + 1), color="yellow", fontsize="small")
+    '''
+
+
+def gt_and_preds_small(ax, predicted_points, target_points, show_indices=True):
+
+    ax.scatter(target_points[:, 0], target_points[:, 1], color='lime', s=15)
+    ax.scatter(predicted_points[:, 0], predicted_points[:, 1], color='red', s=15)
 
     '''
     if show_indices:
