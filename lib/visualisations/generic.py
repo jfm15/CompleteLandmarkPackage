@@ -79,7 +79,7 @@ def gt_and_preds(ax, predicted_points, target_points, show_indices=True):
 
 def preds(ax, predicted_points, target_points, show_indices=False, s=20):
 
-    ax.scatter(predicted_points[:, 0], predicted_points[:, 1], color='pink', s=s)
+    ax.scatter(predicted_points[:, 0], predicted_points[:, 1], color='red', s=s)
 
     if show_indices:
         for i, positions in enumerate(predicted_points):
