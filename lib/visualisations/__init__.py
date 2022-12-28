@@ -11,6 +11,10 @@ from lib.visualisations.generic import final_figure
 from lib.visualisations.generic import gt_and_preds
 from lib.visualisations.generic import preds
 
+from lib.visualisations.heatmap_plots import radial_error_vs_ere_graph
+from lib.visualisations.heatmap_plots import reliability_diagram
+from lib.visualisations.heatmap_plots import roc_outlier_graph
+
 from lib.visualisations.miscellaneous import display_measurement_distribution
 from lib.visualisations.miscellaneous import display_ks_score_of_partition
 from lib.visualisations.miscellaneous import display_ks_scores
