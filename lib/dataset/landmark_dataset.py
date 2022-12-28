@@ -148,6 +148,8 @@ class LandmarkDataset(Dataset):
                     if cfg_dataset.FLIP_AXIS:
                         kps_np_array = np.flip(kps_np_array, axis=1)
 
+                    kps_np_array *= cfg_dataset.GROUND_TRUTH_MULTIPLIER
+
                     # Augment annotations
                     kps = KeypointsOnImage.from_xy_array(kps_np_array, shape=image.shape)
                     kps_resized = seq(keypoints=kps)
