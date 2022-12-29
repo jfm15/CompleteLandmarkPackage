@@ -224,7 +224,12 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
 
         # Save the heatmap analysis plots
         figure_save_path = os.path.join(save_path, "correlation_plot")
-        radial_error_vs_ere_graph(radial_errors_np, eres_np, figure_save_path)
+        radial_error_vs_ere_graph(radial_errors_np.flatten(), eres_np.flatten(), figure_save_path)
         logger.info("Saving Correlation Plot to {}".format(figure_save_path))
+
+        # Save the heatmap analysis plots
+        figure_save_path = os.path.join(save_path, "roc_plot")
+        roc_outlier_graph(radial_errors_np.flatten(), eres_np.flatten(), figure_save_path)
+        logger.info("Saving ROC Plot to {}".format(figure_save_path))
 
     return average_loss, overall_avg
