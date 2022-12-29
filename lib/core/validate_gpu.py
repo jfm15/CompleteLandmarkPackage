@@ -107,9 +107,9 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
     aggregated_point_dict = use_aggregate_methods(predicted_points_per_model, eres_per_model,
                                                   aggregate_methods=cfg_validation.AGGREGATION_METHODS)
     aggregated_points = aggregated_point_dict[cfg_validation.SDR_AGGREGATION_METHOD]
-    aggregated_sacled_point_dict = use_aggregate_methods(scaled_predicted_points_per_model, eres_per_model,
+    aggregated_scaled_point_dict = use_aggregate_methods(scaled_predicted_points_per_model, eres_per_model,
                                                   aggregate_methods=cfg_validation.AGGREGATION_METHODS)
-    aggregated_scaled_points = aggregated_sacled_point_dict[cfg_validation.SDR_AGGREGATION_METHOD]
+    aggregated_scaled_points = aggregated_scaled_point_dict[cfg_validation.SDR_AGGREGATION_METHOD]
 
     radial_errors = cal_radial_errors(aggregated_scaled_points, dataset_target_scaled_points)
 
@@ -118,6 +118,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         measurements_dict[measurement] = []
 
     # quick pass through the images at the end
+    # This loop is for per image information and saving images
     for idx, (image, _, meta) in enumerate(loader):
 
         radial_errors_idx = radial_errors[idx]
