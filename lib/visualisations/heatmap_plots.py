@@ -7,16 +7,16 @@ from sklearn.metrics import roc_curve
 from sklearn.metrics import roc_auc_score
 
 
-def radial_error_vs_ere_graph(all_radial_errors, all_expected_radial_errors, save_path, n_bin=36):
+def radial_error_vs_ere_graph(radial_errors, eres, save_path, n_bin=36):
 
     # Bin the ere and calculate the radial error for each bin
     binned_eres = []
     binned_errors = []
-    sorted_indices = np.argsort(all_expected_radial_errors)
-    for l in range(int(len(all_expected_radial_errors) / n_bin)):
+    sorted_indices = np.argsort(eres)
+    for l in range(int(len(eres) / n_bin)):
         binned_indices = sorted_indices[l * n_bin: (l + 1) * n_bin]
-        binned_eres.append(np.mean(np.take(all_expected_radial_errors, binned_indices)))
-        binned_errors.append(np.mean(np.take(all_radial_errors, binned_indices)))
+        binned_eres.append(np.mean(np.take(eres, binned_indices)))
+        binned_errors.append(np.mean(np.take(radial_errors, binned_indices)))
     correlation = np.corrcoef(binned_eres, binned_errors)[0, 1]
 
     # Plot graph
@@ -33,11 +33,11 @@ def radial_error_vs_ere_graph(all_radial_errors, all_expected_radial_errors, sav
     plt.close()
 
 
-def roc_outlier_graph(all_radial_errors, all_expected_radial_errors, save_path, outlier_threshold=2.0):
-    outliers = all_radial_errors > outlier_threshold
+def roc_outlier_graph(radial_errors, eres, save_path, outlier_threshold=2.0):
+    outliers = radial_errors > outlier_threshold
 
-    fpr, tpr, thresholds = roc_curve(outliers, all_expected_radial_errors)
-    auc = roc_auc_score(outliers, all_expected_radial_errors)
+    fpr, tpr, thresholds = roc_curve(outliers, eres)
+    auc = roc_auc_score(outliers, eres)
 
     first_idx = np.min(np.argwhere(tpr > 0.5))
     proposed_threshold = thresholds[first_idx]
@@ -65,21 +65,21 @@ def roc_outlier_graph(all_radial_errors, all_expected_radial_errors, save_path, 
 
 
 # At the moment this assumes all images have the same resolution
-def reliability_diagram(all_radial_errors, all_mode_probabilities, save_path,
+def reliability_diagram(radial_errors, mode_probabilities, save_path,
                         n_of_bins=10, x_max=0.15, pixel_size=0.30234375, do_not_save=False):
 
     bins = np.linspace(0, x_max, n_of_bins + 1)
     bins[-1] = 1.1
     widths = x_max / n_of_bins
     radius = math.sqrt((pixel_size**2) / math.pi)
-    correct_predictions = all_radial_errors < radius
+    correct_predictions = radial_errors < radius
 
     # a 10 length array with values adding to 19
-    count_for_each_bin, _ = np.histogram(all_mode_probabilities, bins=bins)
+    count_for_each_bin, _ = np.histogram(mode_probabilities, bins=bins)
 
     # total confidence in each bin
     total_confidence_for_each_bin, _, bin_indices \
-        = stats.binned_statistic(all_mode_probabilities, all_mode_probabilities, 'sum', bins=bins)
+        = stats.binned_statistic(mode_probabilities, mode_probabilities, 'sum', bins=bins)
 
     no_of_correct_preds = np.zeros(len(bins) - 1)
     for bin_idx, pred_correct in zip(bin_indices, correct_predictions):
