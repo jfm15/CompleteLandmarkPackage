@@ -10,6 +10,9 @@ from lib.core.evaluate import get_sdr_statistics
 from lib.visualisations import intermediate_figure
 from lib.visualisations import final_figure
 from lib.visualisations import display_box_plot
+from lib.visualisations import radial_error_vs_ere_graph
+from lib.visualisations import reliability_diagram
+from lib.visualisations import roc_outlier_graph
 
 from lib.measures import measure
 from lib.measures import diagnose_set
@@ -212,8 +215,16 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
                    diagnosis, n, tn, fp, fn, tp, precision, recall, accuracy)
             logger.info(txt)
 
+        radial_errors_np = radial_errors.detach().cpu().numpy()
+        eres_np = eres_per_model[0].detach().cpu().numpy()
+
         figure_save_path = os.path.join(save_path, "box_plot")
-        logger.info("Saving Box Plot to {}". format(figure_save_path))
-        display_box_plot(radial_errors.detach().cpu().numpy(), figure_save_path)
+        display_box_plot(radial_errors_np, figure_save_path)
+        logger.info("Saving Box Plot to {}".format(figure_save_path))
+
+        # Save the heatmap analysis plots
+        figure_save_path = os.path.join(save_path, "correlation_plot")
+        radial_error_vs_ere_graph(radial_errors_np, eres_np, figure_save_path)
+        logger.info("Saving Correlation Plot to {}".format(figure_save_path))
 
     return average_loss, overall_avg
