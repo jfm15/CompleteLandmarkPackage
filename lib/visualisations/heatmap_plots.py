@@ -66,7 +66,7 @@ def roc_outlier_graph(radial_errors, eres, save_path, outlier_threshold=2.0):
 
 # At the moment this assumes all images have the same resolution
 def reliability_diagram(radial_errors, mode_probabilities, save_path,
-                        n_of_bins=10, x_max=0.15, pixel_size=0.30234375, do_not_save=False):
+                        n_of_bins=10, x_max=0.15, pixel_size=0.30234375):
 
     bins = np.linspace(0, x_max, n_of_bins + 1)
     bins[-1] = 1.1
@@ -114,9 +114,7 @@ def reliability_diagram(radial_errors, mode_probabilities, save_path,
     plt.legend(fontsize=20, loc="upper left", prop={'size': 16})
     plt.text(0.71, 0.075, 'ECE={:.2f}'.format(ece), backgroundcolor='white', fontsize='x-large', transform=ax.transAxes)
 
-    if not do_not_save:
-        plt.savefig(save_path)
-
+    plt.savefig(save_path)
     plt.close()
 
     return ece
