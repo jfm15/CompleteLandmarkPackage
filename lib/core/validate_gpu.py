@@ -235,7 +235,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
 
         # Save the heatmap analysis plots
         figure_save_path = os.path.join(save_path, "correlation_plot_2")
-        confidence_np = torch.reciprocal(eres_per_model[0]).detach().cpu().numpy()
+        confidence_np = torch.reciprocal(modes_per_model[0]).detach().cpu().numpy()
         radial_error_vs_ere_graph(radial_errors_np.flatten(), confidence_np.flatten(), figure_save_path)
         logger.info("Saving Correlation Plot 2 to {}".format(figure_save_path))
 
