@@ -66,8 +66,12 @@ def get_predicted_and_target_points(output_stack, landmarks_per_annotator, pixel
     # Get expected radial error scores
     eres = get_eres(output_stack, scaled_predicted_points, pixels_sizes)
 
+    # Get the mode of each output heatmap for analysis
+    flattened_heatmaps = torch.flatten(output_stack, start_dim=2)
+    modes, _ = torch.max(flattened_heatmaps, dim=2, keepdim=True)
+
     # return scaled_predicted_points, scaled_target_points, eres
-    return predicted_points, target_points, eres, scaled_predicted_points, scaled_target_points
+    return predicted_points, target_points, eres, modes, scaled_predicted_points, scaled_target_points
 
 
 def cal_radial_errors(predicted_points, target_points, mean=False):
