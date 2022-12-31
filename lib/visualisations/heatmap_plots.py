@@ -108,7 +108,7 @@ def reliability_diagram(radial_errors, mode_probabilities, save_path,
     plt.yticks(fontsize=14)
     plt.grid(zorder=0)
     plt.xlim(0.0, x_max)
-    plt.ylim(0.0, x_max * 2)
+    plt.ylim(0.0, np.max(avg_acc_for_each_bin))
     plt.bar(bins[:-1], avg_acc_for_each_bin, align='edge', width=widths, color='blue', edgecolor='black', label='Accuracy', zorder=3)
     plt.bar(bins[:-1], avg_conf_for_each_bin, align='edge', width=widths, color='lime', edgecolor='black', alpha=0.5,
             label='Gap', zorder=3)
