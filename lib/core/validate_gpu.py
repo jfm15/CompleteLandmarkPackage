@@ -223,6 +223,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
 
         radial_errors_np = radial_errors.detach().cpu().numpy()
         eres_np = eres_per_model[0].detach().cpu().numpy()
+        confidence_np = modes_per_model[0].detach().cpu().numpy()
 
         figure_save_path = os.path.join(save_path, "box_plot")
         display_box_plot(radial_errors_np, figure_save_path)
@@ -235,7 +236,6 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
 
         # Save the heatmap analysis plots
         figure_save_path = os.path.join(save_path, "correlation_plot_2")
-        confidence_np = torch.reciprocal(modes_per_model[0]).detach().cpu().numpy()
         radial_error_vs_ere_graph(radial_errors_np.flatten(), confidence_np.flatten(), figure_save_path)
         logger.info("Saving Correlation Plot 2 to {}".format(figure_save_path))
 
@@ -246,8 +246,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
 
         # Save the reliability diagram
         figure_save_path = os.path.join(save_path, "reliability_plot")
-        modes_np = modes_per_model[0].detach().cpu().numpy()
-        reliability_diagram(radial_errors_np.flatten(), modes_np.flatten(), figure_save_path)
+        reliability_diagram(radial_errors_np.flatten(), confidence_np.flatten(), figure_save_path)
         logger.info("Saving ROC Plot to {}".format(figure_save_path))
 
     return average_loss, overall_avg

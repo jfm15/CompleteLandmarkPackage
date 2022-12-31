@@ -68,7 +68,7 @@ def roc_outlier_graph(radial_errors, eres, save_path, outlier_threshold=2.0):
 def reliability_diagram(radial_errors, mode_probabilities, save_path,
                         n_of_bins=10, pixel_size=0.30234375):
 
-    x_max = math.floor(np.max(radial_errors) / 0.01) * 0.01
+    x_max = math.floor(np.max(mode_probabilities) / 0.01) * 0.01
     bins = np.linspace(0, x_max, n_of_bins + 1)
     bins[-1] = 1.1
     widths = x_max / n_of_bins
