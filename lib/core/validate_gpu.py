@@ -23,6 +23,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
 
     predicted_points_per_model = []
     eres_per_model = []
+    modes_per_model = []
     dataset_target_points = []
     scaled_predicted_points_per_model = []
     dataset_target_scaled_points = []
@@ -45,6 +46,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         dataset_target_points = []
         dataset_target_scaled_points = []
         model_eres = []
+        model_modes = []
 
         for idx, (image, channels, meta) in enumerate(loader):
 
@@ -59,13 +61,14 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             loss = loss_function(output, channels)
             losses.append(loss.item())
 
-            predicted_points, target_points, eres, scaled_predicted_points, scaled_target_points \
+            predicted_points, target_points, eres, modes, scaled_predicted_points, scaled_target_points \
                 = get_predicted_and_target_points(output, meta['landmarks_per_annotator'], meta['pixel_size'])
             model_predicted_points.append(predicted_points)
             dataset_target_points.append(target_points)
             model_predicted_scaled_points.append(scaled_predicted_points)
             dataset_target_scaled_points.append(scaled_target_points)
             model_eres.append(eres)
+            model_modes.append(modes)
 
             # print intermediate figures
             b = 0
@@ -89,6 +92,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         model_predicted_scaled_points = torch.cat(model_predicted_scaled_points)
         dataset_target_scaled_points = torch.cat(dataset_target_scaled_points)
         model_eres = torch.cat(model_eres)
+        model_modes = torch.cat(model_modes)
         # D = Dataset size
         # predicted_points has size [D, N, 2]
         # eres has size [D, N]
@@ -97,6 +101,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         predicted_points_per_model.append(model_predicted_points)
         scaled_predicted_points_per_model.append(model_predicted_scaled_points)
         eres_per_model.append(model_eres)
+        modes_per_model.append(model_modes)
 
     # predicted_points_per_model is size [M, D, N, 2]
     # eres_per_model is size [M, D, N]
@@ -106,6 +111,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
     dataset_target_points = dataset_target_points.float()
     dataset_target_scaled_points = dataset_target_scaled_points.float()
     eres_per_model = torch.stack(eres_per_model).float()
+    modes_per_model = torch.stack(modes_per_model).float()
 
     aggregated_point_dict = use_aggregate_methods(predicted_points_per_model, eres_per_model,
                                                   aggregate_methods=cfg_validation.AGGREGATION_METHODS)
@@ -226,6 +232,12 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         figure_save_path = os.path.join(save_path, "correlation_plot")
         radial_error_vs_ere_graph(radial_errors_np.flatten(), eres_np.flatten(), figure_save_path)
         logger.info("Saving Correlation Plot to {}".format(figure_save_path))
+
+        # Save the heatmap analysis plots
+        figure_save_path = os.path.join(save_path, "correlation_plot_2")
+        confidence_np = torch.reciprocal(eres_per_model[0]).detach().cpu().numpy()
+        radial_error_vs_ere_graph(radial_errors_np.flatten(), confidence_np.flatten(), figure_save_path)
+        logger.info("Saving Correlation Plot 2 to {}".format(figure_save_path))
 
         # Save the heatmap analysis plots
         figure_save_path = os.path.join(save_path, "roc_plot")

@@ -28,7 +28,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             output = final_layer(output)
             loss = loss_function(output, channels)
             losses.append(loss.item())
-            predicted_points, target_points, eres, scaled_predicted_points, scaled_target_points \
+            predicted_points, target_points, eres, _, scaled_predicted_points, scaled_target_points \
                 = get_predicted_and_target_points(output, meta['landmarks_per_annotator'], meta['pixel_size'])
             image_predicted_points.append(predicted_points)
             image_scaled_predicted_points.append(scaled_predicted_points)
