@@ -197,13 +197,16 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         avg, std, med, icc = get_stats(measurements_dict[measurement][:, 0], measurements_dict[measurement][:, 1])
         txt += "{}: [MEAN: {:.3f}\u00B1{:.3f}, MED: {:.3f}, ICC: {:.3f}]\t".format(measurement, avg, std, med, icc)
 
-    logger.info(txt)
+    if not temperature_scaling_mode:
+        logger.info(txt)
 
     sdr_rates = get_sdr_statistics(radial_errors, cfg_validation.SDR_THRESHOLDS)
     txt = "Successful Detection Rates are: "
     for sdr_rate in sdr_rates:
         txt += "{:.2f}%\t".format(sdr_rate)
-    logger.info(txt)
+
+    if not temperature_scaling_mode:
+        logger.info(txt)
 
     # Final graphics
     if not training_mode:
