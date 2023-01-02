@@ -7,12 +7,9 @@ import _init_paths
 import lib
 import lib.models
 
-import numpy as np
-
 from lib.dataset import LandmarkDataset
-from lib.utils import prepare_for_training
+from lib.utils import prepare_for_testing
 from lib.core.function import temperature_scale
-from lib.visualisations import preliminary_figure
 from torchsummary.torchsummary import summary_string
 
 
@@ -71,7 +68,7 @@ def main():
     # Get arguments and the experiment file
     args = parse_args()
 
-    cfg, logger, output_path, yaml_file_name = prepare_for_training(args.cfg, args.output_path)
+    cfg, logger, output_path, yaml_file_name = prepare_for_testing(args.cfg, args.pretrained_model)
 
     # Print the arguments into the log
     logger.info("-----------Arguments-----------")
