@@ -66,7 +66,7 @@ def roc_outlier_graph(radial_errors, eres, save_path, outlier_threshold=2.0):
 
 # At the moment this assumes all images have the same resolution
 def reliability_diagram(radial_errors, mode_probabilities, save_path,
-                        n_of_bins=10, pixel_size=0.30234375):
+                        n_of_bins=10, pixel_size=0.30234375, save=True):
 
     x_max = math.floor(np.max(mode_probabilities) / 0.01) * 0.01
     bins = np.linspace(0, x_max, n_of_bins + 1)
@@ -96,26 +96,27 @@ def reliability_diagram(radial_errors, mode_probabilities, save_path,
         ece += count_for_each_bin[i] / n * np.abs(avg_acc_for_each_bin[i] - avg_conf_for_each_bin[i])
     ece *= 100
 
-    # save plot
-    plt.rcParams["figure.figsize"] = (6, 6)
-    fig, ax = plt.subplots(1, 1)
-    ax.grid(zorder=0)
+    if save:
+        # save plot
+        plt.rcParams["figure.figsize"] = (6, 6)
+        fig, ax = plt.subplots(1, 1)
+        ax.grid(zorder=0)
 
-    plt.subplots_adjust(left=0.15)
-    plt.xlabel('Confidence', fontsize=14)
-    plt.ylabel('Accuracy', fontsize=14)
-    plt.xticks(fontsize=14)
-    plt.yticks(fontsize=14)
-    plt.grid(zorder=0)
-    plt.xlim(0.0, x_max)
-    plt.ylim(0.0, np.max(avg_acc_for_each_bin))
-    plt.bar(bins[:-1], avg_acc_for_each_bin, align='edge', width=widths, color='blue', edgecolor='black', label='Accuracy', zorder=3)
-    plt.bar(bins[:-1], avg_conf_for_each_bin, align='edge', width=widths, color='lime', edgecolor='black', alpha=0.5,
-            label='Gap', zorder=3)
-    plt.legend(fontsize=20, loc="upper left", prop={'size': 16})
-    plt.text(0.71, 0.075, 'ECE={:.2f}'.format(ece), backgroundcolor='white', fontsize='x-large', transform=ax.transAxes)
+        plt.subplots_adjust(left=0.15)
+        plt.xlabel('Confidence', fontsize=14)
+        plt.ylabel('Accuracy', fontsize=14)
+        plt.xticks(fontsize=14)
+        plt.yticks(fontsize=14)
+        plt.grid(zorder=0)
+        plt.xlim(0.0, x_max)
+        plt.ylim(0.0, np.max(avg_acc_for_each_bin))
+        plt.bar(bins[:-1], avg_acc_for_each_bin, align='edge', width=widths, color='blue', edgecolor='black', label='Accuracy', zorder=3)
+        plt.bar(bins[:-1], avg_conf_for_each_bin, align='edge', width=widths, color='lime', edgecolor='black', alpha=0.5,
+                label='Gap', zorder=3)
+        plt.legend(fontsize=20, loc="upper left", prop={'size': 16})
+        plt.text(0.71, 0.075, 'ECE={:.2f}'.format(ece), backgroundcolor='white', fontsize='x-large', transform=ax.transAxes)
 
-    plt.savefig(save_path)
-    plt.close()
+        plt.savefig(save_path)
+        plt.close()
 
     return ece

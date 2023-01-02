@@ -16,7 +16,20 @@ def train_ensemble(ensemble, optimizers, schedulers, training_loader, final_laye
         our_model.cpu()
 
 
-def train_model(model, final_layer, optimizer, scheduler, loader, loss_function, logger):
+def temperature_scale(our_model, optimizer, scheduler, training_loader, final_layer, loss_function, logger):
+
+    logger.info('-----------Fine Tuning Model-----------')
+
+    our_model = our_model.cuda()
+    train_model(our_model, final_layer, optimizer, scheduler, training_loader,
+                loss_function, logger, temperature_scaling=True)
+
+    # move model back to cpu
+    our_model.cpu()
+
+
+def train_model(model, final_layer, optimizer, scheduler, loader, loss_function, logger, temperature_scaling=False):
+
     model.train()
     losses_per_epoch = []
 
@@ -26,7 +39,13 @@ def train_model(model, final_layer, optimizer, scheduler, loader, loss_function,
         image = image.cuda()
         channels = channels.cuda()
 
-        output = model(image.float())
+        if temperature_scaling:
+            with torch.no_grad():
+                output = model(image.float())
+            output = model.scale(output)
+        else:
+            output = model(image.float())
+
         output = final_layer(output)
 
         optimizer.zero_grad()

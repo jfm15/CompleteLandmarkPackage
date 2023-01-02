@@ -19,7 +19,7 @@ from lib.measures import diagnose_set
 
 
 def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg_validation, save_path,
-                      logger=None, training_mode=False):
+                      logger=None, training_mode=False, temperature_scaling_mode=False):
 
     predicted_points_per_model = []
     eres_per_model = []
@@ -248,5 +248,11 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         figure_save_path = os.path.join(save_path, "reliability_plot")
         reliability_diagram(radial_errors_np.flatten(), confidence_np.flatten(), figure_save_path)
         logger.info("Saving ROC Plot to {}".format(figure_save_path))
+
+    if temperature_scaling_mode:
+        radial_errors_np = radial_errors.detach().cpu().numpy()
+        confidence_np = modes_per_model[0].detach().cpu().numpy()
+        ece = reliability_diagram(radial_errors_np.flatten(), confidence_np.flatten(), "", save=False)
+        logger.info("ECE: {:.3f}".format(ece))
 
     return average_loss, overall_avg
