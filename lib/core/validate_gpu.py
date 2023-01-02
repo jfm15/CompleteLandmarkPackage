@@ -253,9 +253,18 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         logger.info("Saving ROC Plot to {}".format(figure_save_path))
 
     if temperature_scaling_mode:
+
         radial_errors_np = radial_errors.detach().cpu().numpy()
         confidence_np = modes_per_model[0].detach().cpu().numpy()
+        eres_np = eres_per_model[0].detach().cpu().numpy()
+
         ece = reliability_diagram(radial_errors_np.flatten(), confidence_np.flatten(), "", save=False)
         logger.info("ECE: {:.3f}".format(ece))
+
+        radial_error_vs_ere_graph(radial_errors_np.flatten(), eres_np.flatten(), "", save=False)
+        logger.info("Correlation: {:.3f}".format(ece))
+
+        temperatures = ensemble[0].temperatures
+        logger.info("Temperature values: {}".format(temperatures))
 
     return average_loss, overall_avg
