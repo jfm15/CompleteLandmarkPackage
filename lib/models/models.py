@@ -20,6 +20,10 @@ class UnetPlusPlus(nn.Module):
     def forward(self, x):
         return self.unet(x)
 
+    def scale(self, x):
+        y = x / self.temperatures
+        return y
+
 
 class Unet(nn.Module):
     def __init__(self, cfg_model, no_of_landmarks):
@@ -35,6 +39,10 @@ class Unet(nn.Module):
 
     def forward(self, x):
         return self.unet(x)
+
+    def scale(self, x):
+        y = x / self.temperatures
+        return y
 
 
 def two_d_softmax(x):
