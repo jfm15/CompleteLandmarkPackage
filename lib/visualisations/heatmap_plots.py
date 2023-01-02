@@ -7,7 +7,7 @@ from sklearn.metrics import roc_curve
 from sklearn.metrics import roc_auc_score
 
 
-def radial_error_vs_ere_graph(radial_errors, eres, save_path, n_bin=36):
+def radial_error_vs_ere_graph(radial_errors, eres, save_path, n_bin=36, save=True):
 
     # Bin the ere and calculate the radial error for each bin
     binned_eres = []
@@ -19,18 +19,21 @@ def radial_error_vs_ere_graph(radial_errors, eres, save_path, n_bin=36):
         binned_errors.append(np.mean(np.take(radial_errors, binned_indices)))
     correlation = np.corrcoef(binned_eres, binned_errors)[0, 1]
 
-    # Plot graph
-    plt.rcParams["figure.figsize"] = (6, 6)
-    fig, ax = plt.subplots(1, 1)
-    ax.grid(zorder=0)
-    plt.xlabel('Expected Radial Error (ERE)', fontsize=14)
-    plt.ylabel('True Radial Error', fontsize=14)
-    plt.xticks(fontsize=14)
-    plt.yticks(fontsize=14)
-    plt.text(0.5, 0.075, "CORRELATION={:.2f}".format(correlation), backgroundcolor=(0.8, 0.8, 0.8, 0.8), size='x-large', transform=ax.transAxes)
-    ax.scatter(binned_eres, binned_errors, c='lime', edgecolors='black', zorder=3)
-    plt.savefig(save_path)
-    plt.close()
+    if save:
+        # Plot graph
+        plt.rcParams["figure.figsize"] = (6, 6)
+        fig, ax = plt.subplots(1, 1)
+        ax.grid(zorder=0)
+        plt.xlabel('Expected Radial Error (ERE)', fontsize=14)
+        plt.ylabel('True Radial Error', fontsize=14)
+        plt.xticks(fontsize=14)
+        plt.yticks(fontsize=14)
+        plt.text(0.5, 0.075, "CORRELATION={:.2f}".format(correlation), backgroundcolor=(0.8, 0.8, 0.8, 0.8), size='x-large', transform=ax.transAxes)
+        ax.scatter(binned_eres, binned_errors, c='lime', edgecolors='black', zorder=3)
+        plt.savefig(save_path)
+        plt.close()
+
+    return correlation
 
 
 def roc_outlier_graph(radial_errors, eres, save_path, outlier_threshold=2.0):
