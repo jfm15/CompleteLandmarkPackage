@@ -261,10 +261,10 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         ece = reliability_diagram(radial_errors_np.flatten(), confidence_np.flatten(), "", save=False)
         logger.info("ECE: {:.3f}".format(ece))
 
-        radial_error_vs_ere_graph(radial_errors_np.flatten(), eres_np.flatten(), "", save=False)
-        logger.info("Correlation: {:.3f}".format(ece))
+        correlation = radial_error_vs_ere_graph(radial_errors_np.flatten(), eres_np.flatten(), "", save=False)
+        logger.info("Correlation: {:.3f}".format(correlation))
 
-        temperatures = ensemble[0].temperatures
+        temperatures = torch.flatten(ensemble[0].temperatures)
         logger.info("Temperature values: {}".format(temperatures))
 
     return average_loss, overall_avg
