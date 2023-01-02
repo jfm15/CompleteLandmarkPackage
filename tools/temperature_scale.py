@@ -95,7 +95,7 @@ def main():
     our_model.load_state_dict(loaded_state_dict, strict=True)
 
     logger.info("-----------Model Summary-----------")
-    model_summary, _ = summary_string(our_model, (1, *cfg.DATASET.CACHED_IMAGE_SIZE))
+    model_summary, _ = summary_string(our_model, (1, *cfg.DATASET.CACHED_IMAGE_SIZE), device=torch.device('cpu'))
     logger.info(model_summary)
 
     our_model.temperatures.requires_grad = True
