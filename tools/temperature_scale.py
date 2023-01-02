@@ -64,7 +64,8 @@ def validate(model, validation_loader, final_layer, loss_function, cfg_validatio
         logger.info('-----------Validation Set-----------')
         _, current_mre = eval("{}.validate_over_set".format(validate_file)) \
             ([model], validation_loader, final_layer, loss_function, [], cfg_validation, None,
-             logger=logger, training_mode=True)
+             logger=logger, training_mode=True, temperature_scaling_mode=True)
+
 
 def main():
 
