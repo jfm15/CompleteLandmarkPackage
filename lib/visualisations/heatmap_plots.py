@@ -11,14 +11,14 @@ from sklearn.metrics import roc_auc_score
 def correlation_graph(x_values, y_values, x_label, y_label, n_bin=36):
 
     # Bin the y values and calculate the average x values for each bin
-    binned_eres = []
-    binned_errors = []
+    binned_x_values = []
+    binned_y_values = []
     sorted_indices = np.argsort(y_values)
     for l in range(int(len(y_values) / n_bin)):
         binned_indices = sorted_indices[l * n_bin: (l + 1) * n_bin]
-        binned_eres.append(np.mean(np.take(y_values, binned_indices)))
-        binned_errors.append(np.mean(np.take(x_values, binned_indices)))
-    correlation = np.corrcoef(binned_eres, binned_errors)[0, 1]
+        binned_y_values.append(np.mean(np.take(y_values, binned_indices)))
+        binned_x_values.append(np.mean(np.take(x_values, binned_indices)))
+    correlation = np.corrcoef(binned_x_values, binned_y_values)[0, 1]
 
     # Plot graph
     plt.rcParams["figure.figsize"] = (6, 6)
@@ -29,7 +29,7 @@ def correlation_graph(x_values, y_values, x_label, y_label, n_bin=36):
     plt.xticks(fontsize=14)
     plt.yticks(fontsize=14)
     plt.text(0.5, 0.075, "CORRELATION={:.2f}".format(correlation), backgroundcolor=(0.8, 0.8, 0.8, 0.8), size='x-large', transform=ax.transAxes)
-    ax.scatter(binned_eres, binned_errors, c='lime', edgecolors='black', zorder=3)
+    ax.scatter(binned_x_values, binned_y_values, c='lime', edgecolors='black', zorder=3)
 
     wb_image = wandb.Image(plt)
     plt.close()
