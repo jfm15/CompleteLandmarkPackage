@@ -1,5 +1,6 @@
 import argparse
 import torch
+import wandb
 import glob
 import os
 
@@ -14,8 +15,6 @@ import lib.core.validate_cpu as validate_cpu
 import lib.core.validate_gpu as validate_gpu
 
 from torchsummary.torchsummary import summary_string
-
-import wandb
 
 
 def parse_args():

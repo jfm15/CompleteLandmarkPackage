@@ -1,4 +1,5 @@
 import math
+import wandb
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -30,6 +31,7 @@ def radial_error_vs_ere_graph(radial_errors, eres, save_path, n_bin=36, save=Tru
         plt.yticks(fontsize=14)
         plt.text(0.5, 0.075, "CORRELATION={:.2f}".format(correlation), backgroundcolor=(0.8, 0.8, 0.8, 0.8), size='x-large', transform=ax.transAxes)
         ax.scatter(binned_eres, binned_errors, c='lime', edgecolors='black', zorder=3)
+        wandb.log({"radial error to ere chart": plt})
         plt.savefig(save_path)
         plt.close()
 
