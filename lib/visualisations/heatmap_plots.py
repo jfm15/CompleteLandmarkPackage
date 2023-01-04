@@ -37,11 +37,11 @@ def correlation_graph(x_values, y_values, x_label, y_label, n_bin=36):
     return correlation, wb_image
 
 
-def roc_outlier_graph(radial_errors, eres, save_path, outlier_threshold=2.0):
-    outliers = radial_errors > outlier_threshold
+def roc_outlier_graph(ground_truth, predictive_feature, outlier_threshold=2.0):
+    outliers = ground_truth > outlier_threshold
 
-    fpr, tpr, thresholds = roc_curve(outliers, eres)
-    auc = roc_auc_score(outliers, eres)
+    fpr, tpr, thresholds = roc_curve(outliers, predictive_feature)
+    auc = roc_auc_score(outliers, predictive_feature)
 
     first_idx = np.min(np.argwhere(tpr > 0.5))
     proposed_threshold = thresholds[first_idx]
@@ -63,16 +63,14 @@ def roc_outlier_graph(radial_errors, eres, save_path, outlier_threshold=2.0):
     plt.text(0.42, 0.075, 'Area Under Curve={:.2f}'.format(auc), backgroundcolor=(0.8, 0.8, 0.8, 0.8), size='x-large',
              transform=ax.transAxes)
 
-    wandb.log({"roc_graph": wandb.Image(plt)})
-    plt.savefig(save_path)
+    wb_image = wandb.Image(plt)
     plt.close()
 
-    return proposed_threshold
+    return proposed_threshold, auc, wb_image
 
 
 # At the moment this assumes all images have the same resolution
-def reliability_diagram(radial_errors, mode_probabilities, save_path,
-                        n_of_bins=10, pixel_size=0.30234375, save=True):
+def reliability_diagram(radial_errors, mode_probabilities, n_of_bins=10, pixel_size=0.30234375):
 
     x_max = math.floor(np.max(mode_probabilities) / 0.01) * 0.01
     bins = np.linspace(0, x_max, n_of_bins + 1)
@@ -102,28 +100,26 @@ def reliability_diagram(radial_errors, mode_probabilities, save_path,
         ece += count_for_each_bin[i] / n * np.abs(avg_acc_for_each_bin[i] - avg_conf_for_each_bin[i])
     ece *= 100
 
-    if save:
-        # save plot
-        plt.rcParams["figure.figsize"] = (6, 6)
-        fig, ax = plt.subplots(1, 1)
-        ax.grid(zorder=0)
+    # save plot
+    plt.rcParams["figure.figsize"] = (6, 6)
+    fig, ax = plt.subplots(1, 1)
+    ax.grid(zorder=0)
 
-        plt.subplots_adjust(left=0.15)
-        plt.xlabel('Confidence', fontsize=14)
-        plt.ylabel('Accuracy', fontsize=14)
-        plt.xticks(fontsize=14)
-        plt.yticks(fontsize=14)
-        plt.grid(zorder=0)
-        plt.xlim(0.0, x_max)
-        plt.ylim(0.0, np.max(avg_acc_for_each_bin))
-        plt.bar(bins[:-1], avg_acc_for_each_bin, align='edge', width=widths, color='blue', edgecolor='black', label='Accuracy', zorder=3)
-        plt.bar(bins[:-1], avg_conf_for_each_bin, align='edge', width=widths, color='lime', edgecolor='black', alpha=0.5,
-                label='Gap', zorder=3)
-        plt.legend(fontsize=20, loc="upper left", prop={'size': 16})
-        plt.text(0.71, 0.075, 'ECE={:.2f}'.format(ece), backgroundcolor='white', fontsize='x-large', transform=ax.transAxes)
+    plt.subplots_adjust(left=0.15)
+    plt.xlabel('Confidence', fontsize=14)
+    plt.ylabel('Accuracy', fontsize=14)
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
+    plt.grid(zorder=0)
+    plt.xlim(0.0, x_max)
+    plt.ylim(0.0, np.max(avg_acc_for_each_bin))
+    plt.bar(bins[:-1], avg_acc_for_each_bin, align='edge', width=widths, color='blue', edgecolor='black', label='Accuracy', zorder=3)
+    plt.bar(bins[:-1], avg_conf_for_each_bin, align='edge', width=widths, color='lime', edgecolor='black', alpha=0.5,
+            label='Gap', zorder=3)
+    plt.legend(fontsize=20, loc="upper left", prop={'size': 16})
+    plt.text(0.71, 0.075, 'ECE={:.2f}'.format(ece), backgroundcolor='white', fontsize='x-large', transform=ax.transAxes)
 
-        wandb.log({"reliability graph": wandb.Image(plt)})
-        plt.savefig(save_path)
-        plt.close()
+    wb_image = wandb.Image(plt)
+    plt.close()
 
-    return ece
+    return ece, wb_image

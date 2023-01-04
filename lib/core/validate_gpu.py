@@ -236,7 +236,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         # Save the heatmap analysis plots
         radial_ere_crl, radial_ere_wb_img = correlation_graph(radial_errors_np.flatten(), eres_np.flatten(),
                                                               "True Radial error (mm)", "Expected Radial Error (ERE) (mm)")
-        wandb.log({"radial_ere_correlation": radial_ere_wb_img})
+        wandb.log({"radial_ere_correlation_plot": radial_ere_wb_img})
 
         # Save the heatmap analysis plots
         radial_cof_crl, radial_conf_wb_img = correlation_graph(radial_errors_np.flatten(), confidence_np.flatten(),
@@ -245,14 +245,13 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         wandb.log({"radial_confidence_correlation": radial_conf_wb_img})
 
         # Save the heatmap analysis plots
-        figure_save_path = os.path.join(save_path, "roc_plot")
-        roc_outlier_graph(radial_errors_np.flatten(), eres_np.flatten(), figure_save_path)
-        logger.info("Saving ROC Plot to {}".format(figure_save_path))
+        proposed_threshold, auc, wb_image = roc_outlier_graph(radial_errors_np.flatten(), eres_np.flatten())
+        wandb.log({"roc_ere_plot": wb_image})
 
         # Save the reliability diagram
-        figure_save_path = os.path.join(save_path, "reliability_plot")
-        reliability_diagram(radial_errors_np.flatten(), confidence_np.flatten(), figure_save_path)
-        logger.info("Saving ROC Plot to {}".format(figure_save_path))
+        # TODO: code in pixel size into below
+        ece, wb_image = reliability_diagram(radial_errors_np.flatten(), confidence_np.flatten(), figure_save_path)
+        wandb.log({"reliability_diagram": wb_image})
 
     if temperature_scaling_mode:
 
@@ -260,10 +259,10 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         confidence_np = modes_per_model[0].detach().cpu().numpy()
         eres_np = eres_per_model[0].detach().cpu().numpy()
 
-        ece = reliability_diagram(radial_errors_np.flatten(), confidence_np.flatten(), "", save=False)
+        ece = reliability_diagram(radial_errors_np.flatten(), confidence_np.flatten())
         logger.info("ECE: {:.3f}".format(ece))
 
-        correlation = radial_error_vs_ere_graph(radial_errors_np.flatten(), eres_np.flatten(), "", save=False)
+        correlation = correlation_graph(radial_errors_np.flatten(), eres_np.flatten())
         logger.info("Correlation: {:.3f}".format(correlation))
 
         temperatures = torch.flatten(ensemble[0].temperatures)
