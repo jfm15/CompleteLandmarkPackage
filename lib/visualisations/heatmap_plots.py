@@ -63,6 +63,8 @@ def roc_outlier_graph(radial_errors, eres, save_path, outlier_threshold=2.0):
     plt.plot(fpr, tpr, c="blue")
     plt.text(0.42, 0.075, 'Area Under Curve={:.2f}'.format(auc), backgroundcolor=(0.8, 0.8, 0.8, 0.8), size='x-large',
              transform=ax.transAxes)
+
+    wandb.log({"roc_graph": wandb.Image(plt)})
     plt.savefig(save_path)
     plt.close()
 
@@ -121,6 +123,7 @@ def reliability_diagram(radial_errors, mode_probabilities, save_path,
         plt.legend(fontsize=20, loc="upper left", prop={'size': 16})
         plt.text(0.71, 0.075, 'ECE={:.2f}'.format(ece), backgroundcolor='white', fontsize='x-large', transform=ax.transAxes)
 
+        wandb.log({"reliability graph": wandb.Image(plt)})
         plt.savefig(save_path)
         plt.close()
 
