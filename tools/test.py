@@ -73,8 +73,9 @@ def main():
 
     wandb.login(key="f6e720fe9b2f70bdd25b65e68e51d5163e2b0337")
 
+    tag = 'validation' if args.validation else 'test'
     wandb.init(project="complete_landmark_package", name=yaml_file_name, config=cfg,
-               entity="j-mccouat", tags=['test'])
+               entity="j-mccouat", tags=[tag])
 
     # Print the arguments into the log
     logger.info("-----------Arguments-----------")

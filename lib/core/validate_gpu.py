@@ -192,6 +192,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
     overall_std = torch.std(radial_errors).item()
     overall_med = torch.median(radial_errors).item()
     txt += "[MEAN: {:.3f}\u00B1{:.3f}, MED: {:.3f}]\t".format(overall_avg, overall_std, overall_med)
+    wandb.run.summary["MRE"] = overall_avg
 
     for measurement in cfg_validation.MEASUREMENTS:
         measurements_dict[measurement] = torch.Tensor(measurements_dict[measurement])
