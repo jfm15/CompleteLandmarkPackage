@@ -8,34 +8,33 @@ from sklearn.metrics import roc_curve
 from sklearn.metrics import roc_auc_score
 
 
-def radial_error_vs_ere_graph(radial_errors, eres, save_path, n_bin=36, save=True):
+def correlation_graph(x_values, y_values, x_label, y_label, n_bin=36):
 
-    # Bin the ere and calculate the radial error for each bin
+    # Bin the y values and calculate the average x values for each bin
     binned_eres = []
     binned_errors = []
-    sorted_indices = np.argsort(eres)
-    for l in range(int(len(eres) / n_bin)):
+    sorted_indices = np.argsort(y_values)
+    for l in range(int(len(y_values) / n_bin)):
         binned_indices = sorted_indices[l * n_bin: (l + 1) * n_bin]
-        binned_eres.append(np.mean(np.take(eres, binned_indices)))
-        binned_errors.append(np.mean(np.take(radial_errors, binned_indices)))
+        binned_eres.append(np.mean(np.take(y_values, binned_indices)))
+        binned_errors.append(np.mean(np.take(x_values, binned_indices)))
     correlation = np.corrcoef(binned_eres, binned_errors)[0, 1]
 
-    if save:
-        # Plot graph
-        plt.rcParams["figure.figsize"] = (6, 6)
-        fig, ax = plt.subplots(1, 1)
-        ax.grid(zorder=0)
-        plt.xlabel('Expected Radial Error (ERE)', fontsize=14)
-        plt.ylabel('True Radial Error', fontsize=14)
-        plt.xticks(fontsize=14)
-        plt.yticks(fontsize=14)
-        plt.text(0.5, 0.075, "CORRELATION={:.2f}".format(correlation), backgroundcolor=(0.8, 0.8, 0.8, 0.8), size='x-large', transform=ax.transAxes)
-        ax.scatter(binned_eres, binned_errors, c='lime', edgecolors='black', zorder=3)
-        wandb.log({"radial error to ere chart": wandb.Image(plt)})
-        plt.savefig(save_path)
-        plt.close()
+    # Plot graph
+    plt.rcParams["figure.figsize"] = (6, 6)
+    fig, ax = plt.subplots(1, 1)
+    ax.grid(zorder=0)
+    plt.xlabel(x_label, fontsize=14)
+    plt.ylabel(y_label, fontsize=14)
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
+    plt.text(0.5, 0.075, "CORRELATION={:.2f}".format(correlation), backgroundcolor=(0.8, 0.8, 0.8, 0.8), size='x-large', transform=ax.transAxes)
+    ax.scatter(binned_eres, binned_errors, c='lime', edgecolors='black', zorder=3)
 
-    return correlation
+    wb_image = wandb.Image(plt)
+    plt.close()
+
+    return correlation, wb_image
 
 
 def roc_outlier_graph(radial_errors, eres, save_path, outlier_threshold=2.0):

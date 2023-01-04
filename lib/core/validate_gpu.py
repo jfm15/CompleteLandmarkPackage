@@ -11,7 +11,7 @@ from lib.core.evaluate import get_sdr_statistics
 from lib.visualisations import intermediate_figure
 from lib.visualisations import final_figure
 from lib.visualisations import display_box_plot
-from lib.visualisations import radial_error_vs_ere_graph
+from lib.visualisations import correlation_graph
 from lib.visualisations import reliability_diagram
 from lib.visualisations import roc_outlier_graph
 
@@ -234,14 +234,15 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         logger.info("Saving Box Plot to {}".format(figure_save_path))
 
         # Save the heatmap analysis plots
-        figure_save_path = os.path.join(save_path, "correlation_plot")
-        radial_error_vs_ere_graph(radial_errors_np.flatten(), eres_np.flatten(), figure_save_path)
-        logger.info("Saving Correlation Plot to {}".format(figure_save_path))
+        radial_ere_crl, radial_ere_wb_img = correlation_graph(radial_errors_np.flatten(), eres_np.flatten(),
+                                                              "True Radial error (mm)", "Expected Radial Error (ERE) (mm)")
+        wandb.log({"radial_ere_correlation": radial_ere_wb_img})
 
         # Save the heatmap analysis plots
-        figure_save_path = os.path.join(save_path, "correlation_plot_2")
-        radial_error_vs_ere_graph(radial_errors_np.flatten(), confidence_np.flatten(), figure_save_path)
-        logger.info("Saving Correlation Plot 2 to {}".format(figure_save_path))
+        radial_cof_crl, radial_conf_wb_img = correlation_graph(radial_errors_np.flatten(), confidence_np.flatten(),
+                                                               "True Radial error (mm)",
+                                                               "Confidence")
+        wandb.log({"radial_confidence_correlation": radial_conf_wb_img})
 
         # Save the heatmap analysis plots
         figure_save_path = os.path.join(save_path, "roc_plot")
