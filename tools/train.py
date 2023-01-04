@@ -7,9 +7,6 @@ import _init_paths
 import lib
 import lib.models
 
-import numpy as np
-
-
 from lib.dataset import LandmarkDataset
 from lib.utils import prepare_for_training
 from lib.core.function import train_ensemble
@@ -18,6 +15,8 @@ from torchsummary.torchsummary import summary_string
 
 import lib.core.validate_cpu as validate_cpu
 import lib.core.validate_gpu as validate_gpu
+
+import wandb
 
 
 '''
