@@ -203,9 +203,14 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         logger.info(txt)
 
     sdr_rates = get_sdr_statistics(radial_errors, cfg_validation.SDR_THRESHOLDS)
+    wb_sdr_data = []
     txt = "Successful Detection Rates are: "
-    for sdr_rate in sdr_rates:
+    for thres, sdr_rate in zip(cfg_validation.SDR_THRESHOLDS, sdr_rates):
+        wb_sdr_data.append([thres, sdr_rate])
         txt += "{:.2f}%\t".format(sdr_rate)
+
+    sdr_table = wandb.Table(columns=["threshold", "% within"], data=wb_sdr_data)
+    wandb.log({"sdr_table": sdr_table})
 
     if not temperature_scaling_mode:
         logger.info(txt)
