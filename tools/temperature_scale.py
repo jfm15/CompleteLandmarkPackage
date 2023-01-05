@@ -1,6 +1,7 @@
 import argparse
 import torch
 import wandb
+import os
 
 import _init_paths
 import lib
@@ -51,7 +52,7 @@ def parse_args():
     return args
 
 
-def validate(model, validation_loader, final_layer, loss_function, cfg_validation, logger):
+def validate(model, validation_loader, final_layer, loss_function, cfg_validation, save_path, logger):
 
     if torch.cuda.is_available():
         validate_file = "validate_gpu"
@@ -62,7 +63,7 @@ def validate(model, validation_loader, final_layer, loss_function, cfg_validatio
     with torch.no_grad():
         logger.info('-----------Validation Set-----------')
         _, current_mre = eval("{}.validate_over_set".format(validate_file)) \
-            ([model], validation_loader, final_layer, loss_function, [], cfg_validation, None,
+            ([model], validation_loader, final_layer, loss_function, [], cfg_validation, save_path,
              logger=logger, training_mode=True, temperature_scaling_mode=True)
 
 
@@ -112,7 +113,11 @@ def main():
     final_layer = eval("lib.models." + cfg.TRAIN.FINAL_LAYER)
     loss_function = eval("lib.models." + cfg.TRAIN.LOSS_FUNCTION)
 
-    validate(our_model, validation_loader, final_layer, loss_function, cfg.VALIDATION, logger)
+    image_save_path = os.path.join(output_path, 'images')
+    if not os.path.exists(image_save_path):
+        os.makedirs(image_save_path)
+
+    validate(our_model, validation_loader, final_layer, loss_function, cfg.VALIDATION, image_save_path, logger)
 
     for epoch in range(10):
 
