@@ -124,7 +124,7 @@ def main():
         logger.info('-----------Epoch {} Temperature Scaling-----------'.format(epoch))
         temperature_scale(our_model, optimizer, scheduler, training_loader, final_layer, loss_function, logger)
 
-        validate(our_model, validation_loader, final_layer, loss_function, cfg.VALIDATION, logger)
+        validate(our_model, validation_loader, final_layer, loss_function, cfg.VALIDATION, image_save_path, logger)
 
     logger.info("-----------Temperature Scaling Complete-----------")
 
