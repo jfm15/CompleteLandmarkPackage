@@ -243,7 +243,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         radial_ere_crl, radial_ere_wb_img = correlation_graph(radial_errors_np.flatten(), eres_np.flatten(),
                                                               "True Radial error (mm)", "Expected Radial Error (ERE) (mm)")
         wandb.log({"radial_ere_correlation_plot": radial_ere_wb_img})
-        wandb.log({"radial_ere_correlation": radial_ere_crl})
+        wandb.log({"radial_ere_cor": radial_ere_crl})
         wandb.run.summary["radial_ere_correlation"] = radial_ere_crl
 
         # Save the heatmap analysis plots
@@ -251,7 +251,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
                                                                "True Radial error (mm)",
                                                                "Confidence")
         wandb.log({"radial_confidence_correlation_plot": radial_conf_wb_img})
-        wandb.log({"radial_confidence_correlation": radial_cof_crl})
+        wandb.log({"radial_confidence_cor": radial_cof_crl})
         wandb.run.summary["radial_confidence_correlation"] = radial_cof_crl
 
         # Save the heatmap analysis plots
