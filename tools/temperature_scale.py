@@ -1,7 +1,6 @@
 import argparse
 import torch
-import os
-import math
+import wandb
 
 import _init_paths
 import lib
@@ -73,6 +72,11 @@ def main():
     args = parse_args()
 
     cfg, logger, output_path, yaml_file_name = prepare_for_testing(args.cfg, args.pretrained_model)
+
+    wandb.login(key="f6e720fe9b2f70bdd25b65e68e51d5163e2b0337")
+
+    wandb.init(project="complete_landmark_package", name=yaml_file_name, config=cfg,
+               entity="j-mccouat", tags=['scaling'])
 
     # Print the arguments into the log
     logger.info("-----------Arguments-----------")
