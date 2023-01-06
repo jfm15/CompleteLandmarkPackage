@@ -192,8 +192,6 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
     overall_std = torch.std(radial_errors).item()
     overall_med = torch.median(radial_errors).item()
     txt += "[MEAN: {:.3f}\u00B1{:.3f}, MED: {:.3f}]\t".format(overall_avg, overall_std, overall_med)
-    wandb.log({"MRE": overall_avg})
-    wandb.run.summary["MRE"] = overall_avg
 
     for measurement in cfg_validation.MEASUREMENTS:
         measurements_dict[measurement] = torch.Tensor(measurements_dict[measurement])
@@ -210,14 +208,13 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         wb_sdr_data.append([thres, sdr_rate])
         txt += "{:.2f}%\t".format(sdr_rate)
 
-    sdr_table = wandb.Table(columns=["threshold", "% within"], data=wb_sdr_data)
-    wandb.log({"sdr_table": sdr_table})
-
     if not temperature_scaling_mode:
         logger.info(txt)
 
     # Final graphics
-    if not training_mode or temperature_scaling_mode:
+    # We want the following functionality:
+    # 1) Add the end of the test script or during the temperature scaling phase where we want things to be logged
+    if not training_mode:
         # Run the diagnosis experiments
         # I need to find the predicted points and the ground truth points
         # aggregated_scaled_points, dataset_target_scaled_points
@@ -245,29 +242,38 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         # Save the heatmap analysis plots
         radial_ere_crl, radial_ere_wb_img = correlation_graph(radial_errors_np.flatten(), eres_np.flatten(),
                                                               "True Radial error (mm)", "Expected Radial Error (ERE) (mm)")
-        wandb.log({"radial_ere_correlation_plot": radial_ere_wb_img})
-        wandb.log({"radial_ere_cor": radial_ere_crl})
-        wandb.run.summary["radial_ere_correlation"] = radial_ere_crl
 
         # Save the heatmap analysis plots
         radial_cof_crl, radial_conf_wb_img = correlation_graph(radial_errors_np.flatten(), confidence_np.flatten(),
                                                                "True Radial error (mm)",
                                                                "Confidence")
-        wandb.log({"radial_confidence_correlation_plot": radial_conf_wb_img})
-        wandb.log({"radial_confidence_cor": radial_cof_crl})
-        wandb.run.summary["radial_confidence_correlation"] = radial_cof_crl
 
         # Save the heatmap analysis plots
         proposed_threshold, auc, wb_image = roc_outlier_graph(radial_errors_np.flatten(), eres_np.flatten())
-        wandb.log({"roc_ere_plot": wb_image})
-        wandb.log({"auc": auc})
-        wandb.run.summary["auc"] = auc
 
         # Save the reliability diagram
         # TODO: code in pixel size into below
         ece, wb_image = reliability_diagram(radial_errors_np.flatten(), confidence_np.flatten())
-        wandb.log({"reliability_diagram": wb_image})
-        wandb.log({"ece": ece})
-        wandb.run.summary["ece"] = ece
+
+        if temperature_scaling_mode:
+            wandb.log({"radial_ere_cor": radial_ere_crl})
+            wandb.log({"radial_confidence_cor": radial_cof_crl})
+            wandb.log({"auc": auc})
+            wandb.log({"ece": ece})
+
+        else:
+            sdr_table = wandb.Table(columns=["threshold", "% within"], data=wb_sdr_data)
+
+            wandb.log({"sdr_table": sdr_table,
+                       "radial_ere_correlation_plot": radial_ere_wb_img,
+                       "radial_confidence_correlation_plot": radial_conf_wb_img,
+                       "roc_ere_plot": wb_image,
+                       "reliability_diagram": wb_image})
+
+            wandb.run.summary["radial_ere_correlation"] = radial_ere_crl
+            wandb.run.summary["radial_confidence_correlation"] = radial_cof_crl
+            wandb.run.summary["auc"] = auc
+            wandb.run.summary["ece"] = ece
+            wandb.run.summary["MRE"] = overall_avg
 
     return average_loss, overall_avg

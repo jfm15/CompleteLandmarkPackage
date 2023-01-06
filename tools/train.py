@@ -153,7 +153,6 @@ def main():
             logger.info('-----------Epoch {} Supervised Training-----------'.format(epoch))
             training_loss = train_ensemble(ensemble, optimizers, schedulers, training_loader,
                                            final_layer, loss_function, logger)
-            wandb.log({"training_loss": training_loss})
 
             # Validate
             with torch.no_grad():
@@ -163,8 +162,10 @@ def main():
                     (ensemble, validation_loader, final_layer, loss_function, [], cfg.VALIDATION, None,
                      logger=logger, training_mode=True)
 
-                wandb.log({"validation_loss": validation_loss})
-                wandb.log({"validation_mre": validation_mre})
+                wandb.log({"training_loss": training_loss,
+                           "validation_loss": validation_loss,
+                           "validation_mre": validation_mre,
+                           "epoch": epoch})
 
         '''
         # reload best models
