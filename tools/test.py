@@ -59,6 +59,12 @@ def parse_args():
                         action='store_true',
                         help='If this is given run over the validation set instead of the test set')
 
+    parser.add_argument('--tags',
+                        help='tags which are passed to weights and biases',
+                        nargs='+',
+                        required=False,
+                        default=[])
+
     args = parser.parse_args()
 
     return args
@@ -73,9 +79,10 @@ def main():
 
     wandb.login(key="f6e720fe9b2f70bdd25b65e68e51d5163e2b0337")
 
-    tag = 'validation' if args.validation else 'test'
+    tags = ['validation'] if args.validation else ['test']
+    tags += args.tags
     wandb.init(project="complete_landmark_package", name=yaml_file_name, config=cfg,
-               entity="j-mccouat", tags=[tag])
+               entity="j-mccouat", tags=tags)
 
     # Print the arguments into the log
     logger.info("-----------Arguments-----------")

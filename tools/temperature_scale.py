@@ -47,6 +47,12 @@ def parse_args():
                         type=str,
                         required=True)
 
+    parser.add_argument('--tags',
+                        help='tags which are passed to weights and biases',
+                        nargs='+',
+                        required=False,
+                        default=[])
+
     args = parser.parse_args()
 
     return args
@@ -76,8 +82,9 @@ def main():
 
     wandb.login(key="f6e720fe9b2f70bdd25b65e68e51d5163e2b0337")
 
+    tags = ['scaling'] + args.tags
     wandb.init(project="complete_landmark_package", name=yaml_file_name, config=cfg,
-               entity="j-mccouat", tags=['scaling'])
+               entity="j-mccouat", tags=tags)
 
     # Print the arguments into the log
     logger.info("-----------Arguments-----------")
