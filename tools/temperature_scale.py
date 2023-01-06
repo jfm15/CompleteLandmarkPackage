@@ -58,7 +58,8 @@ def parse_args():
     return args
 
 
-def validate(model, validation_loader, final_layer, loss_function, cfg_validation, save_path, logger, epoch):
+def validate(model, validation_loader, final_layer, loss_function, cfg_validation,
+             save_path, logger, epoch=0, save_graphs=False):
 
     if torch.cuda.is_available():
         validate_file = "validate_gpu"
@@ -68,9 +69,15 @@ def validate(model, validation_loader, final_layer, loss_function, cfg_validatio
     # Validate
     with torch.no_grad():
         logger.info('-----------Validation Set-----------')
-        _, current_mre = eval("{}.validate_over_set".format(validate_file)) \
-            ([model], validation_loader, final_layer, loss_function, [], cfg_validation, save_path,
-             logger=logger, training_mode=True, temperature_scaling_mode=True, epoch=epoch)
+
+        if not save_graphs:
+            eval("{}.validate_over_set".format(validate_file))\
+                ([model], validation_loader, final_layer, loss_function, [], cfg_validation, save_path,
+                 logger=logger, training_mode=True, temperature_scaling_mode=True, epoch=epoch)
+        else:
+            eval("{}.validate_over_set".format(validate_file)) \
+                ([model], validation_loader, final_layer, loss_function, [], cfg_validation, save_path,
+                 logger=logger)
 
 
 def main():
@@ -124,7 +131,8 @@ def main():
     if not os.path.exists(image_save_path):
         os.makedirs(image_save_path)
 
-    validate(our_model, validation_loader, final_layer, loss_function, cfg.VALIDATION, image_save_path, logger)
+    validate(our_model, validation_loader, final_layer, loss_function,
+             cfg.VALIDATION, image_save_path, logger, save_graphs=True)
 
     for epoch in range(10):
 
@@ -132,9 +140,11 @@ def main():
         temperature_scale(our_model, optimizer, scheduler, training_loader, final_layer, loss_function, logger)
 
         validate(our_model, validation_loader, final_layer, loss_function,
-                 cfg.VALIDATION, image_save_path, logger, epoch)
+                 cfg.VALIDATION, image_save_path, logger, epoch=epoch)
 
     logger.info("-----------Temperature Scaling Complete-----------")
+    validate(our_model, validation_loader, final_layer, loss_function,
+             cfg.VALIDATION, image_save_path, logger, save_graphs=True)
 
 
 if __name__ == '__main__':
