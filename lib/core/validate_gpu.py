@@ -20,7 +20,7 @@ from lib.measures import diagnose_set
 
 
 def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg_validation, save_path,
-                      logger=None, training_mode=False, temperature_scaling_mode=False):
+                      logger=None, training_mode=False, temperature_scaling_mode=False, epoch=0):
 
     predicted_points_per_model = []
     eres_per_model = []
@@ -214,7 +214,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
     # Final graphics
     # We want the following functionality:
     # 1) Add the end of the test script or during the temperature scaling phase where we want things to be logged
-    if not training_mode:
+    if not training_mode or temperature_scaling_mode:
         # Run the diagnosis experiments
         # I need to find the predicted points and the ground truth points
         # aggregated_scaled_points, dataset_target_scaled_points
@@ -256,10 +256,11 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         ece, wb_image = reliability_diagram(radial_errors_np.flatten(), confidence_np.flatten())
 
         if temperature_scaling_mode:
-            wandb.log({"radial_ere_cor": radial_ere_crl})
-            wandb.log({"radial_confidence_cor": radial_cof_crl})
-            wandb.log({"auc": auc})
-            wandb.log({"ece": ece})
+            wandb.log({"radial_ere_cor": radial_ere_crl,
+                       "radial_confidence_cor": radial_cof_crl,
+                       "auc": auc,
+                       "ece": ece,
+                       "epoch": epoch})
 
         else:
             sdr_table = wandb.Table(columns=["threshold", "% within"], data=wb_sdr_data)

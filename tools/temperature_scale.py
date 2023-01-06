@@ -58,7 +58,7 @@ def parse_args():
     return args
 
 
-def validate(model, validation_loader, final_layer, loss_function, cfg_validation, save_path, logger):
+def validate(model, validation_loader, final_layer, loss_function, cfg_validation, save_path, logger, epoch):
 
     if torch.cuda.is_available():
         validate_file = "validate_gpu"
@@ -70,7 +70,7 @@ def validate(model, validation_loader, final_layer, loss_function, cfg_validatio
         logger.info('-----------Validation Set-----------')
         _, current_mre = eval("{}.validate_over_set".format(validate_file)) \
             ([model], validation_loader, final_layer, loss_function, [], cfg_validation, save_path,
-             logger=logger, training_mode=True, temperature_scaling_mode=True)
+             logger=logger, training_mode=True, temperature_scaling_mode=True, epoch=epoch)
 
 
 def main():
@@ -131,7 +131,8 @@ def main():
         logger.info('-----------Epoch {} Temperature Scaling-----------'.format(epoch))
         temperature_scale(our_model, optimizer, scheduler, training_loader, final_layer, loss_function, logger)
 
-        validate(our_model, validation_loader, final_layer, loss_function, cfg.VALIDATION, image_save_path, logger)
+        validate(our_model, validation_loader, final_layer, loss_function,
+                 cfg.VALIDATION, image_save_path, logger, epoch)
 
     logger.info("-----------Temperature Scaling Complete-----------")
 
