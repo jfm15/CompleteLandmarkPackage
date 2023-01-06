@@ -236,9 +236,11 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         eres_np = eres_per_model[0].detach().cpu().numpy()
         confidence_np = modes_per_model[0].detach().cpu().numpy()
 
+        '''
         figure_save_path = os.path.join(save_path, "box_plot")
         display_box_plot(radial_errors_np, figure_save_path)
         logger.info("Saving Box Plot to {}".format(figure_save_path))
+        '''
 
         # Save the heatmap analysis plots
         radial_ere_crl, radial_ere_wb_img = correlation_graph(radial_errors_np.flatten(), eres_np.flatten(),

@@ -104,10 +104,12 @@ def main():
                                          partition_label="validation")
     validation_loader = torch.utils.data.DataLoader(validation_dataset, batch_size=1, shuffle=False)
 
+    '''
     test_dataset = LandmarkDataset(args.images, args.annotations, cfg.DATASET, gaussian=False,
                                    perform_augmentation=False, partition=args.partition,
                                    partition_label="testing")
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1, shuffle=False)
+    '''
 
     # Used for debugging
     if args.debug:
@@ -149,7 +151,9 @@ def main():
         for epoch in range(cfg.TRAIN.EPOCHS):
 
             logger.info('-----------Epoch {} Supervised Training-----------'.format(epoch))
-            train_ensemble(ensemble, optimizers, schedulers, training_loader, final_layer, loss_function, logger)
+            training_loss = train_ensemble(ensemble, optimizers, schedulers, training_loader,
+                                           final_layer, loss_function, logger)
+            wandb.log({"training_loss": training_loss})
 
             # Validate
             with torch.no_grad():
@@ -158,6 +162,9 @@ def main():
                 validation_loss, validation_mre = eval("{}.validate_over_set".format(validate_file)) \
                     (ensemble, validation_loader, final_layer, loss_function, [], cfg.VALIDATION, None,
                      logger=logger, training_mode=True)
+
+                wandb.log({"validation_loss": validation_loss})
+                wandb.log({"validation_mre": validation_mre})
 
         '''
         # reload best models
