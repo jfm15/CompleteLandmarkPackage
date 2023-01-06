@@ -93,6 +93,8 @@ def reliability_diagram(radial_errors, mode_probabilities, n_of_bins=10, pixel_s
     # get confidence of each bin
     avg_conf_for_each_bin = total_confidence_for_each_bin / count_for_each_bin.astype(float)
     avg_acc_for_each_bin = no_of_correct_preds / count_for_each_bin.astype(float)
+    
+    print(avg_acc_for_each_bin, avg_conf_for_each_bin, count_for_each_bin.astype(float))
 
     n = float(np.sum(count_for_each_bin))
     ece = 0.0
