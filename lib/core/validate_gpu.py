@@ -249,11 +249,11 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
                                                                "Confidence")
 
         # Save the heatmap analysis plots
-        proposed_threshold, auc, wb_image = roc_outlier_graph(radial_errors_np.flatten(), eres_np.flatten())
+        proposed_threshold, auc, roc_wb_img = roc_outlier_graph(radial_errors_np.flatten(), eres_np.flatten())
 
         # Save the reliability diagram
         # TODO: code in pixel size into below
-        ece, wb_image = reliability_diagram(radial_errors_np.flatten(), confidence_np.flatten())
+        ece, reliability_diagram_wb_image = reliability_diagram(radial_errors_np.flatten(), confidence_np.flatten())
 
         if temperature_scaling_mode:
             wandb.log({"radial_ere_cor": radial_ere_crl,
@@ -268,8 +268,8 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             wandb.log({"sdr_table": sdr_table,
                        "radial_ere_correlation_plot": radial_ere_wb_img,
                        "radial_confidence_correlation_plot": radial_conf_wb_img,
-                       "roc_ere_plot": wb_image,
-                       "reliability_diagram": wb_image})
+                       "roc_ere_plot": roc_wb_img,
+                       "reliability_diagram": reliability_diagram_wb_image})
 
             wandb.run.summary["radial_ere_correlation"] = radial_ere_crl
             wandb.run.summary["radial_confidence_correlation"] = radial_cof_crl
