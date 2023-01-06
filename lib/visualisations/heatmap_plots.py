@@ -72,10 +72,12 @@ def roc_outlier_graph(ground_truth, predictive_feature, outlier_threshold=2.0):
 # At the moment this assumes all images have the same resolution
 def reliability_diagram(radial_errors, mode_probabilities, n_of_bins=10, pixel_size=0.30234375):
 
+    x_min = np.quantile(mode_probabilities, 0.10)
     x_max = np.quantile(mode_probabilities, 0.90)
-    bins = np.linspace(0, x_max, n_of_bins + 1)
+    bins = np.linspace(x_min, x_max, n_of_bins + 1)
+    bins[0] = 0.0
     bins[-1] = 1.1
-    widths = x_max / n_of_bins
+    widths = (x_max - x_min) / n_of_bins
     radius = math.sqrt((pixel_size**2) / math.pi)
     correct_predictions = radial_errors < radius
 
@@ -93,8 +95,8 @@ def reliability_diagram(radial_errors, mode_probabilities, n_of_bins=10, pixel_s
     # get confidence of each bin
     avg_conf_for_each_bin = total_confidence_for_each_bin / count_for_each_bin.astype(float)
     avg_acc_for_each_bin = no_of_correct_preds / count_for_each_bin.astype(float)
-    
-    print(avg_acc_for_each_bin, avg_conf_for_each_bin, count_for_each_bin.astype(float))
+
+    # print(avg_acc_for_each_bin, avg_conf_for_each_bin, count_for_each_bin.astype(float))
 
     n = float(np.sum(count_for_each_bin))
     ece = 0.0
@@ -113,7 +115,7 @@ def reliability_diagram(radial_errors, mode_probabilities, n_of_bins=10, pixel_s
     plt.xticks(fontsize=14)
     plt.yticks(fontsize=14)
     plt.grid(zorder=0)
-    plt.xlim(0.0, x_max)
+    plt.xlim(x_min, x_max)
     plt.ylim(0.0, max(np.max(avg_acc_for_each_bin), np.max(avg_conf_for_each_bin)) * 1.1)
     plt.bar(bins[:-1], avg_acc_for_each_bin, align='edge', width=widths, color='blue', edgecolor='black', label='Accuracy', zorder=3)
     plt.bar(bins[:-1], avg_conf_for_each_bin, align='edge', width=widths, color='lime', edgecolor='black', alpha=0.5,

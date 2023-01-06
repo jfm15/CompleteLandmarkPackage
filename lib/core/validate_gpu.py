@@ -58,6 +58,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             meta['pixel_size'] = meta['pixel_size'].cuda()
 
             output = model(image.float())
+            output = model.scale(output)
             output = final_layer(output)
             loss = loss_function(output, channels)
             losses.append(loss.item())

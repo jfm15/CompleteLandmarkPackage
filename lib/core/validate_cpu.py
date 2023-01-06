@@ -25,6 +25,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
 
             model.eval()
             output = model(image.float())
+            output = model.scale(output)
             output = final_layer(output)
             loss = loss_function(output, channels)
             losses.append(loss.item())
