@@ -146,10 +146,6 @@ def main():
 
         logger.info("-----------Experiment {}-----------".format(run + 1))
 
-        best_mre = math.inf
-        best_state_dicts = []
-        no_better_count = 0
-
         for epoch in range(cfg.TRAIN.EPOCHS):
 
             logger.info('-----------Epoch {} Supervised Training-----------'.format(epoch))
@@ -159,27 +155,11 @@ def main():
             with torch.no_grad():
 
                 logger.info('-----------Validation Set-----------')
-                _, current_mre = eval("{}.validate_over_set".format(validate_file)) \
+                validation_loss, validation_mre = eval("{}.validate_over_set".format(validate_file)) \
                     (ensemble, validation_loader, final_layer, loss_function, [], cfg.VALIDATION, None,
                      logger=logger, training_mode=True)
 
-                if current_mre < best_mre:
-                    logger.info('-----------Best Results So Far-----------')
-                    # keep track of best models
-                    no_better_count = 0
-                    best_mre = current_mre
-                    ensemble_state_dict = []
-                    for model_idx in range(len(ensemble)):
-                        ensemble_state_dict.append(ensemble[model_idx].state_dict())
-                    best_state_dicts = ensemble_state_dict
-                else:
-                    no_better_count += 1
-
-            if no_better_count == cfg.TRAIN.EARLY_STOPPING:
-                logger.info('-----------Halting Training As No Improvment Seen For {} Epochs-----------'
-                            .format(no_better_count))
-                break
-
+        '''
         # reload best models
         for model_idx in range(len(ensemble)):
             our_model = ensemble[model_idx]
@@ -190,6 +170,7 @@ def main():
             eval("{}.validate_over_set".format(validate_file)) \
                 (ensemble, test_loader, final_layer, loss_function, [], cfg.VALIDATION, None,
                  logger=logger, training_mode=True)
+        '''
 
         logger.info('-----------Saving Models-----------')
         model_run_path = os.path.join(output_path, "run:{}_models".format(run))

@@ -79,8 +79,7 @@ def main():
 
     wandb.login(key="f6e720fe9b2f70bdd25b65e68e51d5163e2b0337")
 
-    tags = ['validation'] if args.validation else ['test']
-    tags += args.tags
+    tags = ['test'] + args.tags
     wandb.init(project="complete_landmark_package", name=yaml_file_name, config=cfg,
                entity="j-mccouat", tags=tags)
 
