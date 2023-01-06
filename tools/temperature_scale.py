@@ -104,12 +104,12 @@ def main():
     logger.info("")
 
     training_dataset = LandmarkDataset(args.images, args.annotations, cfg.DATASET, perform_augmentation=True,
-                                       partition=args.partition, partition_label="validation")
+                                       partition=args.partition, partition_label="training")
     training_loader = torch.utils.data.DataLoader(training_dataset, batch_size=cfg.TRAIN.BATCH_SIZE, shuffle=True)
 
     validation_dataset = LandmarkDataset(args.images, args.annotations, cfg.DATASET, gaussian=False,
                                          perform_augmentation=False, partition=args.partition,
-                                         partition_label="testing")
+                                         partition_label="validation")
     validation_loader = torch.utils.data.DataLoader(validation_dataset, batch_size=1, shuffle=False)
 
     # Load model and state dict from file
