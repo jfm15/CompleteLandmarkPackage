@@ -77,7 +77,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
 
             # turn pixel size into the same shape as the ere
             pixel_size_tensor = meta['pixel_size'][0][0]
-            pixel_size_tensor.repeat(eres.size())
+            pixel_size_tensor = pixel_size_tensor.repeat(eres.size())
             print(pixel_size_tensor)
             model_pixel_sizes.append(pixel_size_tensor)
 
