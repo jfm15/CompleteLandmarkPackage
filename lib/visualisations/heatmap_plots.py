@@ -80,7 +80,6 @@ def reliability_diagram(radial_errors, mode_probabilities, pixel_size, n_of_bins
     widths = (x_max - x_min) / n_of_bins
     radius = np.sqrt(np.square(pixel_size) / math.pi)
     correct_predictions = radial_errors < radius
-    print(correct_predictions)
 
     # a 10 length array with values adding to 19
     count_for_each_bin, _ = np.histogram(mode_probabilities, bins=bins)
