@@ -70,7 +70,7 @@ def roc_outlier_graph(ground_truth, predictive_feature, outlier_threshold=2.0):
 
 
 # At the moment this assumes all images have the same resolution
-def reliability_diagram(radial_errors, mode_probabilities, n_of_bins=10, pixel_size=0.30234375):
+def reliability_diagram(radial_errors, mode_probabilities, pixel_size, n_of_bins=10):
 
     x_min = np.quantile(mode_probabilities, 0.10)
     x_max = np.quantile(mode_probabilities, 0.90)
@@ -78,7 +78,7 @@ def reliability_diagram(radial_errors, mode_probabilities, n_of_bins=10, pixel_s
     bins[0] = 0.0
     bins[-1] = 1.1
     widths = (x_max - x_min) / n_of_bins
-    radius = math.sqrt((pixel_size**2) / math.pi)
+    radius = np.sqrt(np.square(pixel_size) / math.pi)
     correct_predictions = radial_errors < radius
 
     # a 10 length array with values adding to 19

@@ -25,6 +25,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
     predicted_points_per_model = []
     eres_per_model = []
     modes_per_model = []
+    pixel_size_per_model = []
     dataset_target_points = []
     scaled_predicted_points_per_model = []
     dataset_target_scaled_points = []
@@ -48,6 +49,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         dataset_target_scaled_points = []
         model_eres = []
         model_modes = []
+        model_pixel_sizes = []
 
         for idx, (image, channels, meta) in enumerate(loader):
 
@@ -69,8 +71,10 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             dataset_target_points.append(target_points)
             model_predicted_scaled_points.append(scaled_predicted_points)
             dataset_target_scaled_points.append(scaled_target_points)
+            print(eres, meta['pixel_size'][0])
             model_eres.append(eres)
             model_modes.append(modes)
+            model_pixel_sizes.append(meta['pixel_size'][0])
 
             # print intermediate figures
             b = 0
@@ -95,6 +99,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         dataset_target_scaled_points = torch.cat(dataset_target_scaled_points)
         model_eres = torch.cat(model_eres)
         model_modes = torch.cat(model_modes)
+        model_pixel_sizes = torch.cat(model_pixel_sizes)
         # D = Dataset size
         # predicted_points has size [D, N, 2]
         # eres has size [D, N]
@@ -114,6 +119,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
     dataset_target_scaled_points = dataset_target_scaled_points.float()
     eres_per_model = torch.stack(eres_per_model).float()
     modes_per_model = torch.stack(modes_per_model).float()
+    pixel_size_per_model = torch.stack(pixel_size_per_model).float()
 
     aggregated_point_dict = use_aggregate_methods(predicted_points_per_model, eres_per_model,
                                                   aggregate_methods=cfg_validation.AGGREGATION_METHODS)
@@ -233,6 +239,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         radial_errors_np = radial_errors.detach().cpu().numpy()
         eres_np = eres_per_model[0].detach().cpu().numpy()
         confidence_np = modes_per_model[0].detach().cpu().numpy()
+        pixel_size_np = pixel_size_per_model[0].detach().cpu().numpy()
 
         '''
         figure_save_path = os.path.join(save_path, "box_plot")
