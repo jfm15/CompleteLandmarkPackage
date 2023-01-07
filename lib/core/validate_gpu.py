@@ -71,14 +71,12 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             dataset_target_points.append(target_points)
             model_predicted_scaled_points.append(scaled_predicted_points)
             dataset_target_scaled_points.append(scaled_target_points)
-            print(eres)
             model_eres.append(eres)
             model_modes.append(modes)
 
             # turn pixel size into the same shape as the ere
             pixel_size_tensor = meta['pixel_size'][0][0]
             pixel_size_tensor = pixel_size_tensor.repeat(eres.size())
-            print(pixel_size_tensor)
             model_pixel_sizes.append(pixel_size_tensor)
 
             # print intermediate figures
@@ -266,8 +264,8 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         proposed_threshold, auc, roc_wb_img = roc_outlier_graph(radial_errors_np.flatten(), eres_np.flatten())
 
         # Save the reliability diagram
-        # TODO: code in pixel size into below
-        ece, reliability_diagram_wb_image = reliability_diagram(radial_errors_np.flatten(), confidence_np.flatten())
+        ece, reliability_diagram_wb_image = reliability_diagram(radial_errors_np.flatten(), confidence_np.flatten(),
+                                                                pixel_size_np)
 
         if temperature_scaling_mode:
             wandb.log({"radial_ere_cor": radial_ere_crl,
