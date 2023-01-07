@@ -261,7 +261,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
                                                                 pixel_size_np.flatten())
 
         # data should be 2 rows of mre and sdr scores for the threshold
-        threshold_table_data = get_threshold_table(torch.flatten(radial_errors), torch.flatten(eres),
+        threshold_table_data = get_threshold_table(torch.flatten(radial_errors), torch.flatten(eres_per_model[0]),
                                                    proposed_threshold, cfg_validation.SDR_THRESHOLDS)
 
         if temperature_scaling_mode:
