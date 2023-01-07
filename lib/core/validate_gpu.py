@@ -71,10 +71,15 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             dataset_target_points.append(target_points)
             model_predicted_scaled_points.append(scaled_predicted_points)
             dataset_target_scaled_points.append(scaled_target_points)
-            print(eres, meta['pixel_size'][0])
+            print(eres)
             model_eres.append(eres)
             model_modes.append(modes)
-            model_pixel_sizes.append(meta['pixel_size'][0])
+
+            # turn pixel size into the same shape as the ere
+            pixel_size_tensor = meta['pixel_size'][0][0]
+            pixel_size_tensor.repeat(eres.size())
+            print(pixel_size_tensor)
+            model_pixel_sizes.append(pixel_size_tensor)
 
             # print intermediate figures
             b = 0
@@ -109,6 +114,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         scaled_predicted_points_per_model.append(model_predicted_scaled_points)
         eres_per_model.append(model_eres)
         modes_per_model.append(model_modes)
+        pixel_size_per_model.append(model_pixel_sizes)
 
     # predicted_points_per_model is size [M, D, N, 2]
     # eres_per_model is size [M, D, N]
