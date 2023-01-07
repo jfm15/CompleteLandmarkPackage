@@ -273,8 +273,11 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
 
         else:
 
-            threshold_table = wandb.Table(columns=["Set", "# landmarks", "MRE"] + cfg_validation.SDR_THRESHOLDS,
-                                          data=threshold_table_data)
+            columns = ["Set", "# landmarks", "MRE"]
+            for sdr_threshold in cfg_validation.SDR_THRESHOLDS:
+                columns += "sdr: {}".format(sdr_threshold)
+
+            threshold_table = wandb.Table(columns=columns, data=threshold_table_data)
 
             wandb.log({"threshold_table": threshold_table,
                        "radial_ere_correlation_plot": radial_ere_wb_img,
