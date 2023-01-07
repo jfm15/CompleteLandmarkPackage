@@ -265,7 +265,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
 
         # Save the reliability diagram
         ece, reliability_diagram_wb_image = reliability_diagram(radial_errors_np.flatten(), confidence_np.flatten(),
-                                                                pixel_size_np)
+                                                                pixel_size_np.flatten())
 
         if temperature_scaling_mode:
             wandb.log({"radial_ere_cor": radial_ere_crl,
