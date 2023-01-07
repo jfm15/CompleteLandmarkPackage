@@ -275,7 +275,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
 
             columns = ["Set", "# landmarks", "MRE"]
             for sdr_threshold in cfg_validation.SDR_THRESHOLDS:
-                columns += "sdr: {}".format(sdr_threshold)
+                columns.append("sdr: {}".format(sdr_threshold))
 
             threshold_table = wandb.Table(columns=columns, data=threshold_table_data)
 
