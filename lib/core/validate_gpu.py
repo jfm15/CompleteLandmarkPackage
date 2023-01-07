@@ -6,7 +6,7 @@ from lib.utils import get_stats
 from lib.core.evaluate import cal_radial_errors
 from lib.core.evaluate import use_aggregate_methods
 from lib.core.evaluate import get_predicted_and_target_points
-from lib.core.evaluate import get_sdr_statistics
+from lib.core.evaluate import get_threshold_table
 
 from lib.visualisations import intermediate_figure
 from lib.visualisations import final_figure
@@ -212,13 +212,6 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
     if not temperature_scaling_mode:
         logger.info(txt)
 
-    sdr_rates = get_sdr_statistics(radial_errors, cfg_validation.SDR_THRESHOLDS)
-    wb_sdr_data = []
-    txt = "Successful Detection Rates are: "
-    for thres, sdr_rate in zip(cfg_validation.SDR_THRESHOLDS, sdr_rates):
-        wb_sdr_data.append([thres, sdr_rate])
-        txt += "{:.2f}%\t".format(sdr_rate)
-
     if not temperature_scaling_mode:
         logger.info(txt)
 
@@ -267,6 +260,10 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         ece, reliability_diagram_wb_image = reliability_diagram(radial_errors_np.flatten(), confidence_np.flatten(),
                                                                 pixel_size_np.flatten())
 
+        # data should be 2 rows of mre and sdr scores for the threshold
+        threshold_table_data = get_threshold_table(torch.flatten(radial_errors), torch.flatten(eres),
+                                                   proposed_threshold, cfg_validation.SDR_THRESHOLDS)
+
         if temperature_scaling_mode:
             wandb.log({"radial_ere_cor": radial_ere_crl,
                        "radial_confidence_cor": radial_cof_crl,
@@ -275,9 +272,11 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
                        "epoch": epoch})
 
         else:
-            sdr_table = wandb.Table(columns=["threshold", "% within"], data=wb_sdr_data)
 
-            wandb.log({"sdr_table": sdr_table,
+            threshold_table = wandb.Table(columns=["Set", "# landmarks", "MRE"] + cfg_validation.SDR_THRESHOLDS,
+                                          data=threshold_table_data)
+
+            wandb.log({"threshold_table": threshold_table,
                        "radial_ere_correlation_plot": radial_ere_wb_img,
                        "radial_confidence_correlation_plot": radial_conf_wb_img,
                        "roc_ere_plot": roc_wb_img,

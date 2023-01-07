@@ -118,6 +118,31 @@ def get_sdr_statistics(radial_errors, thresholds):
     return successful_detection_rates
 
 
+def get_threshold_table(radial_errors, eres, proposed_split_threshold, sdr_thresholds):
+    unflagged_radial_errors = radial_errors[eres < proposed_split_threshold]
+    flagged_radial_errors = radial_errors[eres >= proposed_split_threshold]
+
+    total_number = torch.numel(radial_errors)
+    unflagged_number = torch.numel(unflagged_radial_errors)
+    flagged_number = torch.numel(flagged_radial_errors)
+
+    total_mre = torch.mean(radial_errors)
+    unflagged_mre = torch.mean(unflagged_radial_errors)
+    flagged_mre = torch.mean(flagged_radial_errors)
+
+    total_sdr_stats = get_sdr_statistics(radial_errors, sdr_thresholds)
+    unflagged_sdr_stats = get_sdr_statistics(unflagged_radial_errors, sdr_thresholds)
+    flagged_sdr_stats = get_sdr_statistics(flagged_radial_errors, sdr_thresholds)
+
+    row_1 = ["Overall", total_number, total_mre] + total_sdr_stats
+    row_2 = ["Unflagged", unflagged_number, unflagged_mre] + unflagged_sdr_stats
+    row_3 = ["Flagged", flagged_number, flagged_mre] + flagged_sdr_stats
+
+    return [row_1, row_2, row_3]
+
+
+
+
 def use_aggregate_methods(predicted_points_per_model, eres_per_model, aggregate_methods):
     """
 
