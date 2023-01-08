@@ -308,6 +308,5 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             wandb.run.summary["radial_confidence_correlation"] = radial_cof_crl
             wandb.run.summary["auc"] = auc
             wandb.run.summary["ece"] = ece
-            wandb.run.summary["MRE"] = overall_avg
 
     return loss_dict, mre_dict

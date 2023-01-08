@@ -80,6 +80,8 @@ def main():
     wandb.login(key="f6e720fe9b2f70bdd25b65e68e51d5163e2b0337")
 
     tags = ['test'] + args.tags
+    if cfg.TRAIN.ENSEMBLE_MODELS > 1:
+        tags.append("ensemble")
     wandb.init(project="complete_landmark_package", name=yaml_file_name, config=cfg,
                entity="j-mccouat", tags=tags)
 
@@ -129,10 +131,21 @@ def main():
         else:
             validate_file = "validate_cpu"
 
-        eval("{}.validate_over_set".format(validate_file)) \
+        loss_dict, mre_dict = eval("{}.validate_over_set".format(validate_file)) \
             (ensemble, test_loader, final_layer, loss_function, args.visuals, cfg.VALIDATION, image_save_path,
              logger=logger)
 
+        if cfg.TRAIN.ENSEMBLE_MODELS == 1:
+            wandb.run.summary["loss"] = loss_dict["1"]
+            wandb.run.summary["MRE"] = mre_dict["1"]
+        else:
+            # Add validation losses
+            for model_idx, model_loss in loss_dict.items():
+                wandb.run.summary["loss_{}".format(model_idx)] = model_loss
+
+            # Add validation mre
+            for model_idx, model_mre in mre_dict.items():
+                wandb.run.summary["mre_{}".format(model_idx)] = model_mre
 
 
 if __name__ == '__main__':
