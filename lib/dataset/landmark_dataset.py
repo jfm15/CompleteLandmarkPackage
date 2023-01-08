@@ -88,10 +88,12 @@ class LandmarkDataset(Dataset):
             image_paths = sorted(glob.glob(images_dir + "/*" + cfg_dataset.IMAGE_EXT))
 
         if subset:
+            percentage = subset[1]
+            percentage_index = np.floor(len(image_paths) * percentage / 100.0)
             if subset[0] == 'below':
-                image_paths = image_paths[:subset[1]]
+                image_paths = image_paths[:percentage_index]
             else:
-                image_paths = image_paths[subset[1]:]
+                image_paths = image_paths[percentage_index:]
 
         for image_path in tqdm(image_paths):
 
