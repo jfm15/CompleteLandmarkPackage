@@ -256,12 +256,14 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
 
         # Save the heatmap analysis plots
         radial_ere_crl, radial_ere_wb_img = correlation_graph(radial_errors_np.flatten(), eres_np.flatten(),
-                                                              "True Radial error (mm)", "Expected Radial Error (ERE) (mm)")
+                                                              "True Radial error (mm)", "Expected Radial Error (ERE) (mm)",
+                                                              n_bin=cfg_validation.CORRELATION_BINS)
 
         # Save the heatmap analysis plots
         radial_cof_crl, radial_conf_wb_img = correlation_graph(radial_errors_np.flatten(), confidence_np.flatten(),
                                                                "True Radial error (mm)",
-                                                               "Confidence")
+                                                               "Confidence",
+                                                               n_bin=cfg_validation.CORRELATION_BINS)
 
         # Save the heatmap analysis plots
         proposed_threshold, auc, roc_wb_img = roc_outlier_graph(radial_errors_np.flatten(), eres_np.flatten())
