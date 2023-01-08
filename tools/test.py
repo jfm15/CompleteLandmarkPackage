@@ -139,7 +139,7 @@ def main():
 
         loss_dict, mre_dict, _ = eval("{}.validate_over_set".format(validate_file)) \
             (ensemble, test_loader, final_layer, loss_function, args.visuals, cfg.VALIDATION, image_save_path,
-             proposed_threhold=args.proposed_threshold, logger=logger)
+             proposed_threshold=args.proposed_threshold, logger=logger)
 
         if cfg.TRAIN.ENSEMBLE_MODELS == 1:
             wandb.run.summary["loss"] = loss_dict["1"]
