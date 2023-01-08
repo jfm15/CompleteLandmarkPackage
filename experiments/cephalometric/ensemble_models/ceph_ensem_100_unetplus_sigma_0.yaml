@@ -30,7 +30,8 @@ TRAIN:
 VALIDATION:
   AGGREGATION_METHODS:
     - "mean average"
-  SDR_AGGREGATION_METHOD: "mean average"
+    - "confidence weighted"
+  SDR_AGGREGATION_METHOD: "confidence weighted"
   SDR_THRESHOLDS:
     - 0.5
     - 1.0
