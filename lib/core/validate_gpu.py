@@ -88,7 +88,8 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             for visual_name in visuals:
                 image_name = meta["file_name"][b]
                 figure_name = "{}_{}_{}".format(image_name, model_idx, visual_name)
-                wb_image = intermediate_figure(image[b], output[b].detach().cpu().numpy(),
+                wb_image = intermediate_figure(image[b].detach().cpu().numpy(),
+                                               output[b].detach().cpu().numpy(),
                                                predicted_points[b].detach().cpu().numpy(),
                                                target_points[b].detach().cpu().numpy(), eres[b].detach().cpu().numpy(),
                                                visual_name)
@@ -196,7 +197,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             figure_name = "{}_{}".format(image_name, visual_name)
             #txt = "Saving Images in {} for {}".format(figure_save_path, visual_name)
             #logger.info(txt)
-            wb_image = final_figure(image[b], aggregated_points_idx.detach().cpu().numpy(),
+            wb_image = final_figure(image[b].detach().cpu().numpy(), aggregated_points_idx.detach().cpu().numpy(),
                                     aggregated_point_dict, target_points_idx.detach().cpu().numpy(),
                                     cfg_validation.MEASUREMENTS_SUFFIX, visual_name)
             visuals_wb_dict[figure_name] = wb_image
