@@ -31,6 +31,9 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
     dataset_target_scaled_points = []
     losses_per_model = []
 
+    # Save the visuals in this for later upload to wb server
+    visuals_wb_dict = {}
+
     # Create folders for images
     for visual_name in visuals:
         visual_dir = os.path.join(save_path, visual_name)
@@ -84,12 +87,12 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             b = 0
             for visual_name in visuals:
                 image_name = meta["file_name"][b]
-                figure_save_path = os.path.join(save_path, visual_name,
-                                                "{}_{}_{}".format(image_name, model_idx, visual_name))
-                intermediate_figure(image[b], output[b].detach().cpu().numpy(),
-                                    predicted_points[b].detach().cpu().numpy(),
-                                    target_points[b].detach().cpu().numpy(), eres[b].detach().cpu().numpy(),
-                                    visual_name, save=True, save_path=figure_save_path)
+                figure_name = "{}_{}_{}".format(image_name, model_idx, visual_name)
+                wb_image = intermediate_figure(image[b], output[b].detach().cpu().numpy(),
+                                               predicted_points[b].detach().cpu().numpy(),
+                                               target_points[b].detach().cpu().numpy(), eres[b].detach().cpu().numpy(),
+                                               visual_name)
+                visuals_wb_dict[figure_name] = wb_image
 
             if (idx + 1) % 30 == 0:
                 logger.info("[{}/{}]".format(idx + 1, len(loader)))
@@ -134,9 +137,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
                                                   aggregate_methods=cfg_validation.AGGREGATION_METHODS)
     aggregated_scaled_points = aggregated_scaled_point_dict[cfg_validation.SDR_AGGREGATION_METHOD]
 
-    # TODO: write code to track the radial errors for each aggregation method
     # Create a dictionary of scaled points
-
     radial_errors_dict = {}
     for aggre_method, aggred_scaled_points in aggregated_scaled_point_dict.items():
         agge_radial_errors = cal_radial_errors(aggred_scaled_points, dataset_target_scaled_points)
@@ -188,20 +189,25 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         # display visuals
         for visual_name in visuals:
             image_name = meta["file_name"][b]
+            '''
             figure_save_path = os.path.join(save_path, visual_name,
                                             "{}_{}".format(image_name, visual_name))
+            '''
+            figure_name = "{}_{}".format(image_name, visual_name)
             #txt = "Saving Images in {} for {}".format(figure_save_path, visual_name)
             #logger.info(txt)
-            final_figure(image[b], aggregated_points_idx.detach().cpu().numpy(),
-                             aggregated_point_dict, target_points_idx.detach().cpu().numpy(),
-                             cfg_validation.MEASUREMENTS_SUFFIX, visual_name,
-                             save=True, save_path=figure_save_path)
+            wb_image = final_figure(image[b], aggregated_points_idx.detach().cpu().numpy(),
+                                    aggregated_point_dict, target_points_idx.detach().cpu().numpy(),
+                                    cfg_validation.MEASUREMENTS_SUFFIX, visual_name)
+            visuals_wb_dict[figure_name] = wb_image
 
     # Write where images have been saved
+    '''
     for visual_name in visuals:
         figure_save_path = os.path.join(save_path, visual_name)
         txt = "Saved Images in {} for {}".format(figure_save_path, visual_name)
         logger.info(txt)
+    '''
 
     # Overall Statistics
     logger.info("\n-----------Final Statistics-----------")
@@ -272,11 +278,6 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         ece, reliability_diagram_wb_image = reliability_diagram(radial_errors_np.flatten(), confidence_np.flatten(),
                                                                 pixel_size_np.flatten())
 
-        # data should be 2 rows of mre and sdr scores for the threshold
-        if proposed_threshold:
-            threshold_table_data = get_threshold_table(torch.flatten(radial_errors), torch.flatten(eres_per_model[0]),
-                                                       proposed_threshold, cfg_validation.SDR_THRESHOLDS)
-
         if temperature_scaling_mode:
             wandb.log({"radial_ere_cor": radial_ere_crl,
                        "radial_confidence_cor": radial_cof_crl,
@@ -313,14 +314,22 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             for sdr_threshold in cfg_validation.SDR_THRESHOLDS:
                 columns.append("sdr: {}".format(sdr_threshold))
 
-            threshold_table = wandb.Table(columns=columns, data=threshold_table_data)
+            # data should be 2 rows of mre and sdr scores for the threshold
+            threshold_table = {}
+            if proposed_threshold:
+                threshold_table_data = get_threshold_table(torch.flatten(radial_errors),
+                                                           torch.flatten(eres_per_model[0]),
+                                                           proposed_threshold, cfg_validation.SDR_THRESHOLDS)
 
-            log_dict = {"threshold_table": threshold_table,
-                        "radial_ere_correlation_plot": radial_ere_wb_img,
+                threshold_table = wandb.Table(columns=columns, data=threshold_table_data)
+                threshold_table = {"threshold_table": threshold_table}
+
+            log_dict = {"radial_ere_correlation_plot": radial_ere_wb_img,
                         "radial_confidence_correlation_plot": radial_conf_wb_img,
                         "roc_ere_plot": roc_wb_img,
                         "reliability_diagram": reliability_diagram_wb_image}
             log_dict.update(diagnosis_wb_dict)
+            log_dict.update(threshold_table)
             wandb.log(log_dict)
 
             wandb.run.summary["radial_ere_correlation"] = radial_ere_crl

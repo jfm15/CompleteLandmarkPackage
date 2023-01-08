@@ -1,3 +1,5 @@
+import wandb
+
 import lib
 import torch
 import numpy as np
@@ -5,7 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
 
-def figure(image, graphics_function, args, save=False, save_path=""):
+def figure(image, graphics_function, args):
     fig, ax = plt.subplots(1, 1)
 
     ax.imshow(image[0], cmap='gray')
@@ -19,52 +21,48 @@ def figure(image, graphics_function, args, save=False, save_path=""):
     fig.set_size_inches(w / 100.0, h / 100.0)
     fig.set_dpi(100)
 
-    if save:
-        plt.savefig(save_path)
-        plt.close()
-    else:
-        plt.show()
+    wb_image = wandb.Image(plt)
+    plt.close()
+
+    return wb_image
 
 
-def preliminary_figure(image, channels, target_points, figure_name, save=False, save_path=""):
+def preliminary_figure(image, channels, target_points, figure_name):
 
     if figure_name == "show_channels":
-        figure(image, show_channels, (channels, target_points),  save=save, save_path=save_path)
+        return figure(image, show_channels, (channels, target_points))
 
 
-def intermediate_figure(image, output, predicted_points, target_points, eres,
-                        figure_name, save=False, save_path=""):
+def intermediate_figure(image, output, predicted_points, target_points, eres, figure_name):
 
     if figure_name == "heatmaps_and_ere":
-        figure(image, heatmaps_and_ere, (output, predicted_points, target_points, eres), save=save, save_path=save_path)
+        return figure(image, heatmaps_and_ere, (output, predicted_points, target_points, eres))
     elif figure_name == "heatmaps_and_preds":
-        figure(image, heatmaps_and_preds, (output, predicted_points, target_points, eres), save=save, save_path=save_path)
+        return figure(image, heatmaps_and_preds, (output, predicted_points, target_points, eres))
 
 
-
-def final_figure(image, aggregated_points, aggregated_point_dict, target_points, suffix,
-                 figure_name, save=False, save_path=""):
+def final_figure(image, aggregated_points, aggregated_point_dict, target_points, suffix, figure_name):
 
     # search for generic figure names
     if figure_name == "gt_and_preds":
-        figure(image, gt_and_preds, (aggregated_points, target_points), save=save, save_path=save_path)
+        return figure(image, gt_and_preds, (aggregated_points, target_points))
     elif figure_name == "gt_and_preds_small":
-        figure(image, gt_and_preds_small, (aggregated_points, target_points), save=save, save_path=save_path)
+        return figure(image, gt_and_preds_small, (aggregated_points, target_points))
     elif figure_name == "preds":
-            figure(image, preds, (aggregated_points, target_points), save=save, save_path=save_path)
+        return figure(image, preds, (aggregated_points, target_points))
     elif figure_name == "gt":
-            figure(image, targets, (aggregated_points, target_points), save=save, save_path=save_path)
+        return figure(image, targets, (aggregated_points, target_points))
     elif figure_name == "gt_no_indices":
-            figure(image, targets, (aggregated_points, target_points, False, False, False), save=save, save_path=save_path)
+        return figure(image, targets, (aggregated_points, target_points, False, False, False))
     elif figure_name == "gt_bounding_box":
-        figure(image, targets, (aggregated_points, target_points, True, True, False, image[0].size()), save=save, save_path=save_path)
+        return figure(image, targets, (aggregated_points, target_points, True, True, False, image[0].size()))
     elif figure_name == "aggregates":
-        figure(image, aggregates, (aggregated_point_dict, target_points), save=save, save_path=save_path)
+        return figure(image, aggregates, (aggregated_point_dict, target_points))
     elif figure_name == "heatmaps_and_ere" or figure_name == "heatmaps_and_preds":
         return
     else:
         graphics_function = eval(".".join(["lib", "visualisations", suffix, figure_name]))
-        figure(image, graphics_function, (aggregated_points, target_points), save=save, save_path=save_path)
+        return figure(image, graphics_function, (aggregated_points, target_points))
 
 
 def gt_and_preds(ax, predicted_points, target_points, show_indices=True):
