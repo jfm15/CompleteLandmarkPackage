@@ -29,7 +29,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
     dataset_target_points = []
     scaled_predicted_points_per_model = []
     dataset_target_scaled_points = []
-    losses = []
+    losses_per_model = []
 
     # Create folders for images
     for visual_name in visuals:
@@ -50,6 +50,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         model_eres = []
         model_modes = []
         model_pixel_sizes = []
+        model_losses = []
 
         for idx, (image, channels, meta) in enumerate(loader):
 
@@ -63,7 +64,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             output = model.scale(output)
             output = final_layer(output)
             loss = loss_function(output, channels)
-            losses.append(loss.item())
+            model_losses.append(loss.item())
 
             predicted_points, target_points, eres, modes, scaled_predicted_points, scaled_target_points \
                 = get_predicted_and_target_points(output, meta['landmarks_per_annotator'], meta['pixel_size'])
@@ -113,6 +114,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         eres_per_model.append(model_eres)
         modes_per_model.append(model_modes)
         pixel_size_per_model.append(model_pixel_sizes)
+        losses_per_model.append(model_losses)
 
     # predicted_points_per_model is size [M, D, N, 2]
     # eres_per_model is size [M, D, N]
@@ -132,7 +134,23 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
                                                   aggregate_methods=cfg_validation.AGGREGATION_METHODS)
     aggregated_scaled_points = aggregated_scaled_point_dict[cfg_validation.SDR_AGGREGATION_METHOD]
 
-    radial_errors = cal_radial_errors(aggregated_scaled_points, dataset_target_scaled_points)
+    # TODO: write code to track the radial errors for each aggregation method
+    # Create a dictionary of scaled points
+
+    radial_errors_dict = {}
+    for aggre_method, aggred_scaled_points in aggregated_scaled_point_dict.items():
+        agge_radial_errors = cal_radial_errors(aggred_scaled_points, dataset_target_scaled_points)
+        radial_errors_dict[aggre_method] = agge_radial_errors
+
+    radial_errors = radial_errors_dict[cfg_validation.SDR_AGGREGATION_METHOD]
+
+    loss_dict = {}
+    for model_idx, model_losses in enumerate(losses_per_model):
+        loss_dict[str(model_idx + 1)] = sum(model_losses) / len(model_losses)
+
+    mre_dict = {}
+    for aggre_method, aggre_radial_errors in radial_errors_dict.items():
+        mre_dict[aggre_method] = torch.mean(aggre_radial_errors).item()
 
     measurements_dict = {}
     for measurement in cfg_validation.MEASUREMENTS:
@@ -185,7 +203,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
     logger.info("\n-----------Final Statistics-----------")
 
     # loss
-    average_loss = sum(losses) / len(losses)
+    average_loss = torch.mean(torch.Tensor(losses_per_model))
     txt = "Average loss: {:.3f}".format(average_loss)
     logger.info(txt)
 
@@ -199,6 +217,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         txt += "[MEAN: {:.3f}\u00B1{:.3f}, MED: {:.3f}]\t".format(avg_for_landmark.item(),
                                                                   std_for_landmark.item(),
                                                                   median_for_landmark.item())
+
     overall_avg = torch.mean(radial_errors).item()
     overall_std = torch.std(radial_errors).item()
     overall_med = torch.median(radial_errors).item()
@@ -291,4 +310,4 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             wandb.run.summary["ece"] = ece
             wandb.run.summary["MRE"] = overall_avg
 
-    return average_loss, overall_avg
+    return loss_dict, mre_dict

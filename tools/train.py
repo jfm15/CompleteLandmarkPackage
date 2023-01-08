@@ -151,21 +151,42 @@ def main():
         for epoch in range(cfg.TRAIN.EPOCHS):
 
             logger.info('-----------Epoch {} Supervised Training-----------'.format(epoch))
-            training_loss = train_ensemble(ensemble, optimizers, schedulers, training_loader,
+
+            # This is a list of training losses for each base estimator
+            training_losses = train_ensemble(ensemble, optimizers, schedulers, training_loader,
                                            final_layer, loss_function, logger)
 
             # Validate
             with torch.no_grad():
 
                 logger.info('-----------Validation Set-----------')
-                validation_loss, validation_mre = eval("{}.validate_over_set".format(validate_file)) \
+                loss_dict, mre_dict = eval("{}.validate_over_set".format(validate_file)) \
                     (ensemble, validation_loader, final_layer, loss_function, [], cfg.VALIDATION, None,
                      logger=logger, training_mode=True)
 
-                wandb.log({"training_loss": training_loss,
-                           "validation_loss": validation_loss,
-                           "validation_mre": validation_mre,
-                           "epoch": epoch})
+            # single model tracking
+            wb_log_dict = {"epoch": epoch}
+            if cfg.TRAIN.ENSEMBLE_MODELS == 1:
+                wb_log_dict.update({
+                    "training_loss": training_losses[0],
+                    "validation_loss": loss_dict["1"],
+                    "validation_mre": mre_dict["1"]
+                })
+            else:
+
+                # Add training losses
+                for model_idx, loss in enumerate(training_losses):
+                    wb_log_dict["training_loss_{}".format(model_idx + 1)] = loss
+
+                # Add validation losses
+                for model_idx, model_loss in loss_dict.items():
+                    wb_log_dict["validation_loss_{}".format(model_idx)] = model_loss
+
+                # Add validation mre
+                for model_idx, model_mre in mre_dict.items():
+                    wb_log_dict["validation_mre_{}".format(model_idx)] = model_mre
+
+            wandb.log(wb_log_dict)
 
         '''
         # reload best models

@@ -18,7 +18,7 @@ def train_ensemble(ensemble, optimizers, schedulers, training_loader, final_laye
         # move model back to cpu
         our_model.cpu()
 
-    return np.mean(training_losses)
+    return training_losses
 
 
 def temperature_scale(our_model, optimizer, scheduler, training_loader, final_layer, loss_function, logger):
