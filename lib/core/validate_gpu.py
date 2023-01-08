@@ -312,11 +312,13 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
 
             threshold_table = wandb.Table(columns=columns, data=threshold_table_data)
 
-            wandb.log({"threshold_table": threshold_table,
-                       "radial_ere_correlation_plot": radial_ere_wb_img,
-                       "radial_confidence_correlation_plot": radial_conf_wb_img,
-                       "roc_ere_plot": roc_wb_img,
-                       "reliability_diagram": reliability_diagram_wb_image})
+            log_dict = {"threshold_table": threshold_table,
+                        "radial_ere_correlation_plot": radial_ere_wb_img,
+                        "radial_confidence_correlation_plot": radial_conf_wb_img,
+                        "roc_ere_plot": roc_wb_img,
+                        "reliability_diagram": reliability_diagram_wb_image}
+            log_dict.update(diagnosis_wb_dict)
+            wandb.log(log_dict)
 
             wandb.run.summary["radial_ere_correlation"] = radial_ere_crl
             wandb.run.summary["radial_confidence_correlation"] = radial_cof_crl
