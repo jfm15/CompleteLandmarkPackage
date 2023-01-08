@@ -156,7 +156,7 @@ def main():
 
             # This is a list of training losses for each base estimator
             training_losses = train_ensemble(ensemble, optimizers, schedulers, training_loader,
-                                           final_layer, loss_function, logger)
+                                             final_layer, loss_function, logger)
 
             # Validate
             with torch.no_grad():
