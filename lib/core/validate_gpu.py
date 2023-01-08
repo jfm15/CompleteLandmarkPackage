@@ -331,6 +331,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
                         "reliability_diagram": reliability_diagram_wb_image}
             log_dict.update(diagnosis_wb_dict)
             log_dict.update(threshold_table)
+            log_dict.update(visuals_wb_dict)
             wandb.log(log_dict)
 
             wandb.run.summary["radial_ere_correlation"] = radial_ere_crl
