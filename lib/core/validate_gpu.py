@@ -298,9 +298,13 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
                     diagnosis, n, tn, fp, fn, tp, precision, recall, accuracy)
                 logger.info(txt)
 
-                threshold_table = wandb.Table(columns=columns, data=threshold_table_data)
+                rows = [["actual positive", tp, fn], ["actual negative", fp, tn]]
+                diagnosis_table = wandb.Table(columns=["", "predicted positive", "predicted negative"], data=rows)
 
-
+                diagnosis_wb_dict["{}_table".format(diagnosis)] = diagnosis_table
+                wandb.run.summary["{}_precision".format(diagnosis)] = precision
+                wandb.run.summary["{}_recall".format(diagnosis)] = recall
+                wandb.run.summary["{}_accuracy".format(diagnosis)] = accuracy
 
             columns = ["Set", "# landmarks", "MRE"]
             for sdr_threshold in cfg_validation.SDR_THRESHOLDS:
