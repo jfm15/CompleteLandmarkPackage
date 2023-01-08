@@ -242,19 +242,6 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
     # We want the following functionality:
     # 1) Add the end of the test script or during the temperature scaling phase where we want things to be logged
     if not training_mode or temperature_scaling_mode:
-        # Run the diagnosis experiments
-        # I need to find the predicted points and the ground truth points
-        # aggregated_scaled_points, dataset_target_scaled_points
-        for diagnosis in cfg_validation.DIAGNOSES:
-            n, tn, fp, fn, tp, precision, recall, accuracy = diagnose_set(aggregated_scaled_points,
-                                                                          dataset_target_scaled_points,
-                                                                          cfg_validation.MEASUREMENTS_SUFFIX,
-                                                                          diagnosis)
-
-            txt = "Results for {} are n: {}, tn: {}, fp: {}, fn: {}, tp: {}, " \
-                  "precision: {:.3f}, recall: {:.3f}, accuracy: {:.3f}".format(
-                   diagnosis, n, tn, fp, fn, tp, precision, recall, accuracy)
-            logger.info(txt)
 
         radial_errors_np = radial_errors.detach().cpu().numpy()
         eres_np = eres_per_model[0].detach().cpu().numpy()
@@ -295,6 +282,20 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
                        "epoch": epoch})
 
         else:
+
+            # Run the diagnosis experiments
+            # I need to find the predicted points and the ground truth points
+            # aggregated_scaled_points, dataset_target_scaled_points
+            for diagnosis in cfg_validation.DIAGNOSES:
+                n, tn, fp, fn, tp, precision, recall, accuracy = diagnose_set(aggregated_scaled_points,
+                                                                              dataset_target_scaled_points,
+                                                                              cfg_validation.MEASUREMENTS_SUFFIX,
+                                                                              diagnosis)
+
+                txt = "Results for {} are n: {}, tn: {}, fp: {}, fn: {}, tp: {}, " \
+                      "precision: {:.3f}, recall: {:.3f}, accuracy: {:.3f}".format(
+                    diagnosis, n, tn, fp, fn, tp, precision, recall, accuracy)
+                logger.info(txt)
 
             columns = ["Set", "# landmarks", "MRE"]
             for sdr_threshold in cfg_validation.SDR_THRESHOLDS:
