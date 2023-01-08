@@ -17,8 +17,7 @@ def figure(image, graphics_function, args):
     ax.axis('off')
     plt.tight_layout()
 
-    print(image)
-    h, w = image[0].size()
+    h, w = np.shape(image[0])
     fig.set_size_inches(w / 100.0, h / 100.0)
     fig.set_dpi(100)
 
