@@ -65,6 +65,12 @@ def parse_args():
                         required=False,
                         default=[])
 
+    parser.add_argument('--proposed_threshold',
+                        help='The proposed threshold',
+                        type=float,
+                        required=False,
+                        default=None)
+
     args = parser.parse_args()
 
     return args
@@ -133,7 +139,7 @@ def main():
 
         loss_dict, mre_dict, _ = eval("{}.validate_over_set".format(validate_file)) \
             (ensemble, test_loader, final_layer, loss_function, args.visuals, cfg.VALIDATION, image_save_path,
-             logger=logger)
+             proposed_threhold=args.proposed_threshold, logger=logger)
 
         if cfg.TRAIN.ENSEMBLE_MODELS == 1:
             wandb.run.summary["loss"] = loss_dict["1"]

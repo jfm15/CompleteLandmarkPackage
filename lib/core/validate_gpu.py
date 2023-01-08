@@ -20,7 +20,7 @@ from lib.measures import diagnose_set
 
 
 def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg_validation, save_path,
-                      logger=None, training_mode=False, temperature_scaling_mode=False, epoch=0):
+                      logger=None, training_mode=False, temperature_scaling_mode=False, proposed_threshold=None, epoch=0):
 
     predicted_points_per_model = []
     eres_per_model = []
@@ -266,15 +266,16 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
                                                                n_bin=cfg_validation.CORRELATION_BINS)
 
         # Save the heatmap analysis plots
-        proposed_threshold, auc, roc_wb_img = roc_outlier_graph(radial_errors_np.flatten(), eres_np.flatten())
+        best_threshold, auc, roc_wb_img = roc_outlier_graph(radial_errors_np.flatten(), eres_np.flatten())
 
         # Save the reliability diagram
         ece, reliability_diagram_wb_image = reliability_diagram(radial_errors_np.flatten(), confidence_np.flatten(),
                                                                 pixel_size_np.flatten())
 
         # data should be 2 rows of mre and sdr scores for the threshold
-        threshold_table_data = get_threshold_table(torch.flatten(radial_errors), torch.flatten(eres_per_model[0]),
-                                                   proposed_threshold, cfg_validation.SDR_THRESHOLDS)
+        if proposed_threshold:
+            threshold_table_data = get_threshold_table(torch.flatten(radial_errors), torch.flatten(eres_per_model[0]),
+                                                       proposed_threshold, cfg_validation.SDR_THRESHOLDS)
 
         if temperature_scaling_mode:
             wandb.log({"radial_ere_cor": radial_ere_crl,
@@ -326,5 +327,6 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             wandb.run.summary["radial_confidence_correlation"] = radial_cof_crl
             wandb.run.summary["auc"] = auc
             wandb.run.summary["ece"] = ece
+            wandb.run.summary["best_threshold"] = best_threshold
 
     return loss_dict, mre_dict, mere_dict
