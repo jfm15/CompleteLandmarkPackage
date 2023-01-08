@@ -286,6 +286,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             # Run the diagnosis experiments
             # I need to find the predicted points and the ground truth points
             # aggregated_scaled_points, dataset_target_scaled_points
+            diagnosis_wb_dict = {}
             for diagnosis in cfg_validation.DIAGNOSES:
                 n, tn, fp, fn, tp, precision, recall, accuracy = diagnose_set(aggregated_scaled_points,
                                                                               dataset_target_scaled_points,
@@ -296,6 +297,10 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
                       "precision: {:.3f}, recall: {:.3f}, accuracy: {:.3f}".format(
                     diagnosis, n, tn, fp, fn, tp, precision, recall, accuracy)
                 logger.info(txt)
+
+                threshold_table = wandb.Table(columns=columns, data=threshold_table_data)
+
+
 
             columns = ["Set", "# landmarks", "MRE"]
             for sdr_threshold in cfg_validation.SDR_THRESHOLDS:
