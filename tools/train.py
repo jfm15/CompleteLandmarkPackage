@@ -162,7 +162,7 @@ def main():
             with torch.no_grad():
 
                 logger.info('-----------Validation Set-----------')
-                loss_dict, mre_dict = eval("{}.validate_over_set".format(validate_file)) \
+                loss_dict, mre_dict, mere_dict = eval("{}.validate_over_set".format(validate_file)) \
                     (ensemble, validation_loader, final_layer, loss_function, [], cfg.VALIDATION, None,
                      logger=logger, training_mode=True)
 
@@ -172,7 +172,8 @@ def main():
                 wb_log_dict.update({
                     "training_loss": training_losses[0],
                     "validation_loss": loss_dict["1"],
-                    "validation_mre": mre_dict["1"]
+                    "validation_mre": mre_dict["1"],
+                    "validation_mere": mere_dict["1"]
                 })
             else:
 
@@ -187,6 +188,10 @@ def main():
                 # Add validation mre
                 for model_idx, model_mre in mre_dict.items():
                     wb_log_dict["validation_mre_{}".format(model_idx)] = model_mre
+
+                # Add validation mean ere
+                for model_idx, model_mere in mere_dict.items():
+                    wb_log_dict["validation_mere_{}".format(model_idx)] = model_mere
 
             wandb.log(wb_log_dict)
 

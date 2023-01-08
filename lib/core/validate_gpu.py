@@ -148,6 +148,10 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
     for model_idx, model_losses in enumerate(losses_per_model):
         loss_dict[str(model_idx + 1)] = sum(model_losses) / len(model_losses)
 
+    mere_dict = {}
+    for model_idx, model_eres in enumerate(eres_per_model):
+        mere_dict[str(model_idx + 1)] = torch.mean(model_eres).item()
+
     mre_dict = {}
     for aggre_method, aggre_radial_errors in radial_errors_dict.items():
         mre_dict[aggre_method] = torch.mean(aggre_radial_errors).item()
@@ -309,4 +313,4 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             wandb.run.summary["auc"] = auc
             wandb.run.summary["ece"] = ece
 
-    return loss_dict, mre_dict
+    return loss_dict, mre_dict, mere_dict

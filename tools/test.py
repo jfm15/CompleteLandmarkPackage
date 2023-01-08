@@ -131,7 +131,7 @@ def main():
         else:
             validate_file = "validate_cpu"
 
-        loss_dict, mre_dict = eval("{}.validate_over_set".format(validate_file)) \
+        loss_dict, mre_dict, _ = eval("{}.validate_over_set".format(validate_file)) \
             (ensemble, test_loader, final_layer, loss_function, args.visuals, cfg.VALIDATION, image_save_path,
              logger=logger)
 
