@@ -37,6 +37,8 @@ def intermediate_figure(image, output, predicted_points, target_points, eres, fi
 
     if figure_name == "heatmaps_and_ere":
         return figure(image, heatmaps_and_ere, (output, predicted_points, target_points, eres))
+    elif figure_name == "heatmaps":
+        return figure(image, heatmaps, (output, predicted_points, target_points, eres))
     elif figure_name == "heatmaps_and_preds":
         return figure(image, heatmaps_and_preds, (output, predicted_points, target_points, eres))
 
@@ -58,7 +60,7 @@ def final_figure(image, aggregated_points, aggregated_point_dict, target_points,
         return figure(image, targets, (aggregated_points, target_points, True, True, False, image[0].size()))
     elif figure_name == "aggregates":
         return figure(image, aggregates, (aggregated_point_dict, target_points))
-    elif figure_name == "heatmaps_and_ere" or figure_name == "heatmaps_and_preds":
+    elif figure_name in ["heatmaps", "heatmaps_and_ere", "heatmaps_and_preds"]:
         return
     else:
         graphics_function = eval(".".join(["lib", "visualisations", suffix, figure_name]))
@@ -164,6 +166,14 @@ def heatmaps_and_ere(ax, output, predicted_points, target_points, eres):
     for ere, position in zip(eres, predicted_points):
         x, y = position
         ax.text(x + 3, y + 3, "{:.3f}".format(ere), color="white", fontsize=7)
+
+
+def heatmaps(ax, output, predicted_points, target_points, eres):
+
+    normalized_heatmaps = output / np.max(output, axis=(1, 2), keepdims=True)
+    squashed_output = np.max(normalized_heatmaps, axis=0)
+
+    ax.imshow(squashed_output, cmap='inferno', alpha=0.5)
 
 
 def heatmaps_and_preds(ax, output, predicted_points, target_points, eres):
