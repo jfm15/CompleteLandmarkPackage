@@ -115,6 +115,7 @@ def reliability_diagram(radial_errors, mode_probabilities, pixel_size, n_of_bins
     plt.xlabel('Confidence', fontsize=14)
     plt.ylabel('Accuracy', fontsize=14)
     plt.xticks(fontsize=14)
+    plt.locator_params(axis='x', nbins=5)
     plt.yticks(fontsize=14)
     plt.grid(zorder=0)
     plt.xlim(x_min, x_max)
