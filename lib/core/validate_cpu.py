@@ -1,5 +1,6 @@
 import os
 import torch
+import wandb
 
 from lib.core.evaluate import cal_radial_errors
 from lib.core.evaluate import use_aggregate_methods
@@ -9,7 +10,8 @@ from lib.visualisations import final_figure
 from lib.measures import measure
 
 
-def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg_validation, save_path, logger=None, training_mode=False):
+def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg_validation, save_path,
+                      logger=None, training_mode=False, temperature_scaling_mode=False, proposed_threshold=None, epoch=0):
 
     all_radial_errors = []
     all_measurement_difs = []
@@ -77,9 +79,13 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         logger.info(txt)
 
         for visual_name in visuals:
-            final_figure(image[b], aggregated_points[b],
-                         aggregated_point_dict, target_points[b],
-                         cfg_validation.MEASUREMENTS_SUFFIX, visual_name)
+            image_name = meta["file_name"][b]
+            figure_name = "{}_{}".format(image_name, visual_name)
+            wb_image = final_figure(image[b], aggregated_points[b],
+                                     aggregated_point_dict, target_points[b],
+                                      cfg_validation.MEASUREMENTS_SUFFIX, visual_name)
+            wandb.log({figure_name: wb_image})
+
 
     average_loss = sum(losses) / len(losses)
     txt = "Average loss: {:.3f}".format(average_loss)
