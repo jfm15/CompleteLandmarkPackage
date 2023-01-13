@@ -24,8 +24,10 @@ def correlation_graph(x_values, y_values, x_label, y_label, n_bin=36):
     correlation = np.corrcoef(binned_x_values, binned_y_values)[0, 1]
 
     # Plot graph
-    plt.rcParams["figure.figsize"] = (6, 6)
+    plt.rcParams["figure.figsize"] = (10, 10)
     fig, ax = plt.subplots(1, 1)
+    plt.subplots_adjust(bottom=0.15)
+    plt.subplots_adjust(left=0.15)
     ax.grid(zorder=0)
     plt.xlabel(x_label, fontsize=font_size)
     plt.ylabel(y_label, fontsize=font_size)
@@ -50,8 +52,10 @@ def roc_outlier_graph(ground_truth, predictive_feature, outlier_threshold=2.0):
     proposed_threshold = thresholds[first_idx]
 
     # Plot graph
-    plt.rcParams["figure.figsize"] = (6, 6)
+    plt.rcParams["figure.figsize"] = (10, 10)
     fig, ax = plt.subplots(1, 1)
+    plt.subplots_adjust(bottom=0.15)
+    plt.subplots_adjust(left=0.15)
     ax.grid(zorder=0)
     plt.xlabel("False Positive Rate (FPR)", fontsize=font_size)
     plt.ylabel("True Positive Rate (TPR)", fontsize=font_size)
