@@ -110,7 +110,7 @@ def reliability_diagram(radial_errors, mode_probabilities, pixel_size, n_of_bins
     ece *= 100
 
     # save plot
-    plt.rcParams["figure.figsize"] = (12, 6)
+    plt.rcParams["figure.figsize"] = (10, 6)
     fig, ax = plt.subplots(1, 1)
     ax.grid(zorder=0)
 
@@ -127,8 +127,8 @@ def reliability_diagram(radial_errors, mode_probabilities, pixel_size, n_of_bins
     plt.bar(bins[:-1], avg_acc_for_each_bin, align='edge', width=widths, color='blue', edgecolor='black', label='Accuracy', zorder=3)
     plt.bar(bins[:-1], avg_conf_for_each_bin, align='edge', width=widths, color='lime', edgecolor='black', alpha=0.5,
             label='Gap', zorder=3)
-    plt.legend(fontsize=font_size, loc="upper left", prop={'size': 16})
-    t = plt.text(0.5, 0.075, 'ECE={:.2f}'.format(ece), fontsize=large_font_size, transform=ax.transAxes)
+    plt.legend(fontsize=font_size, loc="upper left", prop={'size': font_size})
+    t = plt.text(0.6, 0.075, 'ECE={:.2f}'.format(ece), fontsize=large_font_size, transform=ax.transAxes)
     t.set_bbox(dict(facecolor='white', alpha=0.75, edgecolor='grey'))
 
     wb_image = wandb.Image(plt)
