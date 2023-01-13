@@ -114,7 +114,7 @@ def reliability_diagram(radial_errors, mode_probabilities, pixel_size, n_of_bins
     fig, ax = plt.subplots(1, 1)
     ax.grid(zorder=0)
 
-    plt.subplots_adjust(left=0.15)
+    plt.subplots_adjust(left=0.30)
     plt.xlabel('Confidence', fontsize=font_size)
     plt.ylabel('Accuracy', fontsize=font_size)
     plt.xticks(fontsize=font_size)
@@ -129,7 +129,7 @@ def reliability_diagram(radial_errors, mode_probabilities, pixel_size, n_of_bins
             label='Gap', zorder=3)
     plt.legend(fontsize=font_size, loc="upper left", prop={'size': 16})
     t = plt.text(0.5, 0.075, 'ECE={:.2f}'.format(ece), fontsize=large_font_size, transform=ax.transAxes)
-    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
+    t.set_bbox(dict(facecolor='white', alpha=0.75, edgecolor='grey'))
 
     wb_image = wandb.Image(plt)
     plt.close()
