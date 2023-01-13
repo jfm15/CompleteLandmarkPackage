@@ -8,7 +8,7 @@ from sklearn.metrics import roc_curve
 from sklearn.metrics import roc_auc_score
 
 font_size = 25
-large_font_size = 40
+large_font_size = 30
 
 
 def correlation_graph(x_values, y_values, x_label, y_label, n_bin=36):
@@ -110,7 +110,7 @@ def reliability_diagram(radial_errors, mode_probabilities, pixel_size, n_of_bins
     ece *= 100
 
     # save plot
-    plt.rcParams["figure.figsize"] = (6, 6)
+    # plt.rcParams["figure.figsize"] = (6, 6)
     fig, ax = plt.subplots(1, 1)
     ax.grid(zorder=0)
 
@@ -127,7 +127,8 @@ def reliability_diagram(radial_errors, mode_probabilities, pixel_size, n_of_bins
     plt.bar(bins[:-1], avg_conf_for_each_bin, align='edge', width=widths, color='lime', edgecolor='black', alpha=0.5,
             label='Gap', zorder=3)
     plt.legend(fontsize=font_size, loc="upper left", prop={'size': 16})
-    plt.text(0.71, 0.075, 'ECE={:.2f}'.format(ece), backgroundcolor='white', fontsize=40, transform=ax.transAxes)
+    t = plt.text(0.5, 0.075, 'ECE={:.2f}'.format(ece), fontsize=large_font_size, transform=ax.transAxes)
+    t.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='grey'))
 
     wb_image = wandb.Image(plt)
     plt.close()
