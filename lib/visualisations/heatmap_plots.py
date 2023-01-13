@@ -7,8 +7,10 @@ from scipy import stats
 from sklearn.metrics import roc_curve
 from sklearn.metrics import roc_auc_score
 
-font_size = 30
-large_font_size = 35
+font_size = 25
+large_font_size = 20
+x_pad = 0.2
+y_pad = 0.2
 
 
 def correlation_graph(x_values, y_values, x_label, y_label, n_bin=36):
@@ -24,17 +26,17 @@ def correlation_graph(x_values, y_values, x_label, y_label, n_bin=36):
     correlation = np.corrcoef(binned_x_values, binned_y_values)[0, 1]
 
     # Plot graph
-    plt.rcParams["figure.figsize"] = (6, 6)
+    #plt.rcParams["figure.figsize"] = (10, 10)
     fig, ax = plt.subplots(1, 1)
-    plt.subplots_adjust(bottom=0.15)
-    plt.subplots_adjust(left=0.15)
+    plt.subplots_adjust(bottom=y_pad)
+    plt.subplots_adjust(left=x_pad)
     ax.grid(zorder=0)
     plt.xlabel(x_label, fontsize=font_size)
     plt.ylabel(y_label, fontsize=font_size)
     plt.xticks(fontsize=font_size)
     plt.yticks(fontsize=font_size)
-    plt.text(0.15, 0.075, "CORRELATION={:.2f}".format(correlation), backgroundcolor=(0.8, 0.8, 0.8, 0.8), size=large_font_size, transform=ax.transAxes)
-    ax.scatter(binned_x_values, binned_y_values, c='lime', edgecolors='black', zorder=3)
+    plt.text(0.3, 0.075, "CORRELATION={:.2f}".format(correlation), backgroundcolor=(0.8, 0.8, 0.8, 0.8), size=large_font_size, transform=ax.transAxes)
+    ax.scatter(binned_x_values, binned_y_values, c='lime', edgecolors='black', zorder=3, s=60)
 
     wb_image = wandb.Image(plt)
     plt.close()
@@ -52,10 +54,10 @@ def roc_outlier_graph(ground_truth, predictive_feature, outlier_threshold=2.0):
     proposed_threshold = thresholds[first_idx]
 
     # Plot graph
-    plt.rcParams["figure.figsize"] = (6, 6)
+    #plt.rcParams["figure.figsize"] = (10, 10)
     fig, ax = plt.subplots(1, 1)
-    plt.subplots_adjust(bottom=0.15)
-    plt.subplots_adjust(left=0.15)
+    plt.subplots_adjust(bottom=y_pad)
+    plt.subplots_adjust(left=x_pad)
     ax.grid(zorder=0)
     plt.xlabel("False Positive Rate (FPR)", fontsize=font_size)
     plt.ylabel("True Positive Rate (TPR)", fontsize=font_size)
@@ -67,7 +69,7 @@ def roc_outlier_graph(ground_truth, predictive_feature, outlier_threshold=2.0):
     plt.grid(True)
 
     plt.plot(fpr, tpr, c="blue")
-    plt.text(0.15, 0.075, 'Area Under Curve={:.2f}'.format(auc), backgroundcolor=(0.8, 0.8, 0.8, 0.8), size=large_font_size,
+    plt.text(0.2, 0.075, 'Area Under Curve={:.2f}'.format(auc), backgroundcolor=(0.8, 0.8, 0.8, 0.8), size=large_font_size,
              transform=ax.transAxes)
 
     wb_image = wandb.Image(plt)
@@ -114,16 +116,16 @@ def reliability_diagram(radial_errors, mode_probabilities, pixel_size, n_of_bins
     ece *= 100
 
     # save plot
-    plt.rcParams["figure.figsize"] = (10, 6)
+    # plt.rcParams["figure.figsize"] = (10, 6)
     fig, ax = plt.subplots(1, 1)
     ax.grid(zorder=0)
 
-    plt.subplots_adjust(left=0.15)
+    plt.subplots_adjust(left=x_pad)
     plt.xlabel('Confidence', fontsize=font_size)
     plt.ylabel('Accuracy', fontsize=font_size)
     plt.xticks(fontsize=font_size)
     plt.locator_params(axis='x', nbins=5)
-    plt.subplots_adjust(bottom=0.15)
+    plt.subplots_adjust(bottom=y_pad)
     plt.yticks(fontsize=font_size)
     plt.grid(zorder=0)
     plt.xlim(x_min, x_max)
@@ -132,8 +134,7 @@ def reliability_diagram(radial_errors, mode_probabilities, pixel_size, n_of_bins
     plt.bar(bins[:-1], avg_conf_for_each_bin, align='edge', width=widths, color='lime', edgecolor='black', alpha=0.5,
             label='Gap', zorder=3)
     plt.legend(fontsize=font_size, loc="upper left", prop={'size': font_size})
-    t = plt.text(0.6, 0.075, 'ECE={:.2f}'.format(ece), fontsize=large_font_size, transform=ax.transAxes)
-    t.set_bbox(dict(facecolor='white', alpha=0.75, edgecolor='grey'))
+    plt.text(0.65, 0.075, 'ECE={:.2f}'.format(ece), backgroundcolor=(0.8, 0.8, 0.8, 0.8), fontsize=large_font_size, transform=ax.transAxes)
 
     wb_image = wandb.Image(plt)
     plt.close()
