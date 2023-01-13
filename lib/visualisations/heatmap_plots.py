@@ -26,7 +26,7 @@ def correlation_graph(x_values, y_values, x_label, y_label, n_bin=36):
     correlation = np.corrcoef(binned_x_values, binned_y_values)[0, 1]
 
     # Plot graph
-    #plt.rcParams["figure.figsize"] = (10, 10)
+    plt.rcParams["figure.figsize"] = (6.4, 6.4)
     fig, ax = plt.subplots(1, 1)
     plt.subplots_adjust(bottom=y_pad)
     plt.subplots_adjust(left=x_pad)
@@ -54,7 +54,7 @@ def roc_outlier_graph(ground_truth, predictive_feature, outlier_threshold=2.0):
     proposed_threshold = thresholds[first_idx]
 
     # Plot graph
-    #plt.rcParams["figure.figsize"] = (10, 10)
+    plt.rcParams["figure.figsize"] = (6.4, 6.4)
     fig, ax = plt.subplots(1, 1)
     plt.subplots_adjust(bottom=y_pad)
     plt.subplots_adjust(left=x_pad)
@@ -134,7 +134,7 @@ def reliability_diagram(radial_errors, mode_probabilities, pixel_size, n_of_bins
     plt.bar(bins[:-1], avg_conf_for_each_bin, align='edge', width=widths, color='lime', edgecolor='black', alpha=0.5,
             label='Gap', zorder=3)
     plt.legend(fontsize=font_size, loc="upper left", prop={'size': font_size})
-    plt.text(0.65, 0.075, 'ECE={:.2f}'.format(ece), backgroundcolor=(0.8, 0.8, 0.8, 0.8), fontsize=large_font_size, transform=ax.transAxes)
+    plt.text(0.5, 0.075, 'ECE={:.2f}'.format(ece), backgroundcolor=(0.8, 0.8, 0.8, 0.8), fontsize=30, transform=ax.transAxes)
 
     wb_image = wandb.Image(plt)
     plt.close()
