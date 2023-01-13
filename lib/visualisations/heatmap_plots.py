@@ -7,8 +7,8 @@ from scipy import stats
 from sklearn.metrics import roc_curve
 from sklearn.metrics import roc_auc_score
 
-font_size = 25
-large_font_size = 30
+font_size = 30
+large_font_size = 35
 
 
 def correlation_graph(x_values, y_values, x_label, y_label, n_bin=36):
@@ -24,7 +24,7 @@ def correlation_graph(x_values, y_values, x_label, y_label, n_bin=36):
     correlation = np.corrcoef(binned_x_values, binned_y_values)[0, 1]
 
     # Plot graph
-    plt.rcParams["figure.figsize"] = (6, 6)
+    plt.rcParams["figure.figsize"] = (10, 10)
     fig, ax = plt.subplots(1, 1)
     plt.subplots_adjust(bottom=0.15)
     plt.subplots_adjust(left=0.15)
@@ -34,7 +34,7 @@ def correlation_graph(x_values, y_values, x_label, y_label, n_bin=36):
     plt.xticks(fontsize=font_size)
     plt.yticks(fontsize=font_size)
     plt.text(0.35, 0.075, "CORRELATION={:.2f}".format(correlation), backgroundcolor=(0.8, 0.8, 0.8, 0.8), size=large_font_size, transform=ax.transAxes)
-    ax.scatter(binned_x_values, binned_y_values, c='lime', edgecolors='black', zorder=3)
+    ax.scatter(binned_x_values, binned_y_values, c='lime', edgecolors='black', zorder=3, s=10)
 
     wb_image = wandb.Image(plt)
     plt.close()
@@ -52,7 +52,7 @@ def roc_outlier_graph(ground_truth, predictive_feature, outlier_threshold=2.0):
     proposed_threshold = thresholds[first_idx]
 
     # Plot graph
-    plt.rcParams["figure.figsize"] = (6, 6)
+    plt.rcParams["figure.figsize"] = (10, 10)
     fig, ax = plt.subplots(1, 1)
     plt.subplots_adjust(bottom=0.15)
     plt.subplots_adjust(left=0.15)
