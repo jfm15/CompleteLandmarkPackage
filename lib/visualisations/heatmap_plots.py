@@ -110,11 +110,11 @@ def reliability_diagram(radial_errors, mode_probabilities, pixel_size, n_of_bins
     ece *= 100
 
     # save plot
-    # plt.rcParams["figure.figsize"] = (6, 6)
+    plt.rcParams["figure.figsize"] = (10, 10)
     fig, ax = plt.subplots(1, 1)
     ax.grid(zorder=0)
 
-    plt.subplots_adjust(left=0.30)
+    plt.subplots_adjust(left=0.50)
     plt.xlabel('Confidence', fontsize=font_size)
     plt.ylabel('Accuracy', fontsize=font_size)
     plt.xticks(fontsize=font_size)
