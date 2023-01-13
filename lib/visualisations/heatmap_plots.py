@@ -7,6 +7,9 @@ from scipy import stats
 from sklearn.metrics import roc_curve
 from sklearn.metrics import roc_auc_score
 
+font_size = 25
+large_font_size = 40
+
 
 def correlation_graph(x_values, y_values, x_label, y_label, n_bin=36):
 
@@ -24,11 +27,11 @@ def correlation_graph(x_values, y_values, x_label, y_label, n_bin=36):
     plt.rcParams["figure.figsize"] = (6, 6)
     fig, ax = plt.subplots(1, 1)
     ax.grid(zorder=0)
-    plt.xlabel(x_label, fontsize=14)
-    plt.ylabel(y_label, fontsize=14)
-    plt.xticks(fontsize=14)
-    plt.yticks(fontsize=14)
-    plt.text(0.5, 0.075, "CORRELATION={:.2f}".format(correlation), backgroundcolor=(0.8, 0.8, 0.8, 0.8), size='x-large', transform=ax.transAxes)
+    plt.xlabel(x_label, fontsize=font_size)
+    plt.ylabel(y_label, fontsize=font_size)
+    plt.xticks(fontsize=font_size)
+    plt.yticks(fontsize=font_size)
+    plt.text(0.5, 0.075, "CORRELATION={:.2f}".format(correlation), backgroundcolor=(0.8, 0.8, 0.8, 0.8), size=large_font_size, transform=ax.transAxes)
     ax.scatter(binned_x_values, binned_y_values, c='lime', edgecolors='black', zorder=3)
 
     wb_image = wandb.Image(plt)
@@ -50,17 +53,17 @@ def roc_outlier_graph(ground_truth, predictive_feature, outlier_threshold=2.0):
     plt.rcParams["figure.figsize"] = (6, 6)
     fig, ax = plt.subplots(1, 1)
     ax.grid(zorder=0)
-    plt.xlabel("False Positive Rate (FPR)", fontsize=14)
-    plt.ylabel("True Positive Rate (TPR)", fontsize=14)
-    plt.xticks(fontsize=14)
-    plt.yticks(fontsize=14)
+    plt.xlabel("False Positive Rate (FPR)", fontsize=font_size)
+    plt.ylabel("True Positive Rate (TPR)", fontsize=font_size)
+    plt.xticks(fontsize=font_size)
+    plt.yticks(fontsize=font_size)
     plt.plot([0, 1], [0, 1], c='black', linestyle='dashed')
     plt.xlim(0.0, 1.0)
     plt.ylim(0.0, 1.0)
     plt.grid(True)
 
     plt.plot(fpr, tpr, c="blue")
-    plt.text(0.42, 0.075, 'Area Under Curve={:.2f}'.format(auc), backgroundcolor=(0.8, 0.8, 0.8, 0.8), size='x-large',
+    plt.text(0.42, 0.075, 'Area Under Curve={:.2f}'.format(auc), backgroundcolor=(0.8, 0.8, 0.8, 0.8), size=large_font_size,
              transform=ax.transAxes)
 
     wb_image = wandb.Image(plt)
@@ -112,19 +115,19 @@ def reliability_diagram(radial_errors, mode_probabilities, pixel_size, n_of_bins
     ax.grid(zorder=0)
 
     plt.subplots_adjust(left=0.15)
-    plt.xlabel('Confidence', fontsize=14)
-    plt.ylabel('Accuracy', fontsize=14)
-    plt.xticks(fontsize=14)
+    plt.xlabel('Confidence', fontsize=font_size)
+    plt.ylabel('Accuracy', fontsize=font_size)
+    plt.xticks(fontsize=font_size)
     plt.locator_params(axis='x', nbins=5)
-    plt.yticks(fontsize=14)
+    plt.yticks(fontsize=font_size)
     plt.grid(zorder=0)
     plt.xlim(x_min, x_max)
     plt.ylim(0.0, max(np.max(avg_acc_for_each_bin), np.max(avg_conf_for_each_bin)) * 1.1)
     plt.bar(bins[:-1], avg_acc_for_each_bin, align='edge', width=widths, color='blue', edgecolor='black', label='Accuracy', zorder=3)
     plt.bar(bins[:-1], avg_conf_for_each_bin, align='edge', width=widths, color='lime', edgecolor='black', alpha=0.5,
             label='Gap', zorder=3)
-    plt.legend(fontsize=20, loc="upper left", prop={'size': 16})
-    plt.text(0.71, 0.075, 'ECE={:.2f}'.format(ece), backgroundcolor='white', fontsize='x-large', transform=ax.transAxes)
+    plt.legend(fontsize=font_size, loc="upper left", prop={'size': 16})
+    plt.text(0.71, 0.075, 'ECE={:.2f}'.format(ece), backgroundcolor='white', fontsize=40, transform=ax.transAxes)
 
     wb_image = wandb.Image(plt)
     plt.close()

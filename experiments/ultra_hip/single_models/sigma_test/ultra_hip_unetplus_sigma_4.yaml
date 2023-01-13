@@ -43,6 +43,7 @@ VALIDATION:
   MEASUREMENTS:
     - alpha_angle
     - beta_angle
+  CORRELATION_BINS: 6
 
 MODEL:
   ENCODER_NAME: 'resnet34'
