@@ -24,7 +24,7 @@ def correlation_graph(x_values, y_values, x_label, y_label, n_bin=36):
     correlation = np.corrcoef(binned_x_values, binned_y_values)[0, 1]
 
     # Plot graph
-    plt.rcParams["figure.figsize"] = (10, 10)
+    plt.rcParams["figure.figsize"] = (6, 6)
     fig, ax = plt.subplots(1, 1)
     plt.subplots_adjust(bottom=0.15)
     plt.subplots_adjust(left=0.15)
@@ -33,7 +33,7 @@ def correlation_graph(x_values, y_values, x_label, y_label, n_bin=36):
     plt.ylabel(y_label, fontsize=font_size)
     plt.xticks(fontsize=font_size)
     plt.yticks(fontsize=font_size)
-    plt.text(0.5, 0.075, "CORRELATION={:.2f}".format(correlation), backgroundcolor=(0.8, 0.8, 0.8, 0.8), size=large_font_size, transform=ax.transAxes)
+    plt.text(0.35, 0.075, "CORRELATION={:.2f}".format(correlation), backgroundcolor=(0.8, 0.8, 0.8, 0.8), size=large_font_size, transform=ax.transAxes)
     ax.scatter(binned_x_values, binned_y_values, c='lime', edgecolors='black', zorder=3)
 
     wb_image = wandb.Image(plt)
@@ -52,7 +52,7 @@ def roc_outlier_graph(ground_truth, predictive_feature, outlier_threshold=2.0):
     proposed_threshold = thresholds[first_idx]
 
     # Plot graph
-    plt.rcParams["figure.figsize"] = (10, 10)
+    plt.rcParams["figure.figsize"] = (6, 6)
     fig, ax = plt.subplots(1, 1)
     plt.subplots_adjust(bottom=0.15)
     plt.subplots_adjust(left=0.15)
@@ -67,7 +67,7 @@ def roc_outlier_graph(ground_truth, predictive_feature, outlier_threshold=2.0):
     plt.grid(True)
 
     plt.plot(fpr, tpr, c="blue")
-    plt.text(0.42, 0.075, 'Area Under Curve={:.2f}'.format(auc), backgroundcolor=(0.8, 0.8, 0.8, 0.8), size=large_font_size,
+    plt.text(0.30, 0.075, 'Area Under Curve={:.2f}'.format(auc), backgroundcolor=(0.8, 0.8, 0.8, 0.8), size=large_font_size,
              transform=ax.transAxes)
 
     wb_image = wandb.Image(plt)
