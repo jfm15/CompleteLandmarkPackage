@@ -133,7 +133,7 @@ def reliability_diagram(radial_errors, mode_probabilities, pixel_size, n_of_bins
     plt.bar(bins[:-1], avg_acc_for_each_bin, align='edge', width=widths, color='blue', edgecolor='black', label='Accuracy', zorder=3)
     plt.bar(bins[:-1], avg_conf_for_each_bin, align='edge', width=widths, color='lime', edgecolor='black', alpha=0.5,
             label='Gap', zorder=3)
-    plt.legend(fontsize=font_size, loc="upper left", prop={'size': font_size})
+    plt.legend(fontsize=20, loc="upper left", prop={'size': 20})
     plt.text(0.5, 0.075, 'ECE={:.2f}'.format(ece), backgroundcolor=(0.8, 0.8, 0.8, 0.8), fontsize=30, transform=ax.transAxes)
 
     wb_image = wandb.Image(plt)
