@@ -103,7 +103,7 @@ def main():
     logger.info(cfg)
     logger.info("")
 
-    training_dataset = LandmarkDataset(args.images, args.annotations, cfg.DATASET, perform_augmentation=False,
+    training_dataset = LandmarkDataset(args.images, args.annotations, cfg.DATASET, perform_augmentation=True,
                                        partition=args.partition, partition_label="training")
     training_loader = torch.utils.data.DataLoader(training_dataset, batch_size=cfg.TRAIN.BATCH_SIZE, shuffle=True)
 
