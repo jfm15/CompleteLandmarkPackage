@@ -133,8 +133,10 @@ def main():
 
     validate(our_model, validation_loader, final_layer, loss_function,
              cfg.VALIDATION, image_save_path, logger, save_graphs=True)
+    validate(our_model, validation_loader, final_layer, loss_function,
+             cfg.VALIDATION, image_save_path, logger, epoch=0)
 
-    for epoch in range(20):
+    for epoch in range(1, 20):
 
         logger.info('-----------Epoch {} Temperature Scaling-----------'.format(epoch))
         temperature_scale(our_model, optimizer, scheduler, training_loader, final_layer, loss_function, logger)
