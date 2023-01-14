@@ -123,7 +123,7 @@ def main():
 
     our_model.temperatures.requires_grad = True
     optimizer = torch.optim.Adam([our_model.temperatures], lr=cfg.TRAIN.SCALING_LR)
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[21], gamma=0.1)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10], gamma=0.1)
     final_layer = eval("lib.models." + cfg.TRAIN.FINAL_LAYER)
     loss_function = eval("lib.models." + cfg.TRAIN.LOSS_FUNCTION)
 
