@@ -13,7 +13,7 @@ def get_hottest_points(output_stack):
 
 
 # Heatmap is a tensor of size (B, N, W, H)
-def get_eres(output_stack, predicted_points_scaled, pixel_sizes, significant_pixel_cutoff=0.1):
+def get_eres(output_stack, predicted_points_scaled, pixel_sizes, significant_pixel_cutoff=0.05):
     # flip points
     predicted_points_scaled = torch.flip(predicted_points_scaled, dims=[2])
 
