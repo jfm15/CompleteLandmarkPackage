@@ -42,8 +42,9 @@ VALIDATION:
   MEASUREMENTS_SUFFIX: "ultra"
   MEASUREMENTS:
     - alpha_angle
-    - beta_angle\
+    - beta_angle
   CORRELATION_BINS: 6
+  OUTLIER_THRESHOLD: 10.0
 
 MODEL:
   ENCODER_NAME: 'resnet34'

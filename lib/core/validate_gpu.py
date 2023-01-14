@@ -273,7 +273,8 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
                                                                n_bin=cfg_validation.CORRELATION_BINS)
 
         # Save the heatmap analysis plots
-        best_threshold, auc, roc_wb_img = roc_outlier_graph(radial_errors_np.flatten(), eres_np.flatten())
+        best_threshold, auc, roc_wb_img = roc_outlier_graph(radial_errors_np.flatten(), eres_np.flatten(),
+                                                            outlier_threshold=cfg_validation.OUTLIER_THRESHOLD)
 
         # Save the reliability diagram
         ece, reliability_diagram_wb_image = reliability_diagram(radial_errors_np.flatten(), confidence_np.flatten(),

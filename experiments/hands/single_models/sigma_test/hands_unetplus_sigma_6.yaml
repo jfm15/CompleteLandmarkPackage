@@ -38,6 +38,7 @@ VALIDATION:
     - 10.0
   SAVE_IMAGE_PATH: "images/hands/"
   MEASUREMENTS_SUFFIX: "hands"
+  OUTLIER_THRESHOLD: 1.2
 
 MODEL:
   ENCODER_NAME: 'resnet34'

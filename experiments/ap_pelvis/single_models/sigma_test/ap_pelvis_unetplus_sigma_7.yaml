@@ -49,6 +49,8 @@ VALIDATION:
     - 3.0
     - 4.0
   SAVE_IMAGE_PATH: "images/ap_pelvis/"
+  CORRELATION_BINS: 6
+  OUTLIER_THRESHOLD: 4.0
 
 MODEL:
   ENCODER_NAME: 'resnet34'
