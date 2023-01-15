@@ -251,8 +251,8 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
     if not training_mode or temperature_scaling_mode:
 
         radial_errors_np = radial_errors.detach().cpu().numpy()
-        eres_np = eres_per_model[0].detach().cpu().numpy()
-        confidence_np = modes_per_model[0].detach().cpu().numpy()
+        eres_np = torch.mean(eres_per_model, dim=0).detach().cpu().numpy()
+        confidence_np = torch.mean(modes_per_model, dim=0).detach().cpu().numpy()
         pixel_size_np = pixel_size_per_model[0].detach().cpu().numpy()
 
         '''
