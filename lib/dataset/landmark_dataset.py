@@ -89,7 +89,7 @@ class LandmarkDataset(Dataset):
 
         if subset:
             percentage = subset[1]
-            percentage_index = np.floor(len(image_paths) * percentage / 100.0)
+            percentage_index = int(np.floor(len(image_paths) * percentage / 100.0))
             if subset[0] == 'below':
                 image_paths = image_paths[:percentage_index]
             else:
