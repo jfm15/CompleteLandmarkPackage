@@ -40,8 +40,11 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             # print figures
             b = 0
             for visual_name in visuals:
-                intermediate_figure(image[b], output[b].numpy(), predicted_points[b],
-                                    target_points[b], eres[b], visual_name)
+                image_name = meta["file_name"][b]
+                figure_name = "{}_{}".format(image_name, visual_name)
+                wb_image = intermediate_figure(image[b], output[b].numpy(), predicted_points[b],
+                                               target_points[b], eres[b], visual_name)
+                wandb.log({figure_name: wb_image})
 
         # put these arrays into a format suitable for the aggregate methods function
         image_predicted_points = torch.unsqueeze(torch.cat(image_predicted_points), 1).float()
@@ -82,8 +85,8 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             image_name = meta["file_name"][b]
             figure_name = "{}_{}".format(image_name, visual_name)
             wb_image = final_figure(image[b], aggregated_points[b],
-                                     aggregated_point_dict, target_points[b],
-                                      cfg_validation.MEASUREMENTS_SUFFIX, visual_name)
+                                    aggregated_point_dict, target_points[b],
+                                    cfg_validation.MEASUREMENTS_SUFFIX, visual_name)
             wandb.log({figure_name: wb_image})
 
 
@@ -104,4 +107,5 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
                                                                         std_measurement_dif)
     logger.info(txt)
 
-    return average_loss, average_radial_error
+    # TODO populate these with actual loss_dict, mre_dict and mere_dict
+    return {"1": 100}, {"1": 100}, {}

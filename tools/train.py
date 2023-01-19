@@ -96,10 +96,10 @@ def main():
     logger.info(cfg)
     logger.info("")
 
-    training_dataset = LandmarkDataset(args.images, args.annotations, cfg.DATASET, perform_augmentation=True,
+    training_dataset = LandmarkDataset(args.images, args.annotations, cfg.DATASET, perform_augmentation=False,
                                        subset=("below", cfg.TRAIN.LABELED_SUBSET), partition=args.partition,
                                        partition_label="training")
-    training_loader = torch.utils.data.DataLoader(training_dataset, batch_size=cfg.TRAIN.BATCH_SIZE, shuffle=True)
+    training_loader = torch.utils.data.DataLoader(training_dataset, batch_size=1, shuffle=True)
 
     validation_dataset = LandmarkDataset(args.images, args.annotations, cfg.DATASET, gaussian=False,
                                          perform_augmentation=False, partition=args.partition,
@@ -117,9 +117,14 @@ def main():
     if args.debug:
         for batch, (image, channels, meta) in enumerate(training_loader):
             print(meta["file_name"])
+            image_name = meta["file_name"][0]
+            figure_name = "{}_{}".format(image_name, "preliminary")
             landmarks_per_annotator = meta['landmarks_per_annotator']
             target_points = torch.mean(landmarks_per_annotator[0], dim=0)
-            preliminary_figure(image[0], channels[0].detach().cpu().numpy(), target_points, "show_channels")
+            wb_image = preliminary_figure(image[0], channels[0].detach().cpu().numpy(), target_points, "show_channels")
+            wandb.log({figure_name: wb_image})
+
+        return
 
     if torch.cuda.is_available():
         validate_file = "validate_gpu"

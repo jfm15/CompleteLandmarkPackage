@@ -6,6 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
+from scipy.stats import multivariate_normal
+
 
 def figure(image, graphics_function, args):
     fig, ax = plt.subplots(1, 1)
@@ -19,7 +21,7 @@ def figure(image, graphics_function, args):
 
     h, w = np.shape(image[0])
     fig.set_size_inches(w / 100.0, h / 100.0)
-    fig.set_dpi(100)
+    fig.set_dpi(150)
 
     wb_image = wandb.Image(plt)
     plt.close()
@@ -39,6 +41,10 @@ def intermediate_figure(image, output, predicted_points, target_points, eres, fi
         return figure(image, heatmaps_and_ere, (output, predicted_points, target_points, eres))
     elif figure_name == "heatmaps":
         return figure(image, heatmaps, (output, predicted_points, target_points, eres))
+    elif figure_name == "isolated_heatmap":
+        return figure(image, isolated_heatmap, (output, predicted_points, target_points, eres))
+    elif figure_name == "gaussian_approximation":
+        return figure(image, gaussian_approximation, (output, predicted_points, target_points, eres))
     elif figure_name == "heatmaps_and_preds":
         return figure(image, heatmaps_and_preds, (output, predicted_points, target_points, eres))
 
@@ -60,7 +66,8 @@ def final_figure(image, aggregated_points, aggregated_point_dict, target_points,
         return figure(image, targets, (aggregated_points, target_points, True, True, False, image[0].size()))
     elif figure_name == "aggregates":
         return figure(image, aggregates, (aggregated_point_dict, target_points))
-    elif figure_name in ["heatmaps", "heatmaps_and_ere", "heatmaps_and_preds"]:
+    elif figure_name in ["heatmaps", "isolated_heatmap", "gaussian_approximation",
+                         "heatmaps_and_ere", "heatmaps_and_preds"]:
         return
     else:
         graphics_function = eval(".".join(["lib", "visualisations", suffix, figure_name]))
@@ -176,6 +183,43 @@ def heatmaps(ax, output, predicted_points, target_points, eres):
     ax.imshow(squashed_output, cmap='inferno', alpha=0.5)
 
 
+# 6 for x-ray pelvis
+# 20 for hand
+def isolated_heatmap(ax, output, predicted_points, target_points, eres, channel=20):
+    ax.imshow(output[channel], cmap='inferno', alpha=0.5)
+
+
+def gaussian_approximation(ax, output, predicted_points, target_points, eres, channel=6):
+    heatmap = output[channel]
+
+    # find mean
+    expected_position = np.zeros([2])
+    width, height = heatmap.shape
+    for x in range(width):
+        for y in range(height):
+            expected_position += np.array([x, y]) * heatmap[x, y]
+
+    # find covariance matrix
+    ex_x, ex_y = expected_position
+    var_x = 0
+    var_y = 0
+    cov_xy = 0
+    for x in range(width):
+        for y in range(height):
+            var_x += (x - ex_x)**2 * heatmap[x, y]
+            var_y += (y - ex_y) ** 2 * heatmap[x, y]
+            cov_xy += (x - ex_x) * (y - ex_y) * heatmap[x, y]
+
+    ax.imshow(heatmap, cmap='inferno', alpha=0.5)
+    ax.scatter([expected_position[1]], [expected_position[0]], s=5, color="red")
+
+    x, y = np.meshgrid(range(width), range(height))
+    pos = np.dstack((x, y))
+    rv = multivariate_normal(expected_position, [[var_x, cov_xy], [cov_xy, var_y]])
+    pdf = rv.pdf(pos)
+    ax.contour(y, x, pdf, levels=[np.max(pdf) / 3], linewidths=1, colors="yellow")
+
+
 def heatmaps_and_preds(ax, output, predicted_points, target_points, eres):
 
     normalized_heatmaps = output / np.max(output, axis=(1, 2), keepdims=True)
@@ -186,12 +230,14 @@ def heatmaps_and_preds(ax, output, predicted_points, target_points, eres):
     preds(ax, predicted_points, target_points, show_indices=False, s=2)
 
 
-def show_channels(ax, channels, target_points):
-
+def show_channels(ax, channels, target_points, custom=20):
+    ax.imshow(channels[custom], cmap='inferno', alpha=0.4)
+    '''
     squashed_channels = np.max(channels, axis=0)
     ax.imshow(squashed_channels, cmap='inferno', alpha=0.5)
 
     for i, positions in enumerate(target_points):
         ax.text(positions[0], positions[1], "{}".format(i + 1), color="yellow", fontsize="small")
+    '''
 
 

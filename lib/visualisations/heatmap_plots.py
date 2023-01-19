@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from scipy import stats
 from sklearn.metrics import roc_curve
 from sklearn.metrics import roc_auc_score
+from matplotlib.ticker import MultipleLocator
 
 font_size = 25
 large_font_size = 20
@@ -131,6 +132,7 @@ def reliability_diagram(radial_errors, mode_probabilities, pixel_size, n_of_bins
     plt.yticks(fontsize=font_size)
     plt.grid(zorder=0)
     plt.xlim(x_min, x_max)
+    ax.xaxis.set_minor_locator(MultipleLocator(0.002))
     plt.ylim(0.0, max(np.max(avg_acc_for_each_bin), np.max(avg_conf_for_each_bin)) * 1.1)
     plt.bar(bins[:-1], avg_acc_for_each_bin, align='edge', width=widths, color='blue', edgecolor='black', label='Accuracy', zorder=3)
     plt.bar(bins[:-1], avg_conf_for_each_bin, align='edge', width=widths, color='lime', edgecolor='black', alpha=0.5,
