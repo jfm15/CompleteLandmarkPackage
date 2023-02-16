@@ -6,9 +6,8 @@ import math
 import _init_paths
 import lib
 import lib.models
-
+torch.cuda.empty_cache()
 import numpy as np
-
 
 from lib.dataset import LandmarkDataset
 from lib.utils import prepare_for_training

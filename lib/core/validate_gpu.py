@@ -156,7 +156,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             image_name = meta["file_name"][b]
             figure_save_path = os.path.join(save_path, visual_name,
                                             "{}_{}".format(image_name, visual_name))
-            #txt = "Saving Images in {} for {}".format(figure_save_path, visual_name)
+            txt = "Saving Images in {} for {}".format(figure_save_path, visual_name)
             #logger.info(txt)
             final_figure(image[b], aggregated_points_idx.detach().cpu().numpy(),
                              aggregated_point_dict, target_points_idx.detach().cpu().numpy(),

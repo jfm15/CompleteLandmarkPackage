@@ -11,6 +11,7 @@ def display_measurement_distribution(values, measurement_name, color):
     plt.hist(values, bins=10, color=color)
     plt.grid(True)
     plt.show()
+    plt.close()
 
 
 def display_ks_score_of_partition(partition, value_per_id, measurement_name):

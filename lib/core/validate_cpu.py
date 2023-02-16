@@ -37,13 +37,27 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             # print figures
             b = 0
             for visual_name in visuals:
-                intermediate_figure(image[b], output[b].numpy(), predicted_points[b],
-                                    target_points[b], eres[b], visual_name)
+                if not os.path.isdir(save_path+'/'+visual_name):
+                    os.mkdir(save_path+'/'+visual_name)
 
+                intermediate_figure(image[b], output[b].numpy(), predicted_points[b],
+                                    target_points[b], eres[b], visual_name, save=True, save_path=save_path+'/'+visual_name+'/'+meta['file_name'][0])
+               
         # put these arrays into a format suitable for the aggregate methods function
         image_predicted_points = torch.unsqueeze(torch.cat(image_predicted_points), 1).float()
         image_scaled_predicted_points = torch.unsqueeze(torch.cat(image_scaled_predicted_points), 1).float()
-
+        
+        image_scaled_predicted_points_txt = image_scaled_predicted_points.squeeze().numpy()
+        if not os.path.isdir(save_path+'/'+visual_name+'/txt/'):
+            os.mkdir(save_path+'/'+visual_name+'/txt/')
+        
+        with open(save_path+'/'+visual_name+'/txt/'+meta['file_name'][0]+".txt", 'w') as output:
+            for i in range(len(image_scaled_predicted_points_txt)):
+                row=image_scaled_predicted_points_txt[i].tolist()
+                print(row)
+                data_str = (str([round(row[1],5),round(row[0],5)])[1:-1])
+                output.write(data_str)
+        
         image_eres = torch.unsqueeze(torch.cat(image_eres), 1).float()
 
         aggregated_point_dict = use_aggregate_methods(image_predicted_points, image_eres,
@@ -78,7 +92,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         for visual_name in visuals:
             final_figure(image[b], aggregated_points[b],
                          aggregated_point_dict, target_points[b],
-                         cfg_validation.MEASUREMENTS_SUFFIX, visual_name)
+                         cfg_validation.MEASUREMENTS_SUFFIX, visual_name,save=True, save_path=save_path+'/'+visual_name+'/'+meta['file_name'][0])
 
     average_loss = sum(losses) / len(losses)
     txt = "Average loss: {:.3f}".format(average_loss)

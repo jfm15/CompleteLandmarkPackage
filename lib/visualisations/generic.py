@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
 
-def figure(image, graphics_function, args, save=False, save_path=""):
+def figure(image, graphics_function, args, save=True, save_path=""):
     fig, ax = plt.subplots(1, 1)
 
     ax.imshow(image[0], cmap='gray')
@@ -22,6 +22,7 @@ def figure(image, graphics_function, args, save=False, save_path=""):
     if save:
         plt.savefig(save_path)
         plt.close()
+        #print(save_path)
     else:
         plt.show()
 
@@ -33,7 +34,7 @@ def preliminary_figure(image, channels, target_points, figure_name, save=False, 
 
 
 def intermediate_figure(image, output, predicted_points, target_points, eres,
-                        figure_name, save=False, save_path=""):
+                        figure_name, save=True, save_path=""):
 
     if figure_name == "heatmaps_and_ere":
         figure(image, heatmaps_and_ere, (output, predicted_points, target_points, eres), save=save, save_path=save_path)

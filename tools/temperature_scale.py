@@ -117,8 +117,14 @@ def main():
 
         validate(our_model, validation_loader, final_layer, loss_function, cfg.VALIDATION, logger)
 
-    logger.info("-----------Temperature Scaling Complete-----------")
+    logger.info('-----------Saving Models-----------')
+    model_run_path = os.path.join(output_path, "temp_scale_models".format())
+    if not os.path.exists(model_run_path):
+        os.makedirs(model_run_path)
 
+    save_model_path = os.path.join(model_run_path, "model_run:{}.pth".format(yaml_file_name))
+    logger.info("Saving Model State Dict to {}".format(save_model_path))
+    torch.save(our_model.state_dict(), save_model_path)
 
 if __name__ == '__main__':
     main()
