@@ -35,10 +35,9 @@ VALIDATION:
     - "confidence weighted"
   SDR_AGGREGATION_METHOD: "confidence weighted"
   SDR_THRESHOLDS:
-    - 2.0
-    - 2.5
-    - 3.0
-    - 4.0
+    - 10.0
+    - 15.0
+    - 20.0
   SAVE_IMAGE_PATH: "images/ultra_hip/"
   MEASUREMENTS_SUFFIX: "ultra"
   MEASUREMENTS:
