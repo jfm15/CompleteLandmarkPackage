@@ -13,6 +13,7 @@ from lib.visualisations.generic import preds
 
 from lib.visualisations.heatmap_plots import radial_error_vs_ere_graph
 from lib.visualisations.heatmap_plots import reliability_diagram
+from lib.visualisations.heatmap_plots import reliability_diagram_norm
 from lib.visualisations.heatmap_plots import roc_outlier_graph
 
 from lib.visualisations.miscellaneous import display_measurement_distribution

@@ -114,9 +114,9 @@ def main():
             validate_file = "validate_gpu"
         else:
             validate_file = "validate_cpu"
-        validate_file = "validate_cpu"
+        #validate_file = "validate_cpu"
         eval("{}.validate_over_set".format(validate_file)) \
-            (ensemble, test_loader, final_layer, loss_function, args.visuals, cfg.VALIDATION, image_save_path,
+            (ensemble, test_loader, final_layer, loss_function, args.visuals, cfg.VALIDATION, image_save_path, 
              logger=logger)
 
 

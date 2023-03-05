@@ -108,7 +108,7 @@ class LandmarkDataset(Dataset):
 
             annotation_paths = []
             for annotation_sub_dir in annotation_sub_dirs:
-                annotation_paths.append(os.path.join(annotation_sub_dir, file_name + ".txt"))
+                annotation_paths.append(os.path.join(annotation_sub_dir))
                 sub_dir_name = annotation_sub_dir.split("/")[-1]
                 cache_annotation_paths.append(os.path.join(cache_data_dir, file_name + "_" + sub_dir_name + ".txt"))
 

@@ -15,7 +15,7 @@ def prepare_for_training(cfg_path, output_path):
     # get directory to save log and model
     split_cfg_path = cfg_path.split("/")
     yaml_file_name = os.path.splitext(split_cfg_path[-1])[0]
-    output_path = os.path.join(output_path, yaml_file_name)
+    output_path = os.path.join(output_path, yaml_file_name, 'training')
     if not os.path.exists(output_path):
         os.makedirs(output_path)
 
@@ -33,7 +33,7 @@ def prepare_for_testing(cfg_path, model_path):
     split_cfg_path = cfg_path.split("/")
     yaml_file_name = os.path.splitext(split_cfg_path[-1])[0]
     model_name = os.path.basename(model_path)
-    output_path = os.path.join('output', yaml_file_name, model_name)
+    output_path = os.path.join('output', yaml_file_name, 'test', model_name)
     if not os.path.exists(output_path):
         os.makedirs(output_path)
 

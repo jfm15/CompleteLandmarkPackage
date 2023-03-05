@@ -2,16 +2,17 @@ import numpy as np
 import math as math
 from matplotlib import pyplot as plt
 import os
+import math
 class graph_angle_calculations():
     def __init__(self) -> None:
         self.grf_dic = {
             "1": {'a':'>60', 'b':'NA', 'd': 'Normal: Discharge Patient'},
-            "2a": {'a':'50-59', 'b':'NA', 'd': 'Normal: Discharge Patient'},
-            "2b": {'a':'50-59', 'b':'NA', 'd': 'Normal: Clinical Review- monitor+-treat'},
-            "2c": {'a':'43-49', 'b':'<77', 'd':'Abnormal: Clinical Review- treat'},
-            "D": {'a':'43-49', 'b':'>77', 'd': 'Abnormal: Clinical Review- treat'}, 
-            "3": {'a':'<43', 'b':'Unable to calculate', 'd': 'Abnormal: Clinical Review- treat'},
-            "4": {'a':'<43', 'b':'Unable to calculate', 'd': 'Abnormal: Clinical Review- treat'},
+            "2a": {'a':'50-59', 'b':'NA', 'd': 'Normal: Clinical Review -/+ treat'},
+            "2b": {'a':'50-59', 'b':'NA', 'd': 'Abnormal: Clinical Review -/+ treat'},
+            "2c": {'a':'43-49', 'b':'<77', 'd':'Abnormal: Clinical Review + treat'},
+            "D": {'a':'43-49', 'b':'>77', 'd': 'Abnormal: Clinical Review + treat'}, 
+            "3": {'a':'<43', 'b':'Unable to calculate', 'd': 'Abnormal: Clinical Review + treat'},
+            "4": {'a':'<43', 'b':'Unable to calculate', 'd': 'Abnormal: Clinical Review + treat'},
             }
         pass
 
@@ -121,27 +122,25 @@ class graph_angle_calculations():
         return max_r, min_r
 
 
-    def get_angle_range(self,p1,p2,c1,p3,p4,c2,im,img_name,outpath,plot_range=True):
+    def get_angle_range(self, point_radius, p1,p2,c1,p3,p4,c2,im,img_name,outpath,plot_range=True):
         '''
         range of angles you can get for three different points moving with variability x
         note: '_u' is upper and '_l' denotes lower ranges '''
         #pixel radius for variability
-        r = 2
+        r = point_radius
 
         #get lower ad upper bounds assuming uniform variability of 'r' radius from center point given
         #break down vectors into points
-        p1x_u, p1x_l = p1[0]+r,p1[0]-r
-        p2x_u, p2x_l = p2[0]+r,p2[0]-r
-        p3x_u, p3x_l = p3[0]+r,p3[0]-r
-        p4x_u, p4x_l = p4[0]+r,p4[0]-r
+        p1x_u, p1x_l = math.floor(p1[0])+r,math.ceil(p1[0]-r)
+        p2x_u, p2x_l = math.floor(p2[0])+r,math.ceil(p2[0]-r)
+        p3x_u, p3x_l = math.floor(p3[0])+r,math.ceil(p3[0]-r)
+        p4x_u, p4x_l = math.floor(p4[0])+r,math.ceil(p4[0]-r)
         
-        p1y_u, p1y_l = p1[1]+r,p1[1]-r
-        p2y_u, p2y_l = p2[1]+r,p2[1]-r
-        p3y_u, p3y_l = p3[1]+r,p3[1]-r
-        p4y_u, p4y_l = p4[1]+r,p4[1]-r
+        p1y_u, p1y_l = math.floor(p1[1])+r,math.ceil(p1[1]-r)
+        p2y_u, p2y_l = math.floor(p2[1])+r,math.ceil(p2[1]-r)
+        p3y_u, p3y_l = math.floor(p3[1])+r,math.ceil(p3[1]-r)
+        p4y_u, p4y_l = math.floor(p4[1])+r,math.ceil(p4[1]-r)
         
-        max_theta = 0
-        min_theta = 0
         #all possible lines from range, and calculate array of all possible a and b values
         if plot_range == True:
             fig2, ax2 = plt.subplots(1, 1)
@@ -152,8 +151,10 @@ class graph_angle_calculations():
             plt.scatter(p4[1], p4[0],c=c2, s=20)
 
             #can set range for plotting but for computational time take first and last in range defined
-            it = p1x_u-p1x_l-1
+            it = int(p1x_u-p1x_l-1)
             #arr_theta = np.array([])
+            max_theta = 0
+            min_theta = 0
             for x1 in range(p1x_l, p1x_u,it):
                 for x2 in range(p2x_l, p2x_u,it):
                     for y1 in range(p1y_l, p1y_u,it):
@@ -174,7 +175,7 @@ class graph_angle_calculations():
                                             m2 = (x4-x3)/(y4-y3)
                                             b2 = x4-m2*y4
                                             y_values = x_values*m2+b2
-                                            ax2.plot(x_values, y_values,c2, linestyle="-", linewidth=0.05)
+                                            ax2.plot(x_values, y_values,c2, linestyle="-", linewidth=0.09)
                                             
                                             #calculate theta
                                             v_1 = self.get_vector([x1,y1],[x2,y2])
@@ -184,9 +185,20 @@ class graph_angle_calculations():
                                             theta_rad = np.arccos(np.dot(v_1,v_2)/(np.linalg.norm(v_1)*np.linalg.norm(v_2)))
                                             theta = math.degrees(theta_rad)
 
-                                            if max_theta and min_theta == 0:
+                                            if max_theta == 0:
                                                 max_theta = theta
                                                 min_theta = theta
+                                                
+                                                m_max_1 = m
+                                                b_max_1 = b
+                                                m_max_2 = m2
+                                                b_max_2 = b2
+
+                                                m_min_1 = m
+                                                b_min_1 = b
+                                                m_min_2 = m2
+                                                b_min_2 = b2
+
 
                                             if theta > max_theta:
                                                 max_theta = theta
@@ -194,8 +206,6 @@ class graph_angle_calculations():
                                                 b_max_1 = b
                                                 m_max_2 = m2
                                                 b_max_2 = b2
-                                                x1_max, x2_max, y1_max, y2_max = x1,x2,y1,y2
-                                                x3_max, x4_max, y3_max, y4_max = x3,x4,y3,y4
 
                                             if theta < min_theta:
                                                 min_theta = theta
@@ -203,8 +213,7 @@ class graph_angle_calculations():
                                                 b_min_1 = b
                                                 m_min_2 = m2
                                                 b_min_2 = b2
-                                                x1_min, x2_min, y1_min, y2_min = x1,x2,y1,y2
-                                                x3_min, x4_min, y3_min, y4_min = x3,x4,y3,y4
+
 
             print('plot range:', min_theta, 'to', max_theta)
             ax2.imshow(im)
@@ -213,7 +222,9 @@ class graph_angle_calculations():
             ax2.text(0.05, 0.95, txt, transform=ax2.transAxes, fontsize=10,verticalalignment='top', bbox=props)
             if not os.path.isdir(outpath):
                 os.mkdir(outpath)
-            plt.savefig(outpath+'range_'+img_name)
+                os.mkdir(outpath+'/ranges/')
+
+            plt.savefig(outpath+'/ranges/range_'+img_name)
 
             #PLOT MAX AND MIN ONLY
             fig3, ax3 = plt.subplots(1,2)
@@ -234,28 +245,28 @@ class graph_angle_calculations():
             ax3[0].plot(x_values, y_values,c2, linestyle="-", linewidth=1)
         
             props = dict(boxstyle='round', facecolor='white', alpha=0.8)
-            ax3[1].scatter(y1_max, x1_max,c=c1, s=20)
-            ax3[1].scatter(y2_max, x2_max,c=c1, s=20)
-            ax3[1].scatter(y3_max, x3_max,c=c2, s=20)
-            ax3[1].scatter(y4_max, x4_max,c=c2, s=20)
+            ax3[1].scatter(p1[1], p1[0],c=c1, s=20)
+            ax3[1].scatter(p2[1], p2[0],c=c1, s=20)
+            ax3[1].scatter(p3[1], p3[0],c=c2, s=20)
+            ax3[1].scatter(p4[1], p4[0],c=c2, s=20)
             ax3[1].imshow(im)
             txt = "theta: " + str(round(max_theta))+u"\u00b0"
             ax3[1].text(0.05, 0.95, txt, transform=ax3[1].transAxes, fontsize=10,verticalalignment='top', bbox=props)
             
-            ax3[0].scatter(y1_min, x1_min,c=c1, s=20)
-            ax3[0].scatter(y2_min, x2_min,c=c1, s=20)
-            ax3[0].scatter(y3_min, x3_min,c=c2, s=20)
-            ax3[0].scatter(y4_min, x4_min,c=c2, s=20)
+            ax3[0].scatter(p1[1], p1[0],c=c1, s=20)
+            ax3[0].scatter(p2[1], p2[0],c=c1, s=20)
+            ax3[0].scatter(p3[1], p3[0],c=c2, s=20)
+            ax3[0].scatter(p4[1], p4[0],c=c2, s=20)
             ax3[0].imshow(im)
             txt = "theta: " + str(round(min_theta))+u"\u00b0"
             ax3[0].text(0.05, 0.95, txt, transform=ax3[0].transAxes, fontsize=10,verticalalignment='top', bbox=props)
             
             #plt.show()
             #Save
-            if not os.path.isdir(outpath):
-                os.mkdir(outpath)
+            if not os.path.isdir(outpath+'/min-max'):
+                os.mkdir(outpath+'/min-max')
 
-            plt.savefig(outpath+'min-max_'+img_name)
+            plt.savefig(outpath+'/min-max/min-max_'+img_name)
 
             
         # dot product between vector 1 and vector 2 (assume vector 1 is p1, p2 and vector 2 is p1, p3)
@@ -302,4 +313,4 @@ class graph_angle_calculations():
 
         theta_plot_range = (min_theta+max_theta)/2
         plt.close()
-        return theta_plot_range
+        return min_theta,max_theta

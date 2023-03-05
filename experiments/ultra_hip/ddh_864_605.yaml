@@ -7,8 +7,8 @@ DATASET:
     - 1.0
     - 1.0
   CACHED_IMAGE_SIZE:
-    - 640
-    - 480
+    - 864
+    - 608
   SIGMA: 5
   FLIP_AXIS: TRUE
   NO_OF_ANNOTATORS: 1
@@ -23,10 +23,10 @@ DATASET:
     ELASTIC_SMOOTHNESS: 0
 
 TRAIN:
-  BATCH_SIZE: 3
+  BATCH_SIZE: 6
   LR: 0.001
-
-  REPEATS: 3
+  EPOCHS: 30
+  REPEATS: 2
   LABELED_SUBSET: 150
   FINE_TUNE_EPOCHS: 0
   ENSEMBLE_MODELS: 1
@@ -38,9 +38,9 @@ VALIDATION:
   SDR_AGGREGATION_METHOD: "confidence weighted"
   SDR_THRESHOLDS:
     - 2.0
-    - 2.5
-    - 3.0
     - 4.0
+    - 6.0
+    - 8.0
   SAVE_IMAGE_PATH: "images/ultra_hip/"
   MEASUREMENTS_SUFFIX: "ultra"
   MEASUREMENTS:
@@ -48,10 +48,16 @@ VALIDATION:
     - beta_angle
   DIAGNOSES:
     - ddh
+  CORRECT_THRESHOLDS: 
+    - 2.0
+    - 4.0
+    - 8.0
+    - 16.0
 
 MODEL:
   ENCODER_NAME: 'resnet34'
   ENCODER_WEIGHTS: 'imagenet'
+  BATCH_NORM_DECODER: True
   DECODER_CHANNELS:
     - 256
     - 256

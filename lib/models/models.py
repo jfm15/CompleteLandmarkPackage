@@ -12,6 +12,7 @@ class UnetPlusPlus(nn.Module):
             encoder_name=cfg_model.ENCODER_NAME,
             encoder_weights=cfg_model.ENCODER_WEIGHTS,
             decoder_channels=cfg_model.DECODER_CHANNELS,
+            decoder_use_batchnorm=cfg_model.BATCH_NORM_DECODER,
             in_channels=cfg_model.IN_CHANNELS,
             classes=no_of_landmarks,
         )

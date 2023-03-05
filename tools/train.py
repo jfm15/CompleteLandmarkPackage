@@ -6,7 +6,6 @@ import math
 import _init_paths
 import lib
 import lib.models
-torch.cuda.empty_cache()
 import numpy as np
 
 from lib.dataset import LandmarkDataset
@@ -69,6 +68,7 @@ def parse_args():
 def main():
     # get arguments and the experiment file
     args = parse_args()
+    torch.cuda.empty_cache()
 
     cfg, logger, output_path, yaml_file_name = prepare_for_training(args.cfg, args.output_path)
 
@@ -122,7 +122,7 @@ def main():
         for _ in range(cfg.TRAIN.ENSEMBLE_MODELS):
             this_model = eval("lib.models." + cfg.MODEL.NAME)(cfg.MODEL, cfg.DATASET.KEY_POINTS)
             optimizer = torch.optim.Adam(this_model.parameters(), lr=cfg.TRAIN.LR)
-            scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[4, 6, 8], gamma=0.1)
+            scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5, 10, 15], gamma=0.1)
             ensemble.append(this_model)
             optimizers.append(optimizer)
             schedulers.append(scheduler)
@@ -137,7 +137,7 @@ def main():
         best_mre = math.inf
         best_state_dicts = []
         no_better_count = 0
-
+        
         for epoch in range(cfg.TRAIN.EPOCHS):
 
             logger.info('-----------Epoch {} Supervised Training-----------'.format(epoch))
@@ -145,10 +145,11 @@ def main():
 
             # Validate
             with torch.no_grad():
-
                 logger.info('-----------Validation Set-----------')
+                save_path = os.path.join(output_path, "{}".format(yaml_file_name))
+
                 _, current_mre = eval("{}.validate_over_set".format(validate_file)) \
-                    (ensemble, validation_loader, final_layer, loss_function, [], cfg.VALIDATION, None,
+                    (ensemble, validation_loader, final_layer, loss_function, [], cfg.VALIDATION, save_path,
                      logger=logger, training_mode=True)
 
                 if current_mre < best_mre:
@@ -175,9 +176,12 @@ def main():
 
         with torch.no_grad():
             logger.info('-----------Test Set-----------')
+            save_fig_path = os.path.join(output_path, "eval_img_train_run{}".format(run))
+            if not os.path.exists(save_fig_path):
+                os.makedirs(save_fig_path)
             eval("{}.validate_over_set".format(validate_file)) \
-                (ensemble, test_loader, final_layer, loss_function, [], cfg.VALIDATION, None,
-                 logger=logger, training_mode=True)
+                    (ensemble, test_loader, final_layer, loss_function, [], cfg.VALIDATION, save_fig_path,
+                 logger=logger, training_mode=False)
 
         logger.info('-----------Saving Models-----------')
         model_run_path = os.path.join(output_path, "run:{}_models".format(run))

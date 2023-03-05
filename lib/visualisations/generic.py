@@ -8,6 +8,7 @@ import matplotlib.patches as patches
 def figure(image, graphics_function, args, save=True, save_path=""):
     fig, ax = plt.subplots(1, 1)
 
+    #image = image.cpu().detach().numpy()
     ax.imshow(image[0], cmap='gray')
 
     graphics_function(ax, *args)
@@ -15,7 +16,10 @@ def figure(image, graphics_function, args, save=True, save_path=""):
     ax.axis('off')
     plt.tight_layout()
 
-    h, w = image[0].size()
+    try:
+        h, w = image[0].size()
+    except:
+        h, w = image[0].shape
     fig.set_size_inches(w / 100.0, h / 100.0)
     fig.set_dpi(100)
 
@@ -44,7 +48,7 @@ def intermediate_figure(image, output, predicted_points, target_points, eres,
 
 
 def final_figure(image, aggregated_points, aggregated_point_dict, target_points, suffix,
-                 figure_name, save=False, save_path=""):
+                 figure_name, save=True, save_path=""):
 
     # search for generic figure names
     if figure_name == "gt_and_preds":

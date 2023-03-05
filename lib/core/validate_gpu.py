@@ -1,5 +1,6 @@
 import os
 import torch
+import numpy as np
 
 from lib.utils import get_stats
 from lib.core.evaluate import cal_radial_errors
@@ -12,15 +13,17 @@ from lib.visualisations import final_figure
 from lib.visualisations import display_box_plot
 from lib.visualisations import radial_error_vs_ere_graph
 from lib.visualisations import reliability_diagram
+from lib.visualisations import reliability_diagram_norm
 from lib.visualisations import roc_outlier_graph
 
 from lib.measures import measure
 from lib.measures import diagnose_set
 
 
-def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg_validation, save_path,
+def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg_validation, save_path, save_txt=False,
                       logger=None, training_mode=False, temperature_scaling_mode=False):
-
+    
+    print('save path:', save_path)
     predicted_points_per_model = []
     eres_per_model = []
     modes_per_model = []
@@ -29,7 +32,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
     dataset_target_scaled_points = []
     losses = []
 
-    # Create folders for images
+    #Create folders for images
     for visual_name in visuals:
         visual_dir = os.path.join(save_path, visual_name)
         if not os.path.exists(visual_dir):
@@ -76,7 +79,8 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
                 image_name = meta["file_name"][b]
                 figure_save_path = os.path.join(save_path, visual_name,
                                                 "{}_{}_{}".format(image_name, model_idx, visual_name))
-                intermediate_figure(image[b], output[b].detach().cpu().numpy(),
+                intermediate_figure(image[0].detach().cpu().numpy(),
+                                    output[b].detach().cpu().numpy(),
                                     predicted_points[b].detach().cpu().numpy(),
                                     target_points[b].detach().cpu().numpy(), eres[b].detach().cpu().numpy(),
                                     visual_name, save=True, save_path=figure_save_path)
@@ -153,15 +157,26 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
 
         # display visuals
         for visual_name in visuals:
-            image_name = meta["file_name"][b]
-            figure_save_path = os.path.join(save_path, visual_name,
-                                            "{}_{}".format(image_name, visual_name))
-            txt = "Saving Images in {} for {}".format(figure_save_path, visual_name)
-            #logger.info(txt)
-            final_figure(image[b], aggregated_points_idx.detach().cpu().numpy(),
-                             aggregated_point_dict, target_points_idx.detach().cpu().numpy(),
-                             cfg_validation.MEASUREMENTS_SUFFIX, visual_name,
-                             save=True, save_path=figure_save_path)
+            im_name = meta["file_name"][b]
+            figure_save_path = save_path+'/'+im_name+".png"
+            final_figure(image[b].detach().cpu().numpy(), 
+                        aggregated_points_idx.detach().cpu().numpy(),
+                        aggregated_point_dict, target_points_idx.detach().cpu().numpy(),
+                        cfg_validation.MEASUREMENTS_SUFFIX, visual_name,
+                        save=True, save_path=figure_save_path)
+        
+        #save points to txt file
+        if save_txt == True:
+            if not os.path.isdir(save_path+'/'+'txt/'):
+                os.mkdir(save_path+'/'+'txt/')
+            
+            with open(save_path+'/'+'txt/'+im_name+".txt", 'a') as output:
+                image_scaled_predicted_points_txt = scaled_predicted_points_per_model.cpu().squeeze().numpy()
+                image_scaled_predicted_points_txt = image_scaled_predicted_points_txt[idx]
+                for i in range(len(image_scaled_predicted_points_txt)):
+                    row=image_scaled_predicted_points_txt[i]
+                    data_str = str(round(row[1],5))+","+str(round(row[0],5))
+                    output.write(data_str+"\n")
 
     # Write where images have been saved
     for visual_name in visuals:
@@ -213,16 +228,26 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         # Run the diagnosis experiments
         # I need to find the predicted points and the ground truth points
         # aggregated_scaled_points, dataset_target_scaled_points
-        for diagnosis in cfg_validation.DIAGNOSES:
-            n, tn, fp, fn, tp, precision, recall, accuracy = diagnose_set(aggregated_scaled_points,
-                                                                          dataset_target_scaled_points,
-                                                                          cfg_validation.MEASUREMENTS_SUFFIX,
-                                                                          diagnosis)
 
-            txt = "Results for {} are n: {}, tn: {}, fp: {}, fn: {}, tp: {}, " \
-                  "precision: {:.3f}, recall: {:.3f}, accuracy: {:.3f}".format(
-                   diagnosis, n, tn, fp, fn, tp, precision, recall, accuracy)
-            logger.info(txt)
+        for diagnosis in cfg_validation.DIAGNOSES:       
+            n, tn, fp, fn, tp, precision, recall, accuracy = diagnose_set(aggregated_scaled_points,
+                                                                        dataset_target_scaled_points,
+                                                                        cfg_validation.MEASUREMENTS_SUFFIX,
+                                                                        diagnosis)
+
+            if type(accuracy) is np.ndarray:
+                #multiclass
+                for c in range(len(accuracy)):
+                    txt = "Results for {} in class {}, are n: {}, tn: {}, fp: {}, fn: {}, tp: {}, " \
+                    "precision: {}, recall: {}, accuracy: {}".format(
+                    diagnosis, c, n[c], tn[c], fp[c], fn[c], tp[c], precision[c], recall[c], accuracy[c])
+                    logger.info(txt)
+            else:
+                #only one reported accuracy
+                txt = "Results for {} are n: {}, tn: {}, fp: {}, fn: {}, tp: {}, " \
+                "precision: {:.3f}, recall: {:.3f}, accuracy: {:.3f}".format(
+                diagnosis, n, tn, fp, fn, tp, precision, recall, accuracy)
+                logger.info(txt)
 
         radial_errors_np = radial_errors.detach().cpu().numpy()
         eres_np = eres_per_model[0].detach().cpu().numpy()
@@ -248,8 +273,13 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         logger.info("Saving ROC Plot to {}".format(figure_save_path))
 
         # Save the reliability diagram
+        correct_thresholds=cfg_validation.CORRECT_THRESHOLDS
         figure_save_path = os.path.join(save_path, "reliability_plot")
-        reliability_diagram(radial_errors_np.flatten(), confidence_np.flatten(), figure_save_path)
+        reliability_diagram(radial_errors_np.flatten(), correct_thresholds, confidence_np.flatten(), figure_save_path, meta['pixel_size'].cpu().detach().numpy())
+        logger.info("Saving ROC Plot to {}".format(figure_save_path))
+
+        figure_save_path = os.path.join(save_path, "reliability_plot_norm")
+        reliability_diagram_norm(radial_errors_np.flatten(), correct_thresholds, confidence_np.flatten(), figure_save_path, meta['pixel_size'].cpu().detach().numpy())
         logger.info("Saving ROC Plot to {}".format(figure_save_path))
 
     if temperature_scaling_mode:
@@ -258,10 +288,17 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         confidence_np = modes_per_model[0].detach().cpu().numpy()
         eres_np = eres_per_model[0].detach().cpu().numpy()
 
-        ece = reliability_diagram(radial_errors_np.flatten(), confidence_np.flatten(), "", save=False)
-        logger.info("ECE: {:.3f}".format(ece))
+        # Save the reliability diagram
+        correct_thresholds=cfg_validation.CORRECT_THRESHOLDS
+        figure_save_path_ece = os.path.join(save_path, "ece_temp")
+        ece = reliability_diagram(radial_errors_np.flatten(), correct_thresholds, confidence_np.flatten(), figure_save_path_ece, meta['pixel_size'].cpu().detach().numpy())
+        ece_s = np.round(ece,2)
+        logger.info("ECE:"+(str(ece_s)))
+        figure_save_path_ece = os.path.join(save_path, "ece_temp_norm")
+        ece_norm = reliability_diagram_norm(radial_errors_np.flatten(), correct_thresholds, confidence_np.flatten(), figure_save_path_ece, meta['pixel_size'].cpu().detach().numpy())
 
-        correlation = radial_error_vs_ere_graph(radial_errors_np.flatten(), eres_np.flatten(), "", save=False)
+        figure_save_path_corr = os.path.join(save_path, "correlation_temp_scaling")
+        correlation = radial_error_vs_ere_graph(radial_errors_np.flatten(), eres_np.flatten(), figure_save_path_corr, save=True)
         logger.info("Correlation: {:.3f}".format(correlation))
 
         temperatures = torch.flatten(ensemble[0].temperatures)

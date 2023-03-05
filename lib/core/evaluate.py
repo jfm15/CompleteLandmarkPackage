@@ -77,9 +77,9 @@ def get_predicted_and_target_points(output_stack, landmarks_per_annotator, pixel
 def cal_radial_errors(predicted_points, target_points, mean=False):
     '''
 
-    :param predicted_points: tensor of size [D, N, 2]
+    :param predicted_points: tensor of size [D, N, 2] ex. 150, 19, 2
     :param target_points: tensor of size [D, N, 2]
-    :return: the distance between each point, a tensor of size [D, N]
+    :return: the distance between each point, a tensor of size [D, N] 150, 19
     '''
 
     displacement = predicted_points - target_points

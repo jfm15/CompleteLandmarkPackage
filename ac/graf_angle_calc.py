@@ -5,7 +5,7 @@ import numpy as np
 import math as math
 from graf_angle_calculations import graph_angle_calculations
 
-def plt_graf_lines(imgs_path, graf_points_dir, plt_points=True, calc_angles=True, save_calculated_angles=True):
+def plt_graf_lines(imgs_path, graf_points_dir, point_radius, plt_points=True, calc_angles=True, save_calculated_angles=True):
     gac = graph_angle_calculations()
     imgs = [f for f in os.listdir(imgs_path) if not f.startswith('.')]
     calc_df = pd.DataFrame([], columns=['Patient','Calculated alpha','Calculated beta','graf class ab', 'graf class a'])
@@ -31,10 +31,13 @@ def plt_graf_lines(imgs_path, graf_points_dir, plt_points=True, calc_angles=True
             l = [float(i) for i in points[4].strip('\n').split(',')]
 
             #add incase divisible by zero 
-            if i1[0] == i2[0]:
-                i2[0]=+0.0001
             if i1[1] == i2[1]:
-                i2[1]=+0.0001
+                i2[1]=+i2[1]+0.000001
+            if br[1] == l[1]:
+                br[1]=br[1]+0.000001
+            if br[1] == ll[1]: 
+                br[1]=br[1]+0.000001
+
 
             if plt_points==True:
                 plt.scatter(i1[1], i1[0],c='r', s=20)
@@ -46,7 +49,7 @@ def plt_graf_lines(imgs_path, graf_points_dir, plt_points=True, calc_angles=True
             # plt lines 
             # baseline
             x_values = np.linspace(0,im.shape[1])
-            m1 = (i2[0]-i1[0])/(i2[1]-i1[1])#added 0.001 for exploding slope/flat line
+            m1 = (i2[0]-i1[0])/(i2[1]-i1[1])
             b1 = i2[0]-m1*(i2[1])
             y_values = x_values*m1+b1
             plt.plot(x_values, y_values, 'r', linestyle="-", linewidth=1)
@@ -63,10 +66,13 @@ def plt_graf_lines(imgs_path, graf_points_dir, plt_points=True, calc_angles=True
             y_values = x_values*m3+b3
             plt.plot(x_values, y_values, 'b', linestyle="--",linewidth=1)
 
-            outpath= imgs_path[:-len(imgs_path.split('/')[-1])]+'overlay'
-            
+            outpath= imgs_path[:-len(imgs_path.split('/')[-1])]+'graf_angle_plot'+'/pixel_rad_'+str(point_radius)
             if not os.path.isdir(outpath):
-                os.mkdir(outpath)
+                os.makedirs(outpath)
+
+            outpath_ab = outpath+'/alpha_beta_plots'
+            if not os.path.isdir(outpath_ab):
+                os.makedirs(outpath_ab)
 
             #caclulate angles
             if calc_angles == True:
@@ -108,20 +114,22 @@ def plt_graf_lines(imgs_path, graf_points_dir, plt_points=True, calc_angles=True
             ax.text(0.05, 0.90, txt_ab, transform=ax.transAxes, fontsize=10,verticalalignment='top', bbox=props)
 
             plt.imshow(im)
-            plt.savefig(outpath+'/'+img_name)
+            plt.savefig(outpath_ab+'/'+img_name)
 
             #get and plot angle range
             outpath_range = outpath+'/theta_ranges/'
-            a_range = gac.get_angle_range(i1,i2,'r',br,l,'b',im,img_name[:-4]+'_alpha',outpath_range)
-            b_range = gac.get_angle_range(i1,i2,'r',br,ll,'y',im,img_name[:-4]+'_beta',outpath_range)
+            b_range = gac.get_angle_range(point_radius, i1,i2,'r',br,l,'b',im,img_name[:-4]+'_beta',outpath_range)
+            a_range = gac.get_angle_range(point_radius, i1,i2,'r',br,ll,'y',im,img_name[:-4]+'_alpha',outpath_range)
 
             #if save_calculate_angles 
             if save_calculated_angles==True:
                 calc_df = calc_df.append({'Patient':img_name[:-4],
                                         'Calculated alpha': a,
-                                        'range alpha': a_range,
+                                        'range alpha min': a_range[0],
+                                        'range alpha max': a_range[1],                                        ''
                                         'Calculated beta': b,
-                                        'range beta': b_range,
+                                        'range beta min': b_range[0],
+                                        'range beta max': b_range[1],
                                         'graf class ab':graf_class_ab, 
                                         'discription ab':graph_discription_ab,
                                         'graf class a':graf_class_a,
@@ -129,13 +137,26 @@ def plt_graf_lines(imgs_path, graf_points_dir, plt_points=True, calc_angles=True
                                         ignore_index=True)
         else:
             pass
-    #save final csv
-    calc_df.to_csv(outpath+'/calculated_graf_angles.csv')
 
+    #save final csv
+    calc_df.to_csv(outpath+'/calculated_graf_angles_clinicans.csv')
+    #save inputs to txt
+    txt_record_inputs = open(outpath+'/inputs.txt', 'w')
+    txt_record_inputs.write('Image Input Dir:'+imgs_dir+'\n')
+    txt_record_inputs.write('Graf Point Dir:'+graf_points_dir+'\n')
+    txt_record_inputs.write('Point Radius:'+ str(point_radius)+'\n')
+    txt_record_inputs.close()
 
 if __name__ == '__main__':
     imgs_dir =  "/experiments/datasets-in-use/ultrasound-hip-baby-land-seg/images/img" #images
-    #graf_points_dir = "/experiments/datasets-in-use/ultrasound-hip-baby-land-seg/annotations/txt" #annotations from reviewer - TRUTH
-    graf_points_dir = "/experiments/medimaging/experimentsallisonclement/CompleteLandmarkPackage/output/dhd/temp_scale_models/images/heatmaps_and_preds/txt"
-    
-    calculated_angles = plt_graf_lines(imgs_dir,graf_points_dir)    
+    #
+    #imgs_dir =  "/experiments/datasets-in-use/ultrasound-hip-baby-land-seg/crop/img" #images
+
+    graf_points_dir = "/experiments/datasets-in-use/ultrasound-hip-baby-land-seg/annotations/txt" #annotations from reviewer - TRUTH
+    #graf_points_dir = "/experiments/medimaging/experimentsallisonclement/CompleteLandmarkPackage/output/ddh_512_352/temp_scale_models/images/txt"
+
+    #point raidus will be used for how much to plot surrounding a specific identified point
+    #this about this as almost the ground truth radius around specific identified points.
+    all_pixle_rad = [2, 3, 4, 5]
+    for point_radius in all_pixle_rad:
+        calculated_angles = plt_graf_lines(imgs_dir, graf_points_dir, point_radius)    

@@ -1,0 +1,67 @@
+
+DATASET:
+  CACHE_DIR: "cache/ultra_hip/"
+  IMAGE_EXT: ".jpg"
+  KEY_POINTS: 5
+  PIXEL_SIZE:
+    - 1.0
+    - 1.0
+  CACHED_IMAGE_SIZE:
+    - 512 #256
+    - 384 #192
+  SIGMA: 5
+  FLIP_AXIS: TRUE
+  NO_OF_ANNOTATORS: 1
+
+  AUGMENTATION:
+    ROTATION_FACTOR: 5
+    INTENSITY_FACTOR: 0.5
+    SF: 0.2
+    TRANSLATION_X: 0.05
+    TRANSLATION_Y: 0.1
+    ELASTIC_STRENGTH: 0
+    ELASTIC_SMOOTHNESS: 0
+
+TRAIN:
+  BATCH_SIZE: 5
+  LR: 0.001
+  EPOCHS: 20
+  REPEATS: 2
+  LABELED_SUBSET: 150
+  FINE_TUNE_EPOCHS: 20
+  ENSEMBLE_MODELS: 2
+
+VALIDATION:
+  AGGREGATION_METHODS:
+    - "mean average"
+    - "confidence weighted"
+  SDR_AGGREGATION_METHOD: "confidence weighted"
+  SDR_THRESHOLDS:
+    - 2.0 #pixels = 2 mm
+    - 4.0 #pixels = 4 mm
+    - 6.0 #pixels = 6 mm
+    - 8.0 #pixels = 8 mm
+  SAVE_IMAGE_PATH: "images/ultra_hip/"
+  MEASUREMENTS_SUFFIX: "ultra"
+  MEASUREMENTS:
+    - alpha_angle
+    - beta_angle
+  DIAGNOSES:
+    - ddh
+  CORRECT_THRESHOLDS: 
+    - 2 #1 # pixels = 2.0 mm
+    - 4 #2 # pixels = 4.0 mm
+    - 8 # pixels = 8.0 mm
+    - 16 # pixels = 16.0 mm
+
+MODEL:
+  ENCODER_NAME: 'resnet34'
+  ENCODER_WEIGHTS: 'imagenet'
+  BATCH_NORM_DECODER: True
+  DECODER_CHANNELS:
+    - 256
+    - 256
+    - 256
+    - 128
+    - 64
+  IN_CHANNELS: 1

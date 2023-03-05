@@ -48,15 +48,15 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         image_scaled_predicted_points = torch.unsqueeze(torch.cat(image_scaled_predicted_points), 1).float()
         
         image_scaled_predicted_points_txt = image_scaled_predicted_points.squeeze().numpy()
-        if not os.path.isdir(save_path+'/'+visual_name+'/txt/'):
-            os.mkdir(save_path+'/'+visual_name+'/txt/')
         
-        with open(save_path+'/'+visual_name+'/txt/'+meta['file_name'][0]+".txt", 'w') as output:
+        if not os.path.isdir(save_path+'/'+'/txt/'):
+            os.mkdir(save_path+'/'+'/txt/')
+        
+        with open(save_path+'/'+'txt/'+meta['file_name'][0]+".txt", 'a') as output:
             for i in range(len(image_scaled_predicted_points_txt)):
                 row=image_scaled_predicted_points_txt[i].tolist()
-                print(row)
-                data_str = (str([round(row[1],5),round(row[0],5)])[1:-1])
-                output.write(data_str)
+                data_str = str([round(row[1],5),round(row[0],5)])[1:-1]
+                output.write(data_str+"\n")
         
         image_eres = torch.unsqueeze(torch.cat(image_eres), 1).float()
 
@@ -88,6 +88,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             txt += "{}: [{:.3f}, {:.3f}, {:.3f}]\t".format(measurement, predicted_angle, target_angle, dif)
 
         logger.info(txt)
+        #visuals = visuals[0].split(',')
 
         for visual_name in visuals:
             final_figure(image[b], aggregated_points[b],
