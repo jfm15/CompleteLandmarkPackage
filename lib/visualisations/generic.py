@@ -26,7 +26,6 @@ def figure(image, graphics_function, args, save=True, save_path=""):
     if save:
         plt.savefig(save_path)
         plt.close()
-        #print(save_path)
     else:
         plt.show()
 

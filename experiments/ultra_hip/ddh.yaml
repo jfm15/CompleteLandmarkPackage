@@ -49,6 +49,7 @@ VALIDATION:
   DIAGNOSES:
     - ddh
   CORRECT_THRESHOLDS: 
+    - 1 
     - 2 #1 # pixels = 2.0 mm
     - 4 #2 # pixels = 4.0 mm
     - 8 # pixels = 8.0 mm

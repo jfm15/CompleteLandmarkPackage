@@ -91,5 +91,5 @@ def display_box_plot(radial_errors, save_path):
     plt.xlabel('Landmark', fontsize=12)
     plt.ylabel('Radial Error (mm)', fontsize=12)
     plt.savefig(save_path)
-    plt.close()
+    #plt.close()
 

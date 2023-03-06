@@ -2,9 +2,10 @@ import lib
 import numpy as np
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import multilabel_confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 def measure(predicted_points, target_points, suffix, measure_name):
-
     function_name = ".".join(["lib", "measures", suffix, measure_name])
     predicted_angle = eval(function_name)(predicted_points)
     target_angle = eval(function_name)(target_points)
@@ -14,23 +15,29 @@ def measure(predicted_points, target_points, suffix, measure_name):
 
 def diagnose_individual(predicted_points, target_points, suffix, diagnosis_name):
     function_name = ".".join(["lib", "measures", suffix, diagnosis_name])
-    predicted_diagnosis = eval(function_name)(predicted_points)
-    true_diagnosis = eval(function_name)(target_points)
-    return predicted_diagnosis, true_diagnosis
+    predicted_diagnosis, classes_pred = eval(function_name)(predicted_points)
+    true_diagnosis, classes_true = eval(function_name)(target_points)
+    return predicted_diagnosis, true_diagnosis, classes_pred, classes_true
 
 
 def diagnose_set(aggregated_scaled_points, dataset_target_scaled_points, suffix, diagnosis_name):
-
     n = len(aggregated_scaled_points)
     predicted_diagnoses = []
     ground_truth_diagnoses = []
+    classes_pred = []
+    classes_true = []
+
     for i in range(n):
         predicted_points = aggregated_scaled_points[i]
         target_points = dataset_target_scaled_points[i]
-        predicted_diagnosis, true_diagnosis = diagnose_individual(predicted_points, target_points, suffix, diagnosis_name)
+        
+        predicted_diagnosis, true_diagnosis, classes_p, classes_t = diagnose_individual(predicted_points, target_points, suffix, diagnosis_name)
         # use extend because some diagnosis contain left and right
         predicted_diagnoses.extend(predicted_diagnosis)
         ground_truth_diagnoses.extend(true_diagnosis)
+        classes_pred.extend([classes_p])
+        classes_true.extend([classes_t])
+
 
     #check if predicted diagnosis has multiple classes
     if np.unique(np.array(predicted_diagnoses)).size < 2:
@@ -51,9 +58,29 @@ def diagnose_set(aggregated_scaled_points, dataset_target_scaled_points, suffix,
             pass
         else:
             recall = 100 * float(tp) / float(tp + fn)
+            recall = 100 * float(tp) / float(tp + fn)
     else:
-        #multi class so outputs will be an array for tn, fp, fn, tp
-        confusion_matrix_multiclasses = multilabel_confusion_matrix(ground_truth_diagnoses, predicted_diagnoses)
+        #multi class so outputs will be an array for tn, fp, fn, tp    
+        classes = set(classes_true)
+        if diagnosis_name=='ddh':
+            classes = ['1','2a/b', '2c', '3/4', 'D']
+        
+        confusion_matrix_multiclasses = multilabel_confusion_matrix(ground_truth_diagnoses, predicted_diagnoses)#, labels=classes)
+
+        fig, ax= plt.subplots(1, confusion_matrix_multiclasses.shape[0])
+        fig.set_figheight(2)
+        fig.set_figwidth(20)
+        for c in range(confusion_matrix_multiclasses.shape[0]):
+            class_name = classes[c]
+            cm = confusion_matrix_multiclasses[c]
+            sns.heatmap(cm, annot=True, fmt='g', ax=ax[c], vmax= len(classes_true)) 
+            # labels, title and ticks
+            ax[c].set_xlabel('Predicted labels')
+            ax[c].set_ylabel('True labels')
+            ax[c].set_title('Confusion Matrix: '+ class_name)
+        
+        plt.savefig('Confusion_Matrix_allclasses')
+
         #find values for all
         accuracy = np.array([])
         precision = np.array([])

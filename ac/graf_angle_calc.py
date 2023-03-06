@@ -106,15 +106,16 @@ def plt_graf_lines(imgs_path, graf_points_dir, point_radius, plt_points=True, ca
 
             # place a text box in upper left 
             graf_class_ab, graph_discription_ab = gac.graf_angle(a,b)
-            txt_ab = "graf class ab: " + graf_class_ab
+            # txt_ab = "graf class ab: " + graf_class_ab
             graf_class_a, graph_discription_a = gac.graf_angle(a)
             txt_a = "graf class a: " + graf_class_a
             props = dict(boxstyle='round', facecolor='white', alpha=0.8)
             ax.text(0.05, 0.95, txt_a, transform=ax.transAxes, fontsize=10,verticalalignment='top', bbox=props)
-            ax.text(0.05, 0.90, txt_ab, transform=ax.transAxes, fontsize=10,verticalalignment='top', bbox=props)
+            #ax.text(0.05, 0.90, txt_ab, transform=ax.transAxes, fontsize=10,verticalalignment='top', bbox=props)
 
             plt.imshow(im)
             plt.savefig(outpath_ab+'/'+img_name)
+            plt.close()
 
             #get and plot angle range
             outpath_range = outpath+'/theta_ranges/'
@@ -148,15 +149,16 @@ def plt_graf_lines(imgs_path, graf_points_dir, point_radius, plt_points=True, ca
     txt_record_inputs.close()
 
 if __name__ == '__main__':
-    imgs_dir =  "/experiments/datasets-in-use/ultrasound-hip-baby-land-seg/images/img" #images
+    #imgs_dir =  "/experiments/datasets-in-use/ultrasound-hip-baby-land-seg/images/img" #images
     #
-    #imgs_dir =  "/experiments/datasets-in-use/ultrasound-hip-baby-land-seg/crop/img" #images
+    imgs_dir =  "/experiments/datasets-in-use/ultrasound-hip-baby-land-seg/crop/img" #images
 
-    graf_points_dir = "/experiments/datasets-in-use/ultrasound-hip-baby-land-seg/annotations/txt" #annotations from reviewer - TRUTH
+    graf_points_dir = "/experiments/datasets-in-use/ultrasound-hip-baby-land-seg/crop/txt/annotator1" #annotations from reviewer - TRUTH
     #graf_points_dir = "/experiments/medimaging/experimentsallisonclement/CompleteLandmarkPackage/output/ddh_512_352/temp_scale_models/images/txt"
 
     #point raidus will be used for how much to plot surrounding a specific identified point
     #this about this as almost the ground truth radius around specific identified points.
-    all_pixle_rad = [2, 3, 4, 5]
+
+    all_pixle_rad = [1, 2, 3, 4, 5]
     for point_radius in all_pixle_rad:
         calculated_angles = plt_graf_lines(imgs_dir, graf_points_dir, point_radius)    

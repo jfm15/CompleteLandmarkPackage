@@ -103,7 +103,7 @@ def main():
             print(meta["file_name"])
             landmarks_per_annotator = meta['landmarks_per_annotator']
             target_points = torch.mean(landmarks_per_annotator[0], dim=0)
-            preliminary_figure(image[0], channels[0].detach().cpu().numpy(), target_points, "show_channels")
+            preliminary_figure(image[0], channels[0].detach().cpu().numpy(), target_points, "show_channels", output_path+'/output/debug')
 
     if torch.cuda.is_available():
         validate_file = "validate_gpu"

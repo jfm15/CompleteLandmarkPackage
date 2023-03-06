@@ -18,12 +18,12 @@ import imgaug.augmenters as iaa
 class LandmarkDataset(Dataset):
     def __init__(self, image_dir, annotation_dir, cfg_dataset, allow_ground_truth_setting=False,
                  gaussian=True, subset=None, perform_augmentation=False, partition=None, partition_label=None):
-
         self.cfg_dataset = cfg_dataset
+        self.num_annotators = self.cfg_dataset.NO_OF_ANNOTATORS
+
         self.perform_augmentation = perform_augmentation
         self.allow_ground_truth_setting = allow_ground_truth_setting
         self.synthetic_landmarks = {}
-
         # Define augmentation
         data_aug_params = cfg_dataset.AUGMENTATION
         self.augmentation = iaa.Sequential([
@@ -44,13 +44,13 @@ class LandmarkDataset(Dataset):
 
         self.gaussian = gaussian
 
-        self.db = self.cache(image_dir, annotation_dir, cfg_dataset, subset,
+        self.db = self.cache(self.num_annotators, image_dir, annotation_dir, cfg_dataset, subset,
                              partition=partition, partition_label=partition_label)
         self.length = len(self.db)
 
 
     @staticmethod
-    def cache(images_dir, annotation_dir, cfg_dataset, subset, partition=None,
+    def cache(num_annotators, images_dir, annotation_dir, cfg_dataset, subset, partition=None,
               partition_label=None):
 
         db = []
@@ -98,7 +98,7 @@ class LandmarkDataset(Dataset):
             # Get the file name with no extension
             file_name = os.path.basename(image_path).split(".")[0]
 
-            # Get sub-directories for annotations
+            # Get sub-directories for annotations 
             annotation_sub_dirs = sorted(glob.glob(annotation_dir + "/*"))
 
             # Keep track of where we will be saving the downsampled image and the meta data
@@ -107,10 +107,18 @@ class LandmarkDataset(Dataset):
             cache_annotation_paths = []
 
             annotation_paths = []
-            for annotation_sub_dir in annotation_sub_dirs:
-                annotation_paths.append(os.path.join(annotation_sub_dir))
-                sub_dir_name = annotation_sub_dir.split("/")[-1]
-                cache_annotation_paths.append(os.path.join(cache_data_dir, file_name + "_" + sub_dir_name + ".txt"))
+            if num_annotators == 1:
+                cache_annotation_paths.append(os.path.join(cache_data_dir, file_name+'.txt'))
+                for annotation_sub_dir in annotation_sub_dirs:
+                    annotation_paths.append(os.path.join(annotation_sub_dir))
+
+            else:
+                for annotation_sub_dir in annotation_sub_dirs:
+                    annotation_paths.append(os.path.join(annotation_sub_dir))
+                    sub_dir_name = annotation_sub_dir.split("/")[-1]
+                    sub_dir_path = file_name +"_" + sub_dir_name+ ".txt"
+                    cache_annotation_paths.append(os.path.join(cache_data_dir, sub_dir_path))
+
 
             db.append({
                 "cached_image_path": cache_image_path,
@@ -137,9 +145,11 @@ class LandmarkDataset(Dataset):
                 im.save(cache_image_path)
 
                 # -----------Annotations-----------
-
                 # Use pandas to extract the key points from the txt file
                 for annotation_path, cache_annotation_path in zip(annotation_paths, cache_annotation_paths):
+                    im_name = cache_image_path.split('/')[-1][:-4]
+                    i = [i for i, s in enumerate(annotation_paths) if im_name in s]
+                    annotation_path = annotation_paths[i[0]]
 
                     # Get annotations
                     kps_np_array = np.loadtxt(annotation_path, usecols=cfg_dataset.USE_COLS,
@@ -242,7 +252,7 @@ class LandmarkDataset(Dataset):
                 landmarks_per_annotator_augmented = kps_augmented.to_xy_array().reshape(-1, self.cfg_dataset.KEY_POINTS, 2)
                 xs = landmarks_per_annotator_augmented[:, :, 0]
                 ys = landmarks_per_annotator_augmented[:, :, 1]
-                # print(xs, ys, image.shape)
+                #print(xs, ys, image.shape)
                 border = 0
                 if np.all(border <= xs) and np.all(xs < (image.shape[1] - border)) \
                         and np.all(border <= ys) and np.all(ys < (image.shape[0] - border)):

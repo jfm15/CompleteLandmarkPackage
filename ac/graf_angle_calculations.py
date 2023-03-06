@@ -7,12 +7,12 @@ class graph_angle_calculations():
     def __init__(self) -> None:
         self.grf_dic = {
             "1": {'a':'>60', 'b':'NA', 'd': 'Normal: Discharge Patient'},
-            "2a": {'a':'50-59', 'b':'NA', 'd': 'Normal: Clinical Review -/+ treat'},
-            "2b": {'a':'50-59', 'b':'NA', 'd': 'Abnormal: Clinical Review -/+ treat'},
+            "2a/2b": {'a':'50-59', 'b':'NA', 'd': 'Normal/Abnormal: Clinical Review -/+ treat'},
+            #"2b": {'a':'50-59', 'b':'NA', 'd': 'Abnormal: Clinical Review -/+ treat'},
             "2c": {'a':'43-49', 'b':'<77', 'd':'Abnormal: Clinical Review + treat'},
             "D": {'a':'43-49', 'b':'>77', 'd': 'Abnormal: Clinical Review + treat'}, 
-            "3": {'a':'<43', 'b':'Unable to calculate', 'd': 'Abnormal: Clinical Review + treat'},
-            "4": {'a':'<43', 'b':'Unable to calculate', 'd': 'Abnormal: Clinical Review + treat'},
+            "3/4": {'a':'<43', 'b':'Unable to calculate', 'd': 'Abnormal: Clinical Review + treat'},
+            #"4": {'a':'<43', 'b':'Unable to calculate', 'd': 'Abnormal: Clinical Review + treat'},
             }
         pass
 
@@ -45,23 +45,26 @@ class graph_angle_calculations():
         if beta!=None:
             for key in self.grf_dic.items(): 
                 if self.grf_dic[key[0]]['a'] == alpha and self.grf_dic[key[0]]['b'] == beta:
-                    graph_class = key[0]
-                    graph_discription = self.grf_dic[key[0]]['d']
+                    graf_class = key[0]
+                    graf_discription = self.grf_dic[key[0]]['d']
                 elif self.grf_dic[key[0]]['a'] == alpha and self.grf_dic[key[0]]['b'] == 'NA':
-                    graph_class = key[0]
-                    graph_discription = self.grf_dic[key[0]]['d'] + '(BETA NA)'
+                    graf_class = key[0]
+                    graf_discription = self.grf_dic[key[0]]['d'] + '(BETA NA)'
                 elif self.grf_dic[key[0]]['a'] == alpha and self.grf_dic[key[0]]['b'] == 'Unable to calculate':
-                    graph_class = key[0]
-                    graph_discription = self.grf_dic[key[0]]['d'] + ' (Unable to calculate)'
+                    graf_class = key[0]
+                    graf_discription = self.grf_dic[key[0]]['d'] + '(Unable to calculate)'
                 else:
                     pass
         else:
             for key in self.grf_dic.items(): 
                 if self.grf_dic[key[0]]['a'] == alpha:
-                    graph_class = key[0]
-                    graph_discription = self.grf_dic[key[0]]['d']
+                    graf_class = key[0]
+                    if graf_class == "D" or graf_class == "2c":
+                        graf_class = "D/2c"
+                    graf_discription = self.grf_dic[key[0]]['d']
+
             
-        return graph_class, graph_discription
+        return graf_class, graf_discription
 
     def plot_theta(self,intersection, a, start_vector, direction='clockwise'):
         r = 50
@@ -122,7 +125,7 @@ class graph_angle_calculations():
         return max_r, min_r
 
 
-    def get_angle_range(self, point_radius, p1,p2,c1,p3,p4,c2,im,img_name,outpath,plot_range=True):
+    def get_angle_range(self, point_radius, p1,p2,c1,p3,p4,c2,im,img_/experiments/medimaging/experimentsallisonclement/CompleteLandmarkPackage/lib/visualisationsname,outpath,plot_range=True):
         '''
         range of angles you can get for three different points moving with variability x
         note: '_u' is upper and '_l' denotes lower ranges '''
@@ -131,13 +134,15 @@ class graph_angle_calculations():
 
         #get lower ad upper bounds assuming uniform variability of 'r' radius from center point given
         #break down vectors into points
-        p1x_u, p1x_l = math.floor(p1[0])+r,math.ceil(p1[0]-r)
-        p2x_u, p2x_l = math.floor(p2[0])+r,math.ceil(p2[0]-r)
+        ##rr fixes the two baseline points to only have a variability of 2 pixels
+        rr = 2
+        p1x_u, p1x_l = math.floor(p1[0])+rr,math.ceil(p1[0]-rr)
+        p2x_u, p2x_l = math.floor(p2[0])+rr,math.ceil(p2[0]-rr)
         p3x_u, p3x_l = math.floor(p3[0])+r,math.ceil(p3[0]-r)
-        p4x_u, p4x_l = math.floor(p4[0])+r,math.ceil(p4[0]-r)
+        p4x_u, p4x_l = math.floor(p4[0])+rr,math.ceil(p4[0]-r)
         
-        p1y_u, p1y_l = math.floor(p1[1])+r,math.ceil(p1[1]-r)
-        p2y_u, p2y_l = math.floor(p2[1])+r,math.ceil(p2[1]-r)
+        p1y_u, p1y_l = math.floor(p1[1])+rr,math.ceil(p1[1]-rr)
+        p2y_u, p2y_l = math.floor(p2[1])+rr,math.ceil(p2[1]-rr)
         p3y_u, p3y_l = math.floor(p3[1])+r,math.ceil(p3[1]-r)
         p4y_u, p4y_l = math.floor(p4[1])+r,math.ceil(p4[1]-r)
         
@@ -267,6 +272,7 @@ class graph_angle_calculations():
                 os.mkdir(outpath+'/min-max')
 
             plt.savefig(outpath+'/min-max/min-max_'+img_name)
+            plt.close()
 
             
         # dot product between vector 1 and vector 2 (assume vector 1 is p1, p2 and vector 2 is p1, p3)

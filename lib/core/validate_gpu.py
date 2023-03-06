@@ -1,6 +1,8 @@
 import os
 import torch
 import numpy as np
+import matplotlib.image
+import matplotlib.pyplot as plt
 
 from lib.utils import get_stats
 from lib.core.evaluate import cal_radial_errors
@@ -77,13 +79,24 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             b = 0
             for visual_name in visuals:
                 image_name = meta["file_name"][b]
-                figure_save_path = os.path.join(save_path, visual_name,
+                figure_save_path = os.path.join(save_path, visual_name,'images',
                                                 "{}_{}_{}".format(image_name, model_idx, visual_name))
+                if not os.path.exists(os.path.join(save_path, visual_name,'images')):
+                    os.makedirs(os.path.join(save_path, visual_name,'images'))
                 intermediate_figure(image[0].detach().cpu().numpy(),
                                     output[b].detach().cpu().numpy(),
                                     predicted_points[b].detach().cpu().numpy(),
                                     target_points[b].detach().cpu().numpy(), eres[b].detach().cpu().numpy(),
                                     visual_name, save=True, save_path=figure_save_path)
+                
+                heatmap_arr = output[b].detach().cpu().numpy()
+                #save each point
+                for p in range(heatmap_arr.shape[0]):
+                    pp = p + 1 #point number
+                    arr_save_path = os.path.join(save_path, visual_name,'Arr',"{}_{}".format(image_name, pp,'heatmap_arr'))
+                    if not os.path.exists(arr_save_path):
+                        os.makedirs(arr_save_path)
+                    matplotlib.image.imsave(arr_save_path+'.png', heatmap_arr[p])
 
             if (idx + 1) % 30 == 0:
                 logger.info("[{}/{}]".format(idx + 1, len(loader)))
@@ -150,7 +163,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             predicted_angle, target_angle, dif = measure(aggregated_points_idx, target_points_idx,
                                 cfg_validation.MEASUREMENTS_SUFFIX, measurement)
             measurements_dict[measurement].append([predicted_angle, target_angle])
-            txt += "{}: {:.3f}\t".format(measurement, dif)
+            txt += "{}: {:.3f} ({:.3f} from target)\t".format(measurement, predicted_angle, dif)
 
         if not training_mode:
             logger.info(txt)
@@ -177,6 +190,60 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
                     row=image_scaled_predicted_points_txt[i]
                     data_str = str(round(row[1],5))+","+str(round(row[0],5))
                     output.write(data_str+"\n")
+
+    ## plot measurements (ddh - alpha and beta)
+    if list(measurements_dict.keys())[0] == 'alpha_angle':
+        #format is predicted to target
+        _meausrements_dict = measurements_dict.copy()
+        _meausrements_dict['alpha_angle'].sort()
+        _meausrements_dict['beta_angle'].sort()
+        sorted_alpha = np.array(_meausrements_dict['alpha_angle'])
+        sorted_beta = np.array(_meausrements_dict['beta_angle'])
+        aa_pred, aa_true = (sorted_alpha)[:,0], (sorted_alpha)[:,1]
+        ba_pred, ba_true = (sorted_beta)[:,0], (sorted_beta)[:,1]
+        
+        x = np.linspace(1,len(aa_pred),len(aa_pred))
+        y = np.full(len(aa_pred),43)
+
+        plt.scatter(x, aa_true, marker='o', c='r', label='true alpha')  # solid green
+        plt.scatter(x, aa_pred, marker='o', c='g', label='pred alpha')  # solid green     
+        #plt.plot(x,y)
+        
+        plt.legend()
+        plt.xlabel('Patient')
+        plt.ylabel('Angle')
+        plt.savefig('angles_truepred_alpha.png')
+        plt.close()
+
+        y = np.full(len(aa_pred),77)
+        plt.scatter(x, ba_true, marker='*', c='r',label='true beta')  # solid green
+        plt.scatter(x, ba_pred, marker='*',c='g', label='pred beta')  # solid green
+
+        plt.legend()
+        plt.xlabel('Angle')
+        plt.ylabel('Patient')
+        plt.savefig('angles_truepred_beta.png')
+
+
+        plt.scatter(aa_pred, aa_true, marker='o', c='g', label='alpha')  
+        plt.scatter(ba_pred, ba_true, marker='*', c='b', label='beta')  
+        plt.legend()
+        plt.xlabel('Prediction')
+        plt.ylabel('Grund Truth')
+        a, b = np.polyfit(aa_pred, aa_true, 1)
+        plt.plot(aa_pred, a*aa_pred+b)  
+        plt.savefig('truevsprediction_alpha.png')
+        plt.close()
+
+        plt.scatter(ba_pred, ba_true, marker='*', c='b', label='beta')  
+        plt.legend()
+        plt.xlabel('Prediction')
+        plt.ylabel('Grund Truth')
+        a, b = np.polyfit(ba_pred, ba_true, 1)
+        plt.plot(ba_pred, a*ba_pred+b)    #
+        plt.savefig('truevsprediction_beta.png')
+        plt.close()
+
 
     # Write where images have been saved
     for visual_name in visuals:
