@@ -8,13 +8,14 @@ class graph_angle_calculations():
         self.grf_dic = {
             "1": {'a':'>60', 'b':'NA', 'd': 'Normal: Discharge Patient'},
             "2a/2b": {'a':'50-59', 'b':'NA', 'd': 'Normal/Abnormal: Clinical Review -/+ treat'},
-            #"2b": {'a':'50-59', 'b':'NA', 'd': 'Abnormal: Clinical Review -/+ treat'},
             "2c": {'a':'43-49', 'b':'<77', 'd':'Abnormal: Clinical Review + treat'},
             "D": {'a':'43-49', 'b':'>77', 'd': 'Abnormal: Clinical Review + treat'}, 
             "3/4": {'a':'<43', 'b':'Unable to calculate', 'd': 'Abnormal: Clinical Review + treat'},
-            #"4": {'a':'<43', 'b':'Unable to calculate', 'd': 'Abnormal: Clinical Review + treat'},
             }
         pass
+            #"2b": {'a':'50-59', 'b':'NA', 'd': 'Abnormal: Clinical Review -/+ treat'},
+            #"4": {'a':'<43', 'b':'Unable to calculate', 'd': 'Abnormal: Clinical Review + treat'},
+
 
     def get_alpha_category(self,alpha):
         if alpha >= 60:
@@ -125,7 +126,7 @@ class graph_angle_calculations():
         return max_r, min_r
 
 
-    def get_angle_range(self, point_radius, p1,p2,c1,p3,p4,c2,im,img_/experiments/medimaging/experimentsallisonclement/CompleteLandmarkPackage/lib/visualisationsname,outpath,plot_range=True):
+    def get_angle_range(self, point_radius, p1,p2,c1,p3,p4,c2,im,img_name,outpath,plot_range=True):
         '''
         range of angles you can get for three different points moving with variability x
         note: '_u' is upper and '_l' denotes lower ranges '''

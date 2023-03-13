@@ -3,6 +3,7 @@ import torch
 import numpy as np
 import matplotlib.image
 import matplotlib.pyplot as plt
+import pandas as pd
 
 from lib.utils import get_stats
 from lib.core.evaluate import cal_radial_errors
@@ -90,13 +91,13 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
                                     visual_name, save=True, save_path=figure_save_path)
                 
                 heatmap_arr = output[b].detach().cpu().numpy()
-                #save each point
-                for p in range(heatmap_arr.shape[0]):
-                    pp = p + 1 #point number
-                    arr_save_path = os.path.join(save_path, visual_name,'Arr',"{}_{}".format(image_name, pp,'heatmap_arr'))
-                    if not os.path.exists(arr_save_path):
-                        os.makedirs(arr_save_path)
-                    matplotlib.image.imsave(arr_save_path+'.png', heatmap_arr[p])
+                # #save each point
+                # for p in range(heatmap_arr.shape[0]):
+                #     pp = p + 1 #point number
+                #     arr_save_path = os.path.join(save_path, visual_name,'Arr',"{}_{}".format(image_name, pp,'heatmap_arr'))
+                #     if not os.path.exists(os.path.join(save_path, visual_name,'Arr')):
+                #         os.makedirs(os.path.join(save_path, visual_name,'Arr'))
+                #     matplotlib.image.imsave(arr_save_path+'.png', heatmap_arr[p])
 
             if (idx + 1) % 30 == 0:
                 logger.info("[{}/{}]".format(idx + 1, len(loader)))
@@ -179,70 +180,121 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
                         save=True, save_path=figure_save_path)
         
         #save points to txt file
-        if save_txt == True:
-            if not os.path.isdir(save_path+'/'+'txt/'):
-                os.mkdir(save_path+'/'+'txt/')
+        if training_mode==False:
+            if save_txt == True:
+                if not os.path.isdir(save_path+'/'+'txt/'):
+                    os.makedirs(save_path+'/'+'txt/')
+                
+                with open(save_path+'/'+'txt/'+im_name+".txt", 'a') as output:
+                    image_scaled_predicted_points_txt = scaled_predicted_points_per_model.cpu().squeeze().numpy()
+                    image_scaled_predicted_points_txt = image_scaled_predicted_points_txt[idx]
+                    for i in range(len(image_scaled_predicted_points_txt)):
+                        row=image_scaled_predicted_points_txt[i]
+                        data_str = str(round(row[1],5))+","+str(round(row[0],5))
+                        output.write(data_str+"\n")
+
+    ## plot measurements (ddh - alpha and beta)#
+    save_me = True
+    if save_me==True:
+        if list(measurements_dict.keys())[0] == 'alpha_angle':
+            #format is predicted to target .apply(lambda x: pd.Series(str(x).split(",")))
+            _meausrements_dict = pd.DataFrame.from_dict(measurements_dict)
+            #_meausrements_dict['alpha_angle'].sort()
+            #_meausrements_dict['beta_angle'].sort()
+            aa=_meausrements_dict['alpha_angle'].apply(lambda x: pd.Series(str(x).split(",")))
+            aa[1]=aa[1].str.replace(']','')
+            aa[0]=aa[0].str.replace('[','')
+
+            bb=_meausrements_dict['beta_angle'].apply(lambda x: pd.Series(str(x).split(",")))
+            bb[1]=bb[1].str.replace(']','')
+            bb[0]=bb[0].str.replace('[','')
+
+            aa=aa.astype(float).sort_values([1])
+            bb=bb.astype(float).sort_values([1])
+
+            aa_pred, aa_true = aa[0].to_numpy(),aa[1].to_numpy()
+            ba_pred, ba_true = bb[0].to_numpy(),bb[1].to_numpy()
+ 
+            # sorted_alpha = np.array(_meausrements_dict['alpha_angle'])
+            # sorted_beta = np.array(_meausrements_dict['beta_angle'])
+            # aa_pred, aa_true = (sorted_alpha)[:,0], (sorted_alpha)[:,1]
+            # ba_pred, ba_true = (sorted_beta)[:,0], (sorted_beta)[:,1]
             
-            with open(save_path+'/'+'txt/'+im_name+".txt", 'a') as output:
-                image_scaled_predicted_points_txt = scaled_predicted_points_per_model.cpu().squeeze().numpy()
-                image_scaled_predicted_points_txt = image_scaled_predicted_points_txt[idx]
-                for i in range(len(image_scaled_predicted_points_txt)):
-                    row=image_scaled_predicted_points_txt[i]
-                    data_str = str(round(row[1],5))+","+str(round(row[0],5))
-                    output.write(data_str+"\n")
+            #alpha cutoffline
+            x = np.linspace(1,len(aa_pred),len(aa_pred))
+            y_1 = np.full(len(aa_pred),60)
+            y_l = np.full(len(aa_pred),55)
+            y_u = np.full(len(aa_pred),65)
 
-    ## plot measurements (ddh - alpha and beta)
-    if list(measurements_dict.keys())[0] == 'alpha_angle':
-        #format is predicted to target
-        _meausrements_dict = measurements_dict.copy()
-        _meausrements_dict['alpha_angle'].sort()
-        _meausrements_dict['beta_angle'].sort()
-        sorted_alpha = np.array(_meausrements_dict['alpha_angle'])
-        sorted_beta = np.array(_meausrements_dict['beta_angle'])
-        aa_pred, aa_true = (sorted_alpha)[:,0], (sorted_alpha)[:,1]
-        ba_pred, ba_true = (sorted_beta)[:,0], (sorted_beta)[:,1]
-        
-        x = np.linspace(1,len(aa_pred),len(aa_pred))
-        y = np.full(len(aa_pred),43)
+            plt.scatter(x, aa_true, marker='o', c='g', label='True Alpha')
+            plt.scatter(x, aa_pred, marker='o', c='r', label='Pred Alpha') 
+            plt.plot(x,y_1,'b', label='alpha threshold')
+            plt.plot(x,y_l,'b--')
+            plt.plot(x,y_u,'b--')
 
-        plt.scatter(x, aa_true, marker='o', c='r', label='true alpha')  # solid green
-        plt.scatter(x, aa_pred, marker='o', c='g', label='pred alpha')  # solid green     
-        #plt.plot(x,y)
-        
-        plt.legend()
-        plt.xlabel('Patient')
-        plt.ylabel('Angle')
-        plt.savefig('angles_truepred_alpha.png')
-        plt.close()
+            plt.legend()
+            plt.xlabel('Patient')
+            plt.ylabel('Angle')
+            plt.savefig('angles_truepred_alpha.png')
 
-        y = np.full(len(aa_pred),77)
-        plt.scatter(x, ba_true, marker='*', c='r',label='true beta')  # solid green
-        plt.scatter(x, ba_pred, marker='*',c='g', label='pred beta')  # solid green
-
-        plt.legend()
-        plt.xlabel('Angle')
-        plt.ylabel('Patient')
-        plt.savefig('angles_truepred_beta.png')
+            plt.close()
 
 
-        plt.scatter(aa_pred, aa_true, marker='o', c='g', label='alpha')  
-        plt.scatter(ba_pred, ba_true, marker='*', c='b', label='beta')  
-        plt.legend()
-        plt.xlabel('Prediction')
-        plt.ylabel('Grund Truth')
-        a, b = np.polyfit(aa_pred, aa_true, 1)
-        plt.plot(aa_pred, a*aa_pred+b)  
-        plt.savefig('truevsprediction_alpha.png')
-        plt.close()
+            plt.scatter(x, ba_true, marker='*', c='g',label='True Beta')
+            plt.scatter(x, ba_pred, marker='*',c='r', label='Pred Beta')
+            
+            #beta cutoff line
+            y = np.full(len(aa_pred),77)
+            y_l = np.full(len(aa_pred),72)
+            y_u = np.full(len(aa_pred),82)
 
-        plt.scatter(ba_pred, ba_true, marker='*', c='b', label='beta')  
-        plt.legend()
-        plt.xlabel('Prediction')
-        plt.ylabel('Grund Truth')
-        a, b = np.polyfit(ba_pred, ba_true, 1)
-        plt.plot(ba_pred, a*ba_pred+b)    #
-        plt.savefig('truevsprediction_beta.png')
-        plt.close()
+            x = np.linspace(1,len(ba_true),len(ba_true))
+            plt.plot(x,y,'b', label='beta threshold')
+            plt.plot(x,y_l,'b--')
+            plt.plot(x,y_u,'b--')
+            plt.legend()
+            plt.xlabel('Patient')
+            plt.ylabel('Angle')
+            plt.savefig('angles_truepred_beta.png')
+            plt.close()
+
+            plt.rcParams["figure.figsize"] = (5,5)
+            plt.scatter(aa_pred, aa_true, marker='o', c='g', label='alpha')  
+            plt.legend()
+            plt.xlabel('Prediction')
+            plt.ylabel('Grund Truth')
+            #a, b = np.polyfit(aa_pred, aa_true, 1)
+            #plt.plot(aa_pred, a*aa_pred+b)
+            plt.xlim(0, 120)  
+            plt.ylim(0, 120)  
+            x = np.linspace(1,120,60)
+            y = x
+
+            plt.plot(x,y, c='b')
+            plt.plot(x,y+5,'--', c='b')
+            plt.plot(x,y-5,'--', c='b')
+            #plt.savefig('truevsprediction_alpha.png')
+            #plt.close()
+
+            
+            plt.rcParams["figure.figsize"] = (5,5)
+            plt.scatter(ba_pred, ba_true, marker='*', c='b', label='beta')  
+            plt.legend()
+            plt.xlabel('Prediction')
+            plt.ylabel('Grund Truth')
+            plt.xlim(0, 120)  
+            plt.ylim(0, 120)  
+            #a, b = np.polyfit(ba_pred, ba_true, 1)
+            #plt.plot(ba_pred, a*ba_pred+b)    #
+            #x y on diagonal
+            x = np.linspace(1,120,60)
+            y = x
+            plt.plot(x,y, c='g')
+            plt.plot(x,y+5,'--', c='b')
+            plt.plot(x,y-5,'--', c='b')
+            plt.savefig('truevsprediction.png')#_beta.png')
+
+            plt.close()
 
 
     # Write where images have been saved
@@ -250,6 +302,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         figure_save_path = os.path.join(save_path, visual_name)
         txt = "Saved Images in {} for {}".format(figure_save_path, visual_name)
         logger.info(txt)
+
 
     # Overall Statistics
     logger.info("\n-----------Final Statistics-----------")

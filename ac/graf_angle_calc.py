@@ -154,11 +154,11 @@ if __name__ == '__main__':
     imgs_dir =  "/experiments/datasets-in-use/ultrasound-hip-baby-land-seg/crop/img" #images
 
     graf_points_dir = "/experiments/datasets-in-use/ultrasound-hip-baby-land-seg/crop/txt/annotator1" #annotations from reviewer - TRUTH
-    #graf_points_dir = "/experiments/medimaging/experimentsallisonclement/CompleteLandmarkPackage/output/ddh_512_352/temp_scale_models/images/txt"
+    #graf_points_dir = "/experiments/medimaging/experimentsallisonclement/CompleteLandmarkPackage/output/ddh_RUN1/test/temp_scale_models/images/txt"
 
     #point raidus will be used for how much to plot surrounding a specific identified point
     #this about this as almost the ground truth radius around specific identified points.
 
-    all_pixle_rad = [1, 2, 3, 4, 5]
+    all_pixle_rad = [5]
     for point_radius in all_pixle_rad:
         calculated_angles = plt_graf_lines(imgs_dir, graf_points_dir, point_radius)    

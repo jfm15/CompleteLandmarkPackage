@@ -262,7 +262,7 @@ def reliability_diagram_norm(radial_errors, correct_thresholds, mode_probabiliti
         for bin_idx, pred_correct in zip(bin_indices, correct_predictions):
             if pred_correct==True:
                 no_of_correct_preds[bin_idx - 1] += 1
-        print(no_of_correct_preds)
+        #print(no_of_correct_preds)
         
         # get confidence of each bin
         avg_conf_for_each_bin = total_confidence_for_each_bin / count_for_each_bin.astype(float)

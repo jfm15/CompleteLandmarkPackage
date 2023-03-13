@@ -19,6 +19,10 @@ def diagnose_individual(predicted_points, target_points, suffix, diagnosis_name)
     true_diagnosis, classes_true = eval(function_name)(target_points)
     return predicted_diagnosis, true_diagnosis, classes_pred, classes_true
 
+def to_one_hot(y, num_classes):
+    y = y.squeeze()
+    store = np.eye(num_classes)[y]
+    return store
 
 def diagnose_set(aggregated_scaled_points, dataset_target_scaled_points, suffix, diagnosis_name):
     n = len(aggregated_scaled_points)
@@ -31,13 +35,32 @@ def diagnose_set(aggregated_scaled_points, dataset_target_scaled_points, suffix,
         predicted_points = aggregated_scaled_points[i]
         target_points = dataset_target_scaled_points[i]
         
-        predicted_diagnosis, true_diagnosis, classes_p, classes_t = diagnose_individual(predicted_points, target_points, suffix, diagnosis_name)
+        predicted_diagnosis, true_diagnosis, class_p, class_t = diagnose_individual(predicted_points, target_points, suffix, diagnosis_name)
+
         # use extend because some diagnosis contain left and right
         predicted_diagnoses.extend(predicted_diagnosis)
         ground_truth_diagnoses.extend(true_diagnosis)
-        classes_pred.extend([classes_p])
-        classes_true.extend([classes_t])
+        classes_pred.extend([class_p])
+        classes_true.extend([class_t])
+    
+    print(classes_pred, classes_true)
 
+    #T-SNE
+    # x = np.array(predicted_diagnoses)
+    # x = to_one_hot(x, 5)
+    # y = np.array(ground_truth_diagnoses)
+    # from sklearn.manifold import TSNE
+    # import pandas as pd
+    # tsne = TSNE(n_components=2, verbose=1, random_state=123)
+    # z = tsne.fit_transform(x) 
+    # df = pd.DataFrame()
+    # df["y"] = y
+    # df["comp-1"] = z[:,0]
+    # df["comp-2"] = z[:,1]
+
+    # sns.scatterplot(x="comp-1", y="comp-2", hue=df.y.tolist(),
+    #                 palette=sns.color_palette("hls", 5),
+    #                 data=df).set(title="Class Predictions") 
 
     #check if predicted diagnosis has multiple classes
     if np.unique(np.array(predicted_diagnoses)).size < 2:
