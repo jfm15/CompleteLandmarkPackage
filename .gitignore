@@ -1,3 +1,7 @@
+*.pth
+*.txt
+
+
 cache/
 output/
 chm_env/
