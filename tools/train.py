@@ -2,6 +2,7 @@ import argparse
 import torch
 import os
 import math
+import numpy as np
 
 import _init_paths
 import lib
@@ -134,6 +135,7 @@ def main():
     final_layer = eval("lib.models." + cfg.TRAIN.FINAL_LAYER)
     loss_function = eval("lib.models." + cfg.TRAIN.LOSS_FUNCTION)
 
+    mres = []
     for run in range(cfg.TRAIN.REPEATS):
 
         ensemble = []
@@ -180,6 +182,7 @@ def main():
                     "validation_mre": mre_dict["1"],
                     "validation_mere": mere_dict["1"]
                 })
+                mres.append(mre_dict["1"])
             else:
 
                 # Add training losses
@@ -222,6 +225,12 @@ def main():
             save_model_path = os.path.join(model_run_path, "{}_model_run:{}_idx:{}.pth".format(yaml_file_name, run, model_idx))
             logger.info("Saving Model {}'s State Dict to {}".format(model_idx, save_model_path))
             torch.save(our_model.state_dict(), save_model_path)
+
+        for mre in mres:
+            mean_mre = np.mean(mre)
+            std_mre = np.std(mre)
+            msg = "{:.3f}$\pm${:.3f}".format(mean_mre, std_mre)
+            logger.info(msg)
 
 
 if __name__ == '__main__':
