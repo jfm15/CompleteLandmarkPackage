@@ -9,7 +9,7 @@ DATASET:
   CACHED_IMAGE_SIZE:
     - 640
     - 480
-  SIGMA: 5
+  SIGMA: 6
   FLIP_AXIS: TRUE
   NO_OF_ANNOTATORS: 1
 
@@ -46,6 +46,7 @@ VALIDATION:
     - beta_angle
 
 MODEL:
+  NAME: 'Unet'
   ENCODER_NAME: 'resnet34'
   ENCODER_WEIGHTS: 'imagenet'
   DECODER_CHANNELS:
