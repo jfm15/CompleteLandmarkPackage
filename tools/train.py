@@ -182,7 +182,9 @@ def main():
                     "validation_mre": mre_dict["1"],
                     "validation_mere": mere_dict["1"]
                 })
-                mres.append(mre_dict["1"])
+
+                if epoch == cfg.TRAIN.EPOCHS - 1:
+                    mres.append(mre_dict["1"])
             else:
 
                 # Add training losses
@@ -226,11 +228,10 @@ def main():
             logger.info("Saving Model {}'s State Dict to {}".format(model_idx, save_model_path))
             torch.save(our_model.state_dict(), save_model_path)
 
-        for mre in mres:
-            mean_mre = np.mean(mre)
-            std_mre = np.std(mre)
-            msg = "{:.3f}$\pm${:.3f}".format(mean_mre, std_mre)
-            logger.info(msg)
+    mean_mre = np.mean(mres)
+    std_mre = np.std(mres)
+    msg = "{:.3f}$\pm${:.3f}".format(mean_mre, std_mre)
+    logger.info(msg)
 
 
 if __name__ == '__main__':

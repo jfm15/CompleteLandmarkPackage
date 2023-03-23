@@ -242,9 +242,6 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
     if not temperature_scaling_mode:
         logger.info(txt)
 
-    if not temperature_scaling_mode:
-        logger.info(txt)
-
     # Final graphics
     # We want the following functionality:
     # 1) Add the end of the test script or during the temperature scaling phase where we want things to be logged
