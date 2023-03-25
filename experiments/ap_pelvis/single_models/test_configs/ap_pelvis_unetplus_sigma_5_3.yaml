@@ -1,0 +1,63 @@
+DATASET:
+  CACHE_DIR: "cache/ap_pelvis_old/"
+  IMAGE_EXT: ".png"
+  USE_COLS:
+    - 1
+    - 2
+  DELIMITER: " "
+  KEY_POINTS: 8
+  PIXEL_SIZE:
+    - 0.143
+    - 0.143
+  CACHED_IMAGE_SIZE:
+    - 512
+    - 512
+  SIGMA: 5
+  NO_OF_ANNOTATORS: 1
+  FLIP_AXIS: True
+
+  AUGMENTATION:
+    ROTATION_FACTOR: 3
+    INTENSITY_FACTOR: 0.5
+    SF: 0.1
+    TRANSLATION_X: 0.02
+    TRANSLATION_Y: 0.07
+    ELASTIC_STRENGTH: 500
+    ELASTIC_SMOOTHNESS: 50
+
+TRAIN:
+  BATCH_SIZE: 6
+
+  LABELED_SUBSET: 262
+  FINE_TUNE_EPOCHS: 0
+  ENSEMBLE_MODELS: 1
+
+VALIDATION:
+  AGGREGATION_METHODS:
+    - "mean average"
+    - "confidence weighted"
+  SDR_AGGREGATION_METHOD: "confidence weighted"
+  MEASUREMENTS_SUFFIX: "ap_old"
+  MEASUREMENTS:
+    - left_alpha_angle
+    - right_alpha_angle
+    - left_lce_angle
+    - right_lce_angle
+  SDR_THRESHOLDS:
+    - 4.0
+    - 6.0
+    - 10.0
+  SAVE_IMAGE_PATH: "images/ap_pelvis/"
+  CORRELATION_BINS: 6
+  OUTLIER_THRESHOLD: 4.0
+
+MODEL:
+  ENCODER_NAME: 'resnet34'
+  ENCODER_WEIGHTS: 'imagenet'
+  DECODER_CHANNELS:
+    - 256
+    - 256
+    - 256
+    - 128
+    - 64
+  IN_CHANNELS: 1
