@@ -242,7 +242,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         measurements_dict['lce_angle'] = np.concatenate([measurements_dict['left_lce_angle'],
                                                          measurements_dict['right_lce_angle']], axis=0).tolist()
 
-    for measurement in cfg_validation.MEASUREMENTS:
+    for measurement in measurements_dict.keys():
         measurements_dict[measurement] = torch.Tensor(measurements_dict[measurement])
         avg, std, med, icc = get_stats(measurements_dict[measurement][:, 0], measurements_dict[measurement][:, 1])
         txt += "{}: [MEAN: {:.3f}\u00B1{:.3f}, MED: {:.3f}, ICC: {:.3f}]\t".format(measurement, avg, std, med, icc)
