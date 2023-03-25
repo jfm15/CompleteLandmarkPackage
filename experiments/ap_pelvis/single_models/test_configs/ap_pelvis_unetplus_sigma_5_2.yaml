@@ -50,6 +50,8 @@ VALIDATION:
   SAVE_IMAGE_PATH: "images/ap_pelvis/"
   CORRELATION_BINS: 6
   OUTLIER_THRESHOLD: 4.0
+  DIAGNOSES:
+    - fai
 
 MODEL:
   ENCODER_NAME: 'resnet34'

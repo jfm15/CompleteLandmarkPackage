@@ -44,6 +44,8 @@ VALIDATION:
     - beta_angle
   CORRELATION_BINS: 6
   OUTLIER_THRESHOLD: 10.0
+  DIAGNOSES:
+    - ddh
 
 MODEL:
   NAME: 'Unet'
