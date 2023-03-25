@@ -1,6 +1,7 @@
 import os
 import torch
 import wandb
+import numpy as np
 
 from lib.utils import get_stats
 from lib.core.evaluate import cal_radial_errors
@@ -233,6 +234,13 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
     overall_std = torch.std(radial_errors).item()
     overall_med = torch.median(radial_errors).item()
     txt += "[MEAN: {:.3f}\u00B1{:.3f}, MED: {:.3f}]\t".format(overall_avg, overall_std, overall_med)
+
+    # Bad hard coding
+    if cfg_validation.MEASUREMENTS_SUFFIX == 'ap_old' and len(measurements_dict.keys()) == 4:
+        measurements_dict['alpha_angle'] = np.concatenate([measurements_dict['left_alpha_angle'],
+                                                           measurements_dict['right_alpha_angle']], axis=0).tolist()
+        measurements_dict['lce_angle'] = np.concatenate([measurements_dict['left_lce_angle'],
+                                                         measurements_dict['right_lce_angle']], axis=0).tolist()
 
     for measurement in cfg_validation.MEASUREMENTS:
         measurements_dict[measurement] = torch.Tensor(measurements_dict[measurement])
