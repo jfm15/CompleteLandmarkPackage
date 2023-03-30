@@ -230,7 +230,7 @@ def heatmaps_and_preds(ax, output, predicted_points, target_points, eres):
     preds(ax, predicted_points, target_points, show_indices=False, s=2)
 
 
-def show_channels(ax, channels, target_points, custom=20):
+def show_channels(ax, channels, target_points, custom=6):
     ax.imshow(channels[custom], cmap='inferno', alpha=0.4)
     '''
     squashed_channels = np.max(channels, axis=0)
