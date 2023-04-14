@@ -65,7 +65,7 @@ class LandmarkDataset(Dataset):
         # Define how to downsample and pad images
         preprocessing_steps = [
             iaa.Crop(px=2),
-            iaa.PadToAspectRatio(downsampled_aspect_ratio, position='right-bottom', pad_mode='edge'),
+            iaa.PadToAspectRatio(downsampled_aspect_ratio, position='right-bottom', pad_mode='constant'),
             iaa.Resize({"width": downsampled_image_width, "height": downsampled_image_height}),
         ]
         seq = iaa.Sequential(preprocessing_steps)
