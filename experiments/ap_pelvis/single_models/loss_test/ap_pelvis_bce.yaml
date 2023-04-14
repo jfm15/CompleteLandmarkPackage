@@ -24,6 +24,16 @@ DATASET:
     TRANSLATION_Y: 0.07
     ELASTIC_STRENGTH: 500
     ELASTIC_SMOOTHNESS: 50
+    FLIP: True
+    FLIP_PAIRS:
+      - 3
+      - 4
+      - 5
+      - 0
+      - 1
+      - 2
+      - 7
+      - 6
 
 TRAIN:
   BATCH_SIZE: 6

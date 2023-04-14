@@ -152,6 +152,7 @@ class LandmarkDataset(Dataset):
 
                     kps_np_array *= cfg_dataset.GROUND_TRUTH_MULTIPLIER
 
+
                     # Augment annotations
                     kps = KeypointsOnImage.from_xy_array(kps_np_array, shape=image.shape)
                     kps_resized = seq(keypoints=kps)
@@ -242,6 +243,15 @@ class LandmarkDataset(Dataset):
                 kps = KeypointsOnImage.from_xy_array(np.concatenate(landmarks_per_annotator), shape=image.shape)
                 image_augmented, kps_augmented = self.augmentation(image=image, keypoints=kps)
                 landmarks_per_annotator_augmented = kps_augmented.to_xy_array().reshape(-1, self.cfg_dataset.KEY_POINTS, 2)
+
+                # Perform horizontal flip
+                if self.cfg_dataset.AUGMENTATION.FLIP:
+                    if np.random.rand() > 0.5:
+                        image_augmented = np.flip(image_augmented, axis=1)
+                        landmarks_per_annotator_augmented[:, :, 0] = image_augmented.shape[0] - landmarks_per_annotator_augmented[:, :, 0]
+                        if self.cfg_dataset.AUGMENTATION.FLIP_PAIRS:
+                            landmarks_per_annotator_augmented = np.take(landmarks_per_annotator_augmented, self.data_aug_params.FLIP_PAIRS, axis=1)
+
                 xs = landmarks_per_annotator_augmented[:, :, 0]
                 ys = landmarks_per_annotator_augmented[:, :, 1]
                 # print(xs, ys, image.shape)
