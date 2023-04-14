@@ -247,7 +247,7 @@ class LandmarkDataset(Dataset):
                 # Perform horizontal flip
                 if self.cfg_dataset.AUGMENTATION.FLIP:
                     if np.random.rand() > 0.5:
-                        image_augmented = np.flip(image_augmented, axis=1)
+                        image_augmented = np.flip(image_augmented, axis=1).copy()
                         landmarks_per_annotator_augmented[:, :, 0] = image_augmented.shape[0] - landmarks_per_annotator_augmented[:, :, 0]
                         if self.cfg_dataset.AUGMENTATION.FLIP_PAIRS:
                             landmarks_per_annotator_augmented = np.take(landmarks_per_annotator_augmented, self.cfg_dataset.AUGMENTATION.FLIP_PAIRS, axis=1)
