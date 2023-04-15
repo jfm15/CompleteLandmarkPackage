@@ -82,3 +82,25 @@ def fai(points):
         r_fai = 1
 
     return [l_fai, r_fai]
+
+
+def fai_pincer(points):
+
+    l_lce = left_lce_angle(points)
+
+    r_lce = right_lce_angle(points)
+
+    # diagnose left
+    lce_threshold = 40
+
+    if l_lce < lce_threshold:
+        l_fai = 0
+    else:
+        l_fai = 1
+
+    if r_lce < lce_threshold:
+        r_fai = 0
+    else:
+        r_fai = 1
+
+    return [l_fai, r_fai]
