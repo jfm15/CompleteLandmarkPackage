@@ -59,12 +59,24 @@ def fai(points):
     aa_threshold = 65
     lce_threshold = 40
 
+    '''
     if l_aa < aa_threshold and l_lce < lce_threshold:
         l_fai = 0
     else:
         l_fai = 1
 
     if r_aa < aa_threshold and r_lce < lce_threshold:
+        r_fai = 0
+    else:
+        r_fai = 1
+    '''
+
+    if l_aa < aa_threshold:
+        l_fai = 0
+    else:
+        l_fai = 1
+
+    if r_aa < aa_threshold:
         r_fai = 0
     else:
         r_fai = 1
