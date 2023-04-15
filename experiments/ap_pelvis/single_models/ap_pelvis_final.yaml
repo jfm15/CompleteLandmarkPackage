@@ -60,6 +60,7 @@ VALIDATION:
   CORRELATION_BINS: 6
   DIAGNOSES:
     - fai
+    - fai_pincer
 
 MODEL:
   ENCODER_NAME: 'resnet34'
