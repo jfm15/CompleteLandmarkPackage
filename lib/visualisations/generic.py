@@ -88,8 +88,8 @@ def gt_and_preds(ax, predicted_points, target_points, show_indices=True):
 
 def gt_and_preds_small(ax, predicted_points, target_points, show_indices=True):
 
-    ax.scatter(target_points[:, 0], target_points[:, 1], color='lime', s=5)
-    ax.scatter(predicted_points[:, 0], predicted_points[:, 1], color='red', s=5)
+    ax.scatter(target_points[:, 0], target_points[:, 1], color='lime', s=2)
+    ax.scatter(predicted_points[:, 0], predicted_points[:, 1], color='red', s=2)
 
     '''
     if show_indices:
