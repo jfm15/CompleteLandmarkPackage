@@ -1,9 +1,6 @@
 *.pth
 *.png
 
-cache/
-output/
 chm_env/
 __pycache__/
 .vscode/
-output/dhd/
