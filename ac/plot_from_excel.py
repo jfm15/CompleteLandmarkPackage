@@ -97,10 +97,7 @@ if __name__=='__main__':
     diff_std=(abs(_df[X]-_df[Y])).std()
     print('avg', diff,'std' ,diff_std)
 
-    
-    
-    
-#### tables for pixels
+    #### tables for pixels
     file_path = '/experiments/datasets-in-use/ultrasound-hip-baby-land-seg/crop/graf_angle_plot_uniform/pixel_rad_2/calculated_graf_angles_clinicans.csv'
     _df = pd.read_csv(file_path)
     _df=_df.drop(['Unnamed: 0'],axis=1)

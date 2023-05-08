@@ -3,6 +3,7 @@ from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
 import math as math
+import argparse
 from graf_angle_calculations import graph_angle_calculations
 
 def plt_graf_lines(imgs_path, graf_points_dir, point_radius, plt_points=True, calc_angles=True, save_calculated_angles=True):
@@ -148,17 +149,43 @@ def plt_graf_lines(imgs_path, graf_points_dir, point_radius, plt_points=True, ca
     txt_record_inputs.write('Point Radius:'+ str(point_radius)+'\n')
     txt_record_inputs.close()
 
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='')
+
+    parser.add_argument('--imgs_dir',
+                        help='The path to the images',
+                        required=True,
+                        type=str)
+
+    parser.add_argument('--graf_points_dir',
+                        help='The path to the assoicated points you wish to plot for images',
+                        type=str,
+                        required=True,
+                        default='')
+    parser.add_argument('--pixel_radius',
+                        help='Radius defined',
+                        type=int,
+                        required=True,
+                        default='')
+    
+    args = parser.parse_args()
+
+    return args
+
 if __name__ == '__main__':
-    #imgs_dir =  "/experiments/datasets-in-use/ultrasound-hip-baby-land-seg/images/img" #images
-    #
-    imgs_dir =  "/experiments/datasets-in-use/ultrasound-hip-baby-land-seg/crop/img" #images
 
-    graf_points_dir = "/experiments/datasets-in-use/ultrasound-hip-baby-land-seg/crop/txt/annotator1" #annotations from reviewer - TRUTH
-    #graf_points_dir = "/experiments/medimaging/experimentsallisonclement/CompleteLandmarkPackage/output/ddh_RUN1/test/temp_scale_models/images/txt"
+    args = parse_args()
 
+    imgs_dir = args.imgs_dir
+    #"/experiments/datasets-in-use/ultrasound-hip-baby-land-seg/crop/img" #images
+
+    graf_points_dir = args.graf_points_dir 
+    #"/experiments/datasets-in-use/ultrasound-hip-baby-land-seg/crop/txt/annotator1" #annotations from reviewer - TRUTH
+    #"/experiments/medimaging/experimentsallisonclement/CompleteLandmarkPackage/output/ddh_RUN1/test/temp_scale_models/images/txt"
+
+    point_radius = args.pixel_radius
+    
     #point raidus will be used for how much to plot surrounding a specific identified point
     #this about this as almost the ground truth radius around specific identified points.
-
-    all_pixle_rad = [5]
-    for point_radius in all_pixle_rad:
-        calculated_angles = plt_graf_lines(imgs_dir, graf_points_dir, point_radius)    
+    calculated_angles = plt_graf_lines(imgs_dir, graf_points_dir, point_radius)    
