@@ -151,7 +151,7 @@ def plt_graf_lines(imgs_path, graf_points_dir, point_radius, plt_points=True, ca
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='')
+    parser = argparse.ArgumentParser(description='This function is used to plot images with the graf plot overlays from txt file set of 5 landmarks.')
 
     parser.add_argument('--imgs_dir',
                         help='The path to the images',

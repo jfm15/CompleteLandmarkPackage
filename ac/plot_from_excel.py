@@ -4,132 +4,111 @@ import seaborn as sns
 import pandas as pd
 import numpy as np
 
-if __name__=='__main__':
-    file_path = '/experiments/datasets-in-use/ultrasound-hip-baby-land-seg/crop/graf_angle_plot_uniform/pixel_rad_1/calculated_graf_angles_clinicans.csv'
-    _df = pd.read_csv(file_path)
+class plot_from_excel():
+    ''' This class takes an input excel file and plots the relationship between x and y of each data point the class from the third column
+     is set to different colors. This will help show the relation ship between x, y and class.'''
+    def __init__(self, file_path):
+        self.file_path = file_path
 
-    X = 'Calculated alpha'
-    Y = 'Calculated beta'
-    C = 'graf class ab'
+        #plot limits and figure
+        self.x_lim = 120
+        self.y_lim = 120
+        self.fig_size = 5
 
-    for key in _df.keys():
-        if key==X or key==Y or key==C:
-            pass
-        else:
-            _df =_df.drop([key], axis=1)
-        
-    #plot classes
-    classes = ['1', '2a/2b','2c','D','3/4']
-    cc = 0
-    for c in classes:
-        cc=cc+1
-        _df.loc[_df[C] == c] = _df.loc[_df[C] == c].replace(c, cc)
+        return
     
-    ax = _df.plot.scatter(X,Y,c=C,colormap='viridis')
-    ax.set_xlim(0,120)
-    ax.set_ylim(0,120)
-    x=np.linspace(0,120,120)
-    a_limit = np.full(120,60)
-    plt.plot(a_limit,x,'r--', label='Threshold')
-    ax.set_title('Clinician Classification')
-    plt.rcParams["figure.figsize"] = (5,5)
-    plt.show()
+    def plot_file(self, classes, X, Y, C, title, threshold_line = None):
+        _df = pd.read_csv(self.file_path)
 
-#### ALPHA
+        for key in _df.keys():
+            if key==X or key==Y or key==C:
+                pass
+            else:
+                _df =_df.drop([key], axis=1)
+            
+        #plot classes
+        cc = 0
+        for c in classes:
+            cc=cc+1
+            _df.loc[_df[C] == c] = _df.loc[_df[C] == c].replace(c, cc)
+        
+        ax = _df.plot.scatter(X,Y,c=C,colormap='viridis')
+        
+        ax.set_xlim(0,self.x_lim)
+        ax.set_ylim(0,self.y_lim)
+
+        if threshold_line != None:     
+            x=np.linspace(0,self.x_lim,self.x_lim)
+            a_limit = np.full(self.x_lim,threshold_line)
+            plt.plot(a_limit,x,'r--',label='Threshold')
+
+        ax.set_title(title)
+        plt.rcParams["figure.figsize"] = (self.fig_size,self.fig_size)
+        plt.show()
+
+        return
+    
+    def get_class_stdmean(self, classes, col_name):
+        '''gets table of classes mean and std'''
+        _df = pd.read_csv(self.file_path)
+        
+        try:
+            #do for graf data 
+            _df=_df.drop(['Unnamed: 0'],axis=1)
+            _df=_df.drop(['Patient'],axis=1)
+            _df=_df.drop(['discription a'],axis=1)
+            _df=_df.drop(['discription ab'],axis=1)
+            _df=_df.drop(['graf class a'],axis=1)
+        except: 
+            pass
+
+        _df_dif_a = _df['range alpha max']-_df['range alpha min']
+        _df_dif_b = _df['range beta max']-_df['range beta min']
+
+        _df['dif_a'] = _df_dif_a 
+        _df['dif_b'] = _df_dif_b
+        
+        C = col_name
+        cc = 0
+
+        df_mean_std = pd.DataFrame()
+        for c in classes:
+            cc=cc+1
+            mean = (_df.loc[_df[C] == c]).mean()
+            std = (_df.loc[_df[C] == c]).std()
+            mean[C]=c
+            mean['calc'] = 'avg'
+            std[C]=c
+            std['calc'] = 'std'
+            
+            df_mean_std = df_mean_std.append(mean, ignore_index = True)
+            df_mean_std = df_mean_std.append(std, ignore_index = True)
+        
+        print(df_mean_std)
+        return
+
+def main():
+    #this is an example plotting x,y, class for 3 pixel varation
     file_path = '/experiments/datasets-in-use/ultrasound-hip-baby-land-seg/crop/graf_angle_plot_uniform/pixel_rad_3/calculated_graf_angles_clinicans.csv'
-    _df = pd.read_csv(file_path)
-
-    X = 'range alpha min'
-    Y = 'range alpha max'
-    C = 'graf class ab'
-
-    for key in _df.keys():
-        if key==X or key==Y or key==C:
-            pass
-        else:
-            _df =_df.drop([key], axis=1)
-        
-    #plot classes
+    
     classes = ['1', '2a/2b','2c','D','3/4']
-    cc = 0
-    for c in classes:
-        cc=cc+1
-        _df.loc[_df[C] == c] = _df.loc[_df[C] == c].replace(c, cc)
-    
-    ax = _df.plot.scatter(X,Y,c=C,colormap='viridis')
-    ax.set_xlim(0,120)
-    ax.set_ylim(0,120)
-    ax.set_title('Alpha: 3 Pixel Variation')
-    plt.rcParams["figure.figsize"] = (5,5)
-    plt.show()
-    diff=(abs(_df[X]-_df[Y])).mean()
-    diff_std=(abs(_df[X]-_df[Y])).std()
-    print('avg', diff,'std' ,diff_std)
 
-#### beta
-    file_path = '/experiments/datasets-in-use/ultrasound-hip-baby-land-seg/crop/graf_angle_plot_uniform/pixel_rad_1/calculated_graf_angles_clinicans.csv'
-    _df = pd.read_csv(file_path)
+    title = 'Clinician Classification'
+    X,Y,C = 'Calculated alpha','Calculated beta','graf class ab'
+    plot_from_excel(file_path).plot_file(classes, X, Y, C, title, threshold_line=60)
 
-    X = 'range beta min'
-    Y = 'range beta max'
-    C = 'graf class ab'
+    title = 'Alpha: 3 Pixel Variation'
+    X,Y,C = 'range alpha min','range alpha max','graf class ab'
+    plot_from_excel(file_path).plot_file(classes, X, Y, C, title)
 
-    for key in _df.keys():
-        if key==X or key==Y or key==C:
-            pass
-        else:
-            _df =_df.drop([key], axis=1)
-        
-    #plot classes
-    classes = ['1', '2a/2b','2c','D','3/4']
-    cc = 0
-    for c in classes:
-        cc=cc+1
-        _df.loc[_df[C] == c] = _df.loc[_df[C] == c].replace(c, cc)
-    
-    ax = _df.plot.scatter(X,Y,c=C,colormap='viridis')
-    ax.set_xlim(0,120)
-    ax.set_ylim(0,120)
-    ax.set_title('Beta - 1 Pixel Variation')
-    plt.rcParams["figure.figsize"] = (10,10)
-    plt.show()
-    diff=(abs(_df[X]-_df[Y])).mean()
-    diff_std=(abs(_df[X]-_df[Y])).std()
-    print('avg', diff,'std' ,diff_std)
+    title = 'Beta: 3 Pixel Variation'
+    X,Y,C = 'range beta min','range beta max','graf class ab'
+    plot_from_excel(file_path).plot_file(classes, X, Y, C, title)    
 
-    #### tables for pixels
-    file_path = '/experiments/datasets-in-use/ultrasound-hip-baby-land-seg/crop/graf_angle_plot_uniform/pixel_rad_2/calculated_graf_angles_clinicans.csv'
-    _df = pd.read_csv(file_path)
-    _df=_df.drop(['Unnamed: 0'],axis=1)
-    _df=_df.drop(['Patient'],axis=1)
-    _df=_df.drop(['discription a'],axis=1)
-    _df=_df.drop(['discription ab'],axis=1)
-    _df=_df.drop(['graf class a'],axis=1)
-
-    _df_dif_a = _df['range alpha max']-_df['range alpha min']
-    _df_dif_b = _df['range beta max']-_df['range beta min']
-
-    _df['dif_a'] = _df_dif_a 
-    _df['dif_b'] = _df_dif_b
-    classes = ['1', '2a/2b','2c','D','3/4']
-    cc = 0
-
-    df_mean_std = pd.DataFrame()
-    for c in classes:
-        cc=cc+1
-        mean = (_df.loc[_df[C] == c]).mean()
-        std = (_df.loc[_df[C] == c]).std()
-        mean['graf class ab']=c
-        mean['calc'] = 'avg'
-        std['graf class ab']=c
-        std['calc'] = 'std'
-        
-        df_mean_std = df_mean_std.append(mean, ignore_index = True)
-        df_mean_std = df_mean_std.append(std, ignore_index = True)
-    
-    print(df_mean_std)
+    #get mean and standard deivation
+    col_name = 'graf class ab'
+    plot_from_excel(file_path).get_class_stdmean(classes, col_name)
 
 
-
-
-    
+if __name__=='__main__':
+    main()
