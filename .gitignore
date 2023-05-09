@@ -1,7 +1,7 @@
 *.pth
 *.png
 
-/output
+output/
 chm_env/
 __pycache__/
 .vscode/
