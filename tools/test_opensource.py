@@ -10,8 +10,7 @@ import lib.models
 from lib.dataset import LandmarkDataset
 from lib.utils import prepare_for_testing
 
-import lib.core.validate_cpu as validate_cpu
-import lib.core.validate_gpu as validate_gpu
+import lib.core.test_cpu as test_cpu
 
 #from torchsummary.torchsummary import summary_string
 
@@ -110,14 +109,10 @@ def main():
     if not os.path.exists(image_save_path):
         os.makedirs(image_save_path)
 
-    # Validate
     with torch.no_grad():
-        if torch.cuda.is_available():
-            validate_file = "validate_gpu"
-        else:
-            validate_file = "validate_cpu"
+        test_file = 'test_cpu'
 
-        eval("{}.validate_over_set".format(validate_file)) \
+        eval("{}.test_over_set".format(test_file)) \
             (ensemble, test_loader, final_layer, loss_function, args.visuals, cfg.VALIDATION, image_save_path, 
              logger=logger)
 

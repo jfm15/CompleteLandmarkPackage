@@ -26,6 +26,7 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             model.eval()
             output = model(image.float())
             output = final_layer(output)
+            print('out shape',output.shape)
             loss = loss_function(output, channels)
             losses.append(loss.item())
             predicted_points, target_points, eres, _, scaled_predicted_points, scaled_target_points \
@@ -49,10 +50,10 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
         
         image_scaled_predicted_points_txt = image_scaled_predicted_points.squeeze().numpy()
         
-        if not os.path.isdir(save_path+'/'+'/txt/'):
-            os.mkdir(save_path+'/'+'/txt/')
+        if not os.path.isdir(save_path+'/txt/'):
+            os.mkdir(save_path+'/txt/')
         
-        with open(save_path+'/'+'txt/'+meta['file_name'][0]+".txt", 'a') as output:
+        with open(save_path+'/txt/'+meta['file_name'][0]+".txt", 'a') as output:
             for i in range(len(image_scaled_predicted_points_txt)):
                 row=image_scaled_predicted_points_txt[i].tolist()
                 data_str = str([round(row[1],5),round(row[0],5)])[1:-1]

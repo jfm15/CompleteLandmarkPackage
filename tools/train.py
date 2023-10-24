@@ -12,7 +12,7 @@ from lib.dataset import LandmarkDataset
 from lib.utils import prepare_for_training
 from lib.core.function import train_ensemble
 from lib.visualisations import preliminary_figure
-from torchsummary.torchsummary import summary_string
+#from torchsummary.torchsummary import summary_string
 
 import lib.core.validate_cpu as validate_cpu
 import lib.core.validate_gpu as validate_gpu
@@ -69,7 +69,7 @@ def main():
     # get arguments and the experiment file
     args = parse_args()
     torch.cuda.empty_cache()
-
+    
     cfg, logger, output_path, yaml_file_name = prepare_for_training(args.cfg, args.output_path)
 
     # print the arguments into the log
@@ -86,7 +86,6 @@ def main():
                                        subset=("below", cfg.TRAIN.LABELED_SUBSET), partition=args.partition,
                                        partition_label="training")
     training_loader = torch.utils.data.DataLoader(training_dataset, batch_size=cfg.TRAIN.BATCH_SIZE, shuffle=True)
-
     validation_dataset = LandmarkDataset(args.images, args.annotations, cfg.DATASET, gaussian=False,
                                          perform_augmentation=False, partition=args.partition,
                                          partition_label="validation")
@@ -109,7 +108,8 @@ def main():
         validate_file = "validate_gpu"
     else:
         validate_file = "validate_cpu"
-
+    validate_file = "validate_cpu"
+    
     final_layer = eval("lib.models." + cfg.TRAIN.FINAL_LAYER)
     loss_function = eval("lib.models." + cfg.TRAIN.LOSS_FUNCTION)
 
@@ -129,8 +129,8 @@ def main():
 
         if run == 0:
             logger.info("-----------Model Summary-----------")
-            model_summary, _ = summary_string(ensemble[0], (1, *cfg.DATASET.CACHED_IMAGE_SIZE), device=torch.device('cpu'))
-            logger.info(model_summary)
+            #model_summary, _ = summary_string(ensemble[0], (1, *cfg.DATASET.CACHED_IMAGE_SIZE), device=torch.device('cpu'))
+            #logger.info(model_summary)
 
         logger.info("-----------Experiment {}-----------".format(run + 1))
 
@@ -146,7 +146,7 @@ def main():
             # Validate
             with torch.no_grad():
                 logger.info('-----------Validation Set-----------')
-                save_path = os.path.join(output_path, "{}".format(yaml_file_name))
+                save_path = os.path.join(output_path)
 
                 _, current_mre = eval("{}.validate_over_set".format(validate_file)) \
                     (ensemble, validation_loader, final_layer, loss_function, [], cfg.VALIDATION, save_path,

@@ -146,27 +146,30 @@ class LandmarkDataset(Dataset):
 
                 # -----------Annotations-----------
                 # Use pandas to extract the key points from the txt file
-                for annotation_path, cache_annotation_path in zip(annotation_paths, cache_annotation_paths):
-                    im_name = cache_image_path.split('/')[-1][:-4]
-                    i = [i for i, s in enumerate(annotation_paths) if im_name in s]
-                    annotation_path = annotation_paths[i[0]]
+                if annotation_dir == None:
+                    pass
+                else:           
+                    for annotation_path, cache_annotation_path in zip(annotation_paths, cache_annotation_paths):
+                        im_name = cache_image_path.split('/')[-1][:-4]
+                        i = [i for i, s in enumerate(annotation_paths) if im_name in s]
+                        annotation_path = annotation_paths[i[0]]
 
-                    # Get annotations
-                    kps_np_array = np.loadtxt(annotation_path, usecols=cfg_dataset.USE_COLS,
-                                              delimiter=cfg_dataset.DELIMITER, max_rows=cfg_dataset.KEY_POINTS)
+                        # Get annotations
+                        kps_np_array = np.loadtxt(annotation_path, usecols=cfg_dataset.USE_COLS,
+                                                delimiter=cfg_dataset.DELIMITER, max_rows=cfg_dataset.KEY_POINTS)
 
-                    if cfg_dataset.FLIP_AXIS:
-                        kps_np_array = np.flip(kps_np_array, axis=1)
+                        if cfg_dataset.FLIP_AXIS:
+                            kps_np_array = np.flip(kps_np_array, axis=1)
 
-                    kps_np_array *= cfg_dataset.GROUND_TRUTH_MULTIPLIER
+                        kps_np_array *= cfg_dataset.GROUND_TRUTH_MULTIPLIER
 
-                    # Augment annotations
-                    kps = KeypointsOnImage.from_xy_array(kps_np_array, shape=image.shape)
-                    kps_resized = seq(keypoints=kps)
+                        # Augment annotations
+                        kps = KeypointsOnImage.from_xy_array(kps_np_array, shape=image.shape)
+                        kps_resized = seq(keypoints=kps)
 
-                    # Save annotations
-                    kps_np_array = kps_resized.to_xy_array()
-                    np.savetxt(cache_annotation_path, kps_np_array, fmt="%.14g", delimiter=" ")
+                        # Save annotations
+                        kps_np_array = kps_resized.to_xy_array()
+                        np.savetxt(cache_annotation_path, kps_np_array, fmt="%.14g", delimiter=" ")
 
                 # -----------Meta Data-----------
 
@@ -235,47 +238,68 @@ class LandmarkDataset(Dataset):
         # Use pandas to extract the key points from the txt file
         landmarks_per_annotator = []
 
-        for cached_annotation_path in cached_annotation_paths:
-            kps_np_array = np.loadtxt(cached_annotation_path, delimiter=" ")
-            landmarks_per_annotator.append(kps_np_array)
+        if os.path.isfile(cached_annotation_paths[0])==False:
+            landmarks_per_annotator = []
+            kps_np_array=[]
+        else:
+            for cached_annotation_path in cached_annotation_paths:
+                kps_np_array = np.loadtxt(cached_annotation_path, delimiter=" ")
+                landmarks_per_annotator.append(kps_np_array)
 
         if self.perform_augmentation:
 
             repeat = True
-
             counter = 0
             while repeat and counter < 10:
+
                 counter += 1
                 # Augment image and annotations at the same to ensure the augmentation is the same
-                kps = KeypointsOnImage.from_xy_array(np.concatenate(landmarks_per_annotator), shape=image.shape)
-                image_augmented, kps_augmented = self.augmentation(image=image, keypoints=kps)
-                landmarks_per_annotator_augmented = kps_augmented.to_xy_array().reshape(-1, self.cfg_dataset.KEY_POINTS, 2)
-                xs = landmarks_per_annotator_augmented[:, :, 0]
-                ys = landmarks_per_annotator_augmented[:, :, 1]
-                #print(xs, ys, image.shape)
-                border = 0
-                if np.all(border <= xs) and np.all(xs < (image.shape[1] - border)) \
-                        and np.all(border <= ys) and np.all(ys < (image.shape[0] - border)):
-                    repeat = False
-                    image = image_augmented
-                    landmarks_per_annotator = landmarks_per_annotator_augmented
+                if os.path.isfile(cached_annotation_paths[0])==False:
+                    kps = []
+                    image_augmented, kps_augmented = self.augmentation(image=image, keypoints=kps)
+                    border = 0
+                    if np.all(border <= xs) and np.all(xs < (image.shape[1] - border)) \
+                            and np.all(border <= ys) and np.all(ys < (image.shape[0] - border)):
+                        repeat = False
+                        image = image_augmented
+                        landmarks_per_annotator=[]
+                else:
+                    kps = KeypointsOnImage.from_xy_array(np.concatenate(landmarks_per_annotator), shape=image.shape)
+                    image_augmented, kps_augmented = self.augmentation(image=image, keypoints=kps)
+                    landmarks_per_annotator_augmented = kps_augmented.to_xy_array().reshape(-1, self.cfg_dataset.KEY_POINTS, 2)
+                    xs = landmarks_per_annotator_augmented[:, :, 0]
+                    ys = landmarks_per_annotator_augmented[:, :, 1]
+                    #print(xs, ys, image.shape)
+                    border = 0
+                    if np.all(border <= xs) and np.all(xs < (image.shape[1] - border)) \
+                            and np.all(border <= ys) and np.all(ys < (image.shape[0] - border)):
+                        repeat = False
+                        image = image_augmented
+                        landmarks_per_annotator = landmarks_per_annotator_augmented
 
-        # This line is here so we slice the array later in the code
-        landmarks_per_annotator = np.array(landmarks_per_annotator)
+        if os.path.isfile(cached_annotation_paths[0])==False:
+            channels = 0
+            pass
+        else:
+            # This line is here so we slice the array later in the code
+            landmarks_per_annotator = np.array(landmarks_per_annotator)
 
-        # Generate ground truth maps
-        channels = np.zeros([self.cfg_dataset.KEY_POINTS, image.shape[0], image.shape[1]])
-        for i in range(self.cfg_dataset.KEY_POINTS):
-            x, y = np.mean(landmarks_per_annotator[:, i], axis=0).astype(int)
-            if 0 <= y < channels.shape[1] and 0 <= x < channels.shape[2]:
-                channels[i, y, x] = 1.0
-                if self.gaussian and self.sigmas[i] > 0:
-                    channels[i] = gaussian(channels[i], sigma=self.sigmas[i])
+            # Generate ground truth maps
+            channels = np.zeros([self.cfg_dataset.KEY_POINTS, image.shape[0], image.shape[1]])
+            for i in range(self.cfg_dataset.KEY_POINTS):
+                x, y = np.mean(landmarks_per_annotator[:, i], axis=0).astype(int)
+                if 0 <= y < channels.shape[1] and 0 <= x < channels.shape[2]:
+                    channels[i, y, x] = 1.0
+                    if self.gaussian and self.sigmas[i] > 0:
+                        channels[i] = gaussian(channels[i], sigma=self.sigmas[i])
 
         # Add a channel to the images
         image = np.expand_dims(image, axis=0)
 
-        # Modify meta
+        print(image.shape)
+        print(channels.shape)
+
+        #        print(channels.shape)
         meta["landmarks_per_annotator"] = landmarks_per_annotator.copy()
         meta["pixel_size"] = np.array([meta["pixel_size_x"], meta["pixel_size_y"]])
 

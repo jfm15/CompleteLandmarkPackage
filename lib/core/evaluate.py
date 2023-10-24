@@ -53,6 +53,20 @@ def get_eres(output_stack, predicted_points_scaled, pixel_sizes, significant_pix
     return torch.stack(eres_per_image)
 
 
+def get_predicted_points(output_stack, landmarks_per_annotator, pixels_sizes):
+    # Evaluate radial error
+    # Predicted points has shape (B, N, 2)
+    predicted_points = get_hottest_points(output_stack)
+    scaled_predicted_points = torch.multiply(predicted_points, pixels_sizes)
+
+
+    # Get the mode of each output heatmap for analysis
+    flattened_heatmaps = torch.flatten(output_stack, start_dim=2)
+    modes, _ = torch.max(flattened_heatmaps, dim=2, keepdim=True)
+
+    return predicted_points, scaled_predicted_points, modes
+
+
 def get_predicted_and_target_points(output_stack, landmarks_per_annotator, pixels_sizes):
     # Evaluate radial error
     # Predicted points has shape (B, N, 2)

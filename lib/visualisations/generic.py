@@ -164,8 +164,11 @@ def heatmaps_and_ere(ax, output, predicted_points, target_points, eres):
     squashed_output = np.max(normalized_heatmaps, axis=0)
 
     ax.imshow(squashed_output, cmap='inferno', alpha=0.4)
-
-    gt_and_preds(ax, predicted_points, target_points, show_indices=False)
+    
+    if target_points == []:
+        pass
+    else:
+        gt_and_preds(ax, predicted_points, target_points, show_indices=False)
 
     for ere, position in zip(eres, predicted_points):
         x, y = position

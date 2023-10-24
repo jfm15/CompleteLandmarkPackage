@@ -58,6 +58,8 @@ def logits(x):
 # dimensions are [B, C, W, H]
 # the log is done within this lsos function whereas normally it would be a log softmax
 def nll_across_batch(output, target):
+    print('nnl',output.shape)
+    print('nnl',target.shape)
     nll = target * torch.log(output.double())
     return -torch.mean(torch.sum(nll, dim=(2, 3)))
 

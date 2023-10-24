@@ -1,7 +1,11 @@
 *.pth
 *.png
+*.txt
+*.out
 
 output/
 chm_env/
 __pycache__/
 .vscode/
+cache/
+ddh/training/

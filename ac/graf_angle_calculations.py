@@ -3,7 +3,7 @@ import math as math
 from matplotlib import pyplot as plt
 import os
 import math
-class graph_angle_calculations():
+class graf_angle_calculations():
     def __init__(self) -> None:
         self.grf_dic = {
             "1": {'a':'>60', 'b':'NA', 'd': 'Normal: Discharge Patient'},

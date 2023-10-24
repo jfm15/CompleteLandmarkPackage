@@ -8,7 +8,7 @@ def train_ensemble(ensemble, optimizers, schedulers, training_loader, final_laye
         logger.info('-----------Training Model {}-----------'.format(model_idx))
 
         our_model = ensemble[model_idx]
-        our_model = our_model.cuda()
+        #our_model = our_model.cuda()
         train_model(our_model, final_layer, optimizers[model_idx], schedulers[model_idx], training_loader,
                     loss_function, logger)
 
@@ -35,9 +35,11 @@ def train_model(model, final_layer, optimizer, scheduler, loader, loss_function,
 
     for batch, (image, channels, meta) in enumerate(loader):
 
+        print(image.shape)
+        print(channels.shape)
         # Put image and channels onto gpu
-        image = image.cuda()
-        channels = channels.cuda()
+        #image = image.cuda()
+        #channels = channels.cuda()
 
         if temperature_scaling:
             with torch.no_grad():
