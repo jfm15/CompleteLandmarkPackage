@@ -26,7 +26,6 @@ def validate_over_set(ensemble, loader, final_layer, loss_function, visuals, cfg
             model.eval()
             output = model(image.float())
             output = final_layer(output)
-            print('out shape',output.shape)
             loss = loss_function(output, channels)
             losses.append(loss.item())
             predicted_points, target_points, eres, _, scaled_predicted_points, scaled_target_points \
