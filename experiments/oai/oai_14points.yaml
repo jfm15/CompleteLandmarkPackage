@@ -2,7 +2,7 @@
 DATASET:
   CACHE_DIR: "cache/oai/"
   IMAGE_EXT: ".jpg"
-  KEY_POINTS: 6
+  KEY_POINTS: 14
   PIXEL_SIZE:
     - 1.0
     - 1.0

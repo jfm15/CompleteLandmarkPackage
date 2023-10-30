@@ -8,19 +8,19 @@ def l_angle(points):
         # a   centre of the ankle
         # all distances are used squared as late as possible to avoid multiple sqrt
         '''
-        coord_l = points[3:] 
+        coord_l = points[7:] 
         coord_ls = [coord_l]
         for coords in coord_ls:
             if (coords).dtype==str:
                 f_coords=int(coords[0].split(',')[0]),int(coords[0].split(',')[1])
-                k_coords=int(coords[1].split(',')[0]),int(coords[1].split(',')[1])
-                a_coords=int(coords[2].split(',')[0]),int(coords[2].split(',')[1])
+                k_coords=int(coords[2].split(',')[0]),int(coords[2].split(',')[1])
+                a_coords=int(coords[5].split(',')[0]),int(coords[5].split(',')[1])
             else:
                 points = points.detach().cpu().numpy()
                 #print(points)
                 f_coords=int(coords[0][0]),int(coords[0][1])
-                k_coords=int(coords[1][0]),int(coords[1][1])
-                a_coords=int(coords[2][0]),int(coords[2][1])
+                k_coords=int(coords[2][0]),int(coords[2][1])
+                a_coords=int(coords[5][0]),int(coords[5][1])
 
             fk=tuple(np.subtract(k_coords , f_coords))
             ka=tuple(np.subtract(a_coords , k_coords))
@@ -56,18 +56,18 @@ def r_angle(points):
     # a   centre of the ankle
     # all distances are used squared as late as possible to avoid multiple sqrt
     '''
-    coord_r = points[:3]
+    coord_r = points[:7]
     coord_ls = [coord_r]
     for coords in coord_ls:
         if (coords).dtype==str:
             f_coords=int(coords[0].split(',')[0]),int(coords[0].split(',')[1])
-            k_coords=int(coords[1].split(',')[0]),int(coords[1].split(',')[1])
-            a_coords=int(coords[2].split(',')[0]),int(coords[2].split(',')[1])
+            k_coords=int(coords[2].split(',')[0]),int(coords[2].split(',')[1])
+            a_coords=int(coords[5].split(',')[0]),int(coords[5].split(',')[1])
         else:
             points = points.detach().cpu().numpy()
             f_coords=int(coords[0][0]),int(coords[0][1])
-            k_coords=int(coords[1][0]),int(coords[1][1])
-            a_coords=int(coords[2][0]),int(coords[2][1])
+            k_coords=int(coords[2][0]),int(coords[2][1])
+            a_coords=int(coords[5][0]),int(coords[5][1])
 
         fk=tuple(np.subtract(k_coords , f_coords))
         ka=tuple(np.subtract(a_coords , k_coords))
